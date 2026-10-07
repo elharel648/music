@@ -30,6 +30,8 @@ def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, o
     ref = analysis.analyze_reference(ref_path, bpm_hint=bpm or pk.get("bpm_hint"))
     bpm = bpm or ref["bpm"]
     prog(f"Reference: {ref['bpm']:.0f} BPM, {ref['key']['tonic']} {ref['key']['mode']}, {ref['bars']} bars, {len(ref['sections'])} sections", 0.15)
+    if pk.get("warnings"):
+        raise RuntimeError(" ".join(pk["warnings"]) + f" (folder: {pack_dir})")
     kit = packmod.choose_kit(pk, bpm)
     prog(f"Kit: {', '.join(sorted(kit))}", 0.22)
     work = work_dir or os.path.join(out or tempfile.gettempdir(), "FLOW loops")

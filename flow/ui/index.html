@@ -186,9 +186,10 @@ $('analyzeBtn').onclick = async ()=>{ $('refMsg').textContent='Listening…'; $(
 $('to2').onclick=()=>show(2); $('back1').onclick=()=>show(1);
 
 $('pickPack').onclick = async ()=>{ const p = await api().pick_folder(); if(!p) return; S.packPath=p; $('packName').textContent=p.split(/[\\/]/).pop(); $('packPath').textContent=p; $('packMsg').textContent='Reading every file…';
-  const r = await api().scan_pack(p); if(!r.ok){ $('packMsg').innerHTML=`<span class="err">${r.error}</span>`; return; } S.pack=r.pack; $('packMsg').textContent='';
+  const r = await api().scan_pack(p); if(!r.ok){ $('packMsg').innerHTML=`<span class="err">${r.error}</span>`; return; } S.pack=r.pack;
+  const warn = (r.pack.warnings||[]); $('packMsg').innerHTML = warn.length ? `<span class="err">${warn.join(' ')}</span>` : `<span class="ok">Kick found · ready to build</span>`;
   const roles = Object.entries(r.pack.by_role).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span class="chip">${k.toUpperCase()} · ${v}</span>`).join('');
-  $('packChips').innerHTML = `<span class="chip sel">${r.pack.count} SOUNDS</span>` + roles + (r.pack.bpm_hint?`<span class="chip">${r.pack.bpm_hint} BPM loops</span>`:''); $('packResult').classList.remove('hidden'); $('to3').disabled=false; };
+  $('packChips').innerHTML = `<span class="chip sel">${r.pack.count} SOUNDS</span>` + roles + (r.pack.bpm_hint?`<span class="chip">${r.pack.bpm_hint} BPM loops</span>`:''); $('packResult').classList.remove('hidden'); $('to3').disabled = warn.length>0; };
 $('to3').onclick=()=>{ show(3); checkTarget(); }; $('back2').onclick=()=>show(2);
 
 document.querySelectorAll('#styleChips .chip').forEach(c=>c.onclick=()=>{ document.querySelectorAll('#styleChips .chip').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); S.style=c.dataset.v; });

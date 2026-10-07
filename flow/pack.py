@@ -66,8 +66,18 @@ def scan_pack(folder: str, bpm: float | None = None, max_files: int = 2000) -> d
     bpm_hint = max(set(bpms), key=bpms.count) if bpms else None
     keys = [s["key"]["pc"] for s in samples if s["key"]]
     key_hint = max(set(keys), key=keys.count) if keys else None
+    has_kick = bool(by_role.get("kick"))
+    has_drums = any(r in by_role for r in DRUM_ROLES)
+    warnings = []
+    if not samples:
+        warnings.append("No audio files in this folder.")
+    elif not has_drums:
+        warnings.append("No drums found in this folder. Choose the pack's TOP folder, the one that contains Drums, Loops and FX.")
+    elif not has_kick:
+        warnings.append("No kick drum found. FLOW builds the groove around a kick; add one or choose the pack's top folder.")
     return {"folder": folder, "count": len(samples), "samples": samples, "by_role": {k: len(v) for k, v in by_role.items()},
-            "bpm_hint": bpm_hint, "key_hint": key_hint, "_by_role": by_role}
+            "bpm_hint": bpm_hint, "key_hint": key_hint, "has_kick": has_kick, "has_drums": has_drums, "warnings": warnings,
+            "_by_role": by_role}
 
 
 def _features(path: str) -> dict:
