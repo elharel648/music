@@ -129,6 +129,9 @@
   .stopbox { display:flex; flex-direction:column; gap:14px; padding:22px 24px; }
   .stopbox .t { font-size:16px; font-weight:600; }
   .stopbox .m { font-size:13.5px; color:var(--sec); line-height:1.55; }
+  .sw { width:42px; height:24px; border-radius:999px; background:var(--track); border:0; position:relative; cursor:pointer; transition:background .25s var(--ease); flex:0 0 42px; }
+  .sw::after { content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(20,20,30,.25); transition:transform .25s var(--ease); }
+  .sw.on { background:var(--acc); } .sw.on::after { transform:translateX(18px); }
   .resume { display:flex; align-items:center; gap:16px; padding:16px 20px; border-color:var(--tint2); background:#FBFBFE; }
   .resume .body { flex:1; min-width:0; }
   .resume .t { font-size:13.5px; font-weight:600; }
@@ -216,7 +219,7 @@
       <div class="row"><div><div class="k">Length</div><div class="h">Never shorter than 2:00. Sections scale with the track; builds and breakdowns stay tight.</div></div>
         <div class="c"><div class="presets" id="lenPresets"><button data-v="180">3:00</button><button data-v="270">4:30</button><button data-v="360">6:00</button><button data-v="450">7:30</button></div><input type="range" id="lenRange" min="120" max="600" step="15" value="270"><div class="readout" id="lenOut">4:30</div></div></div>
       <div class="row"><div><div class="k">Build in</div><div class="h" id="targetHint"></div></div>
-        <div class="c"><div class="seg" id="targetSeg"><button data-v="ableton" class="on">Ableton Live</button><button data-v="stems">Stems + MIDI</button></div></div></div>
+        <div class="c"><button class="btn ghost sm hidden" id="installBridge">INSTALL FLOW BRIDGE</button><div class="seg" id="targetSeg"><button data-v="ableton" class="on">Ableton Live</button><button data-v="stems">Stems + MIDI</button></div></div></div>
       <div class="row hidden" id="outRow"><div><div class="k">Output folder</div><div class="h">Stems, a MIDI file with markers, and the Blueprint report.</div></div>
         <div class="c"><span class="tiny" id="outPath">Next to the reference</span><button class="btn ghost sm" id="pickOut">CHOOSE</button></div></div>
     </div>
@@ -229,6 +232,11 @@
           <div class="c"><select id="scSel"><option value="">None</option></select><button class="btn ghost sm" id="scanPlug">SCAN</button></div></div>
       </div>
       <div class="tiny" id="plugMsg"></div>
+    </div>
+    <div class="section" data-rv style="--i:3">
+      <h2>FINISH</h2>
+      <div class="rows card" id="finishCard"></div>
+      <div class="tiny">Done with Ableton's own devices, on every track FLOW builds. Turn off anything you would rather do by hand. For Stems + MIDI only the transition sweeps apply.</div>
     </div>
     <div class="foot"><button class="btn ghost" id="back2">BACK</button><div class="spacer"></div><button class="btn acc" id="buildBtn">BUILD MY TRACK</button></div>
   </section>
@@ -291,6 +299,7 @@ $('resumeYes').onclick = async ()=>{ const l=S.lastOpts; $('resumeCard').classLi
   document.querySelectorAll('#styleSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.style)); document.querySelectorAll('#targetSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.target));
   if(l.length){ $('lenRange').value=l.length; } updateLen(); if(l.bpm) $('bpmIn').value=l.bpm;
   if(l.synth||l.sidechain){ await scanPlugins(); $('synthSel').value=l.synth||''; $('scSel').value=l.sidechain||''; }
+  if(Array.isArray(l.finish)){ S.finish = new Set(l.finish); S.finishLoaded=false; }
   show(3); checkTarget(); };
 
 // ---- step 1
@@ -312,9 +321,17 @@ async function scanPack(){ const p=S.packPath; const parts=p.split(/:(?=\/)|;(?=
   $('packName').textContent = parts.length>1 ? `${parts.length} folders` : parts[0].split(/[\\/]/).pop(); $('packPath').textContent = parts.join('  +  ');
   $('packEmpty').classList.add('hidden'); $('packWell').classList.remove('hidden'); alertBox($('packMsg'), 'Reading every file…', 'ok'); $('packResult').classList.add('hidden'); $('to3').disabled=true;
   const r = await api().scan_pack(p); if(!r.ok){ alertBox($('packMsg'), r.error); return; } S.pack=r.pack;
-  const warn = (r.pack.warnings||[]); if(warn.length) alertBox($('packMsg'), warn.join(' ')); else alertBox($('packMsg'), `${r.pack.count} sounds · kick found · ready to build`, 'ok');
-  const roles = Object.entries(r.pack.by_role).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>`<span class="chip" data-rv style="--i:${i+1}">${k.toUpperCase()} · ${v}</span>`).join('');
-  $('packChips').innerHTML = `<span class="chip dark" data-rv style="--i:0">${r.pack.count} SOUNDS</span>` + roles + (r.pack.bpm_hint?`<span class="chip">${r.pack.bpm_hint} BPM LOOPS</span>`:''); $('packResult').classList.remove('hidden'); $('to3').disabled = warn.length>0; }
+  const warn = (r.pack.warnings||[]);
+  if(warn.some(w=>/iCloud/.test(w))){ const n = (warn.find(w=>/iCloud/.test(w)).match(/^(\d+)/)||[0,'some'])[1];
+    alertBox($('packMsg'), `${n} of these sounds live in iCloud, not on this Mac. Downloading them now…`, 'warn'); const origProgress = window.flowProgress; window.flowProgress = (m)=>{ $('packMsg').textContent = m; };
+    const d = await api().download_icloud(p); window.flowProgress = origProgress; if(d.ok){ alertBox($('packMsg'), 'Downloaded. iCloud may evict them again when disk space is low; keep a copy outside iCloud to be safe.', 'ok'); $('packMsg').innerHTML += ` <button class="link" id="keepLocal" style="margin-left:8px">Keep a local copy</button>`; $('keepLocal').onclick = async ()=>{ alertBox($('packMsg'), 'Copying to Music › FLOW Samples…', 'ok'); const c = await api().copy_pack_local(p); if(c.ok){ S.packPath=c.folder; await scanPack(); } else alertBox($('packMsg'), c.error); };
+      const r2 = await api().scan_pack(p); if(r2.ok){ S.pack=r2.pack; renderPack(r2.pack); } return; }
+    alertBox($('packMsg'), d.error || `${d.remaining} files did not download. In Finder: right-click the folder › Download Now, then choose it again.`); return; }
+  if(warn.length) alertBox($('packMsg'), warn.join(' ')); else alertBox($('packMsg'), `${r.pack.count} sounds · kick found · ready to build`, 'ok');
+  renderPack(r.pack); }
+function renderPack(pack){ const warn = pack.warnings||[];
+  const roles = Object.entries(pack.by_role).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>`<span class="chip" data-rv style="--i:${i+1}">${k.toUpperCase()} · ${v}</span>`).join('');
+  $('packChips').innerHTML = `<span class="chip dark" data-rv style="--i:0">${pack.count} SOUNDS</span>` + roles + (pack.bpm_hint?`<span class="chip">${pack.bpm_hint} BPM LOOPS</span>`:''); $('packResult').classList.remove('hidden'); $('to3').disabled = warn.length>0; }
 async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; await scanPack(); }
 $('pickPack').onclick = pickPack; $('pickPack2').onclick = pickPack;
 $('to3').onclick=()=>{ show(3); checkTarget(); }; $('back2').onclick=()=>show(2);
@@ -325,9 +342,16 @@ seg('styleSeg','style'); seg('targetSeg','target', checkTarget);
 function updateLen(){ const r=$('lenRange'); S.len = +r.value; r.style.setProperty('--p', `${(S.len-120)/(600-120)*100}%`); const bpm = S.ref ? S.ref.bpm : 120; const bars = Math.max(64, Math.round(S.len*bpm/240/8)*8); $('lenOut').innerHTML = `${fmt(S.len)}<small>≈ ${bars} bars</small>`;
   document.querySelectorAll('#lenPresets button').forEach(b=>b.classList.toggle('on', +b.dataset.v===S.len)); }
 $('lenRange').oninput = updateLen; document.querySelectorAll('#lenPresets button').forEach(b=>b.onclick=()=>{ $('lenRange').value=b.dataset.v; updateLen(); }); updateLen();
-async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!=='stems'); $('plugCard').style.opacity = S.target==='ableton'?1:.45;
-  if(S.target==='ableton'){ $('targetHint').textContent='Checking Live…'; const r = await api().ableton_status(); $('targetHint').innerHTML = r.ok ? (r.fresh?`<span style="color:var(--ok);font-weight:600">Live is ready · empty set in front</span>`:`<span style="color:var(--warn);font-weight:600">Live has ${r.tracks} tracks open. File › New Live Set first.</span>`) : `<span style="color:var(--warn);font-weight:600">${r.reason}</span>`; return r; }
+async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!=='stems'); $('plugCard').style.opacity = S.target==='ableton'?1:.45; $('installBridge').classList.add('hidden');
+  if(!S.finishLoaded) loadFinish();
+  if(S.target==='ableton'){ $('targetHint').textContent='Checking Live…'; const r = await api().ableton_status(); $('targetHint').innerHTML = r.ok ? (r.fresh?`<span style="color:var(--ok);font-weight:600">Live is ready · empty set in front</span>`:`<span style="color:var(--warn);font-weight:600">Live has ${r.tracks} tracks open. File › New Live Set first.</span>`) : `<span style="color:var(--warn);font-weight:600">${r.reason}</span>`; if(!r.ok) $('installBridge').classList.remove('hidden'); return r; }
   $('targetHint').textContent = 'Full-length stems and a MIDI file with markers. Logic, FL Studio, Cubase, Studio One, Bitwig, Reaper.'; return {ok:true, fresh:true}; }
+$('installBridge').onclick = async ()=>{ $('targetHint').textContent='Installing the FLOW Bridge…'; const r = await api().install_bridge(); if(!r.ok){ $('targetHint').innerHTML=`<span style="color:var(--err);font-weight:600">${r.error}</span>`; return; }
+  $('targetHint').innerHTML = `<span style="color:var(--ok);font-weight:600">Installed to ${r.path}</span><br>${r.steps.map((s,i)=>`${i+1}. ${s}`).join('<br>')}`; };
+S.finish = null; S.finishLoaded = false;
+async function loadFinish(){ S.finishLoaded = true; const opts = await api().finish_options(); if(!S.finish) S.finish = new Set(opts.filter(o=>o.on).map(o=>o.key));
+  $('finishCard').innerHTML = opts.map(o=>`<div class="row"><div><div class="k">${o.name}</div><div class="h">${o.hint}</div></div><div class="c"><button class="sw ${S.finish.has(o.key)?'on':''}" data-k="${o.key}" aria-label="${o.name}"></button></div></div>`).join('');
+  $('finishCard').querySelectorAll('.sw').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if(S.finish.has(k)) S.finish.delete(k); else S.finish.add(k); b.classList.toggle('on', S.finish.has(k)); }); }
 $('pickOut').onclick = async ()=>{ const p = await api().pick_folder(); if(p){ S.out=p; $('outPath').textContent=p; } };
 async function scanPlugins(){ $('plugMsg').textContent='Scanning this computer…'; const r = await api().scan_plugins(); if(!r.ok){ $('plugMsg').textContent=r.error; return; }
   $('plugMsg').textContent = `${r.plugins.count} plug-ins found · synths: ${r.plugins.synths.join(', ')||'none recognized'} · sidechain: ${r.plugins.sidechain.join(', ')||'none'}`;
@@ -338,7 +362,7 @@ $('scanPlug').onclick = scanPlugins;
 // ---- step 4
 function setStage(i, state){ document.querySelectorAll('.stage').forEach(s=>{ const n=+s.dataset.i; s.classList.remove('active','done','error'); if(n<i) s.classList.add('done'); else if(n===i) s.classList.add(state||'active'); }); }
 function resetBuild(){ $('log').textContent=''; $('bar').style.width='0%'; $('progress').classList.remove('done'); $('doneCard').classList.add('hidden'); alertBox($('doneWarn'), null); $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('stages').classList.remove('hidden'); $('buildTitle').textContent='Building'; $('buildLead').textContent='Measuring, choosing sounds, rendering patterns, placing every clip.'; $('saveNote').textContent=''; setStage(0); }
-function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, force:false }; }
+function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
 async function startBuild(){ resetBuild(); show(4);
   if(S.target==='ableton'){ const st = await api().ableton_status(); if(!st.ok || !st.fresh){ await sleep(350); window.flowError(st.ok ? `The Live Set in front has ${st.tracks} tracks. In Ableton: File › New Live Set, then press Retry.` : st.reason); return; } }
   S.lastOpts = currentOpts(); const r = await api().build(S.lastOpts); if(!r.ok){ window.flowError(r.error); } }

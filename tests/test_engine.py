@@ -107,3 +107,23 @@ def test_oasis_reference_structure():
     for must in (17, 33, 49):
         assert any(abs(s - must) <= 1 for s in starts), starts
     assert r["bars"] in (72, 73)
+
+
+def test_transition_sweeps_cut_spans(tmp_path):
+    from flow import transitions
+    import numpy as np, soundfile as sf
+    loop = tmp_path / "loop.wav"
+    sf.write(str(loop), np.random.uniform(-0.3, 0.3, (48000 * 8, 2)).astype("float32"), 48000)  # 4 bars at 120
+    plan = {"bpm": 120.0, "sections": [{"label": "Intro", "start": 1, "end": 17}, {"label": "Drop", "start": 17, "end": 49}],
+            "tracks": [{"name": "Hat Loop · x", "role": "hat_loop", "kind": "audio", "clip_bars": 4, "spans": [(1, 49)], "source": {"path": str(loop), "kind": "loop"}}]}
+    n = transitions.add_sweeps(plan, str(tmp_path))
+    t = plan["tracks"][0]
+    assert n == 1 and t["spans"] == [(1, 9), (17, 49)] and t["sweeps"][0][0] == 9
+    y, sr = sf.read(t["sweeps"][0][1])
+    assert abs(len(y) / sr - 16.0) < 0.01  # 8 bars at 120 BPM
+
+
+def test_finish_options_shape():
+    from flow import finish
+    keys = {k for k, _, _ in finish.OPTIONS}
+    assert finish.DEFAULT_ON <= keys and "transitions" in keys

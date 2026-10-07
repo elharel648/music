@@ -1,0 +1,115 @@
+"""Generate flow/bridge/FLOW/__init__.py: the FLOW Ableton bridge, forked from AbletonMCP (MIT, Siddharth Ahuja).
+
+  python tools/make_bridge.py "/path/to/AbletonMCP/__init__.py"
+
+Changes vs. upstream: port 9878, binds to 127.0.0.1 only, FLOW naming, and commands for mixer volume/pan/sends,
+master-track devices and parameters. Everything else is upstream code; the MIT notice is kept.
+"""
+from __future__ import annotations
+import os
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.path.join(ROOT, "flow", "bridge", "FLOW", "__init__.py")
+
+NOTICE = '''# FLOW Bridge for Ableton Live — a Remote Script that lets the FLOW desktop app build arrangements in the Set in front.
+# Forked from AbletonMCP by Siddharth Ahuja (https://github.com/ahujasid/ableton-mcp), MIT License:
+#   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+#   documentation files (the "Software"), to deal in the Software without restriction... THE SOFTWARE IS PROVIDED
+#   "AS IS", WITHOUT WARRANTY OF ANY KIND. (Full text: https://opensource.org/licenses/MIT)
+# FLOW additions (c) 2026 Harel Eliyahu. Listens on 127.0.0.1:9878 only.
+'''
+
+MAIN_THREAD_ADD = '"create_locator", "set_track_volume", "set_track_pan", "set_send", "load_on_master", "set_master_parameter"]:'
+
+DISPATCH_ADD = '''                        elif command_type == "set_track_volume":
+                            result = self._set_track_volume(params.get("track_index", 0), params.get("db", 0.0))
+                        elif command_type == "set_track_pan":
+                            result = self._set_track_pan(params.get("track_index", 0), params.get("pan", 0.0))
+                        elif command_type == "set_send":
+                            result = self._set_send(params.get("track_index", 0), params.get("send_index", 0), params.get("value", 0.0))
+                        elif command_type == "load_on_master":
+                            result = self._load_on_master(params.get("uri", ""))
+                        elif command_type == "set_master_parameter":
+                            result = self._set_master_parameter(params.get("device_index", 0), params.get("parameter_index", 0), params.get("value", 0.0))
+                        elif command_type == "set_tempo":'''
+
+READ_ADD = '''            elif command_type == "get_master_parameters":
+                response["result"] = self._get_master_parameters(params.get("device_index", 0))
+            elif command_type == "get_track_info":'''
+
+METHODS = '''
+    # ---- FLOW additions -------------------------------------------------
+    @staticmethod
+    def _db_to_volume(db):
+        """Live's volume slider: 0.85 = 0 dB, 1.0 = +6 dB; below 0 dB roughly 0.025 per dB, curving to -inf."""
+        db = float(db)
+        if db >= 0:
+            return min(1.0, 0.85 + db / 40.0)
+        if db >= -18:
+            return 0.85 + db * 0.025
+        return max(0.0, 0.4 * (10 ** ((db + 18) / 40.0)))
+
+    def _set_track_volume(self, track_index, db):
+        track = self._song.tracks[track_index]
+        track.mixer_device.volume.value = self._db_to_volume(db)
+        return {"track_index": track_index, "db": float(db), "value": float(track.mixer_device.volume.value)}
+
+    def _set_track_pan(self, track_index, pan):
+        track = self._song.tracks[track_index]
+        track.mixer_device.panning.value = max(-1.0, min(1.0, float(pan)))
+        return {"track_index": track_index, "pan": float(track.mixer_device.panning.value)}
+
+    def _set_send(self, track_index, send_index, value):
+        track = self._song.tracks[track_index]
+        sends = track.mixer_device.sends
+        if send_index < 0 or send_index >= len(sends):
+            raise IndexError("Send index out of range")
+        sends[send_index].value = max(0.0, min(1.0, float(value)))
+        return {"track_index": track_index, "send_index": send_index, "value": float(sends[send_index].value)}
+
+    def _load_on_master(self, uri):
+        app = self.application()
+        item = self._find_browser_item_by_uri(app.browser, uri)
+        if not item:
+            raise ValueError("Browser item with URI '{0}' not found".format(uri))
+        self._song.view.selected_track = self._song.master_track
+        app.browser.load_item(item)
+        return {"loaded": True, "item_name": item.name, "device_count": len(self._song.master_track.devices)}
+
+    def _get_master_parameters(self, device_index):
+        devices = self._song.master_track.devices
+        if device_index < 0 or device_index >= len(devices):
+            raise IndexError("Device index out of range")
+        return {"device": self._serialize_device(devices[device_index], device_index, include_params=True)}
+
+    def _set_master_parameter(self, device_index, parameter_index, value):
+        devices = self._song.master_track.devices
+        if device_index < 0 or device_index >= len(devices):
+            raise IndexError("Device index out of range")
+        param = devices[device_index].parameters[parameter_index]
+        param.value = float(value)
+        return {"device_index": device_index, "parameter_index": parameter_index, "name": param.name, "value": float(param.value)}
+
+    def _get_device_parameters(self, track_index, device_index):'''
+
+
+def main():
+    src = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/Music/Ableton/User Library/Remote Scripts/AbletonMCP/__init__.py")
+    code = open(src, encoding="utf-8").read()
+    assert '"create_locator"]:' in code and 'elif command_type == "set_tempo":' in code and 'elif command_type == "get_track_info":' in code
+    code = code.replace('"create_locator"]:', MAIN_THREAD_ADD, 1)
+    code = code.replace('                        elif command_type == "set_tempo":', DISPATCH_ADD, 1)
+    code = code.replace('            elif command_type == "get_track_info":', READ_ADD, 1)
+    code = code.replace("    def _get_device_parameters(self, track_index, device_index):", METHODS, 1)
+    code = code.replace("DEFAULT_PORT = 9877", "DEFAULT_PORT = 9878", 1)
+    code = code.replace('HOST = "0.0.0.0"', 'HOST = "127.0.0.1"', 1)
+    code = code.replace("AbletonMCP: Listening", "FLOW Bridge: Listening")
+    code = code.replace("# AbletonMCP/init.py", NOTICE, 1)
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    open(OUT, "w", encoding="utf-8").write(code)
+    print("wrote", OUT, len(code.splitlines()), "lines")
+
+
+if __name__ == "__main__":
+    main()

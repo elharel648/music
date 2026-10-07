@@ -49,7 +49,7 @@ class Api:
 
     def save_session(self, opts: dict):
         try:
-            keep = {k: opts.get(k) for k in ("reference", "pack", "length", "target", "out", "style", "bpm", "synth", "sidechain")}
+            keep = {k: opts.get(k) for k in ("reference", "pack", "length", "target", "out", "style", "bpm", "synth", "sidechain", "finish")}
             with open(self._session_path(), "w") as f:
                 json.dump(keep, f)
             return {"ok": True}
@@ -105,6 +105,21 @@ class Api:
         except Exception as e:
             return {"ok": False, "error": f"{e}"}
 
+    def download_icloud(self, folder: str):
+        try:
+            r = packmod.download_icloud(folder, progress=self._emit)
+            return {"ok": r.get("remaining", 0) == 0, **r}
+        except Exception as e:
+            return {"ok": False, "error": f"{e}"}
+
+    def copy_pack_local(self, folder: str):
+        try:
+            packmod.download_icloud(folder, progress=self._emit)
+            new = packmod.copy_pack_local(folder, progress=self._emit)
+            return {"ok": True, "folder": new}
+        except Exception as e:
+            return {"ok": False, "error": f"{e}"}
+
     def scan_plugins(self):
         try:
             p = plugins.scan_installed()
@@ -112,6 +127,39 @@ class Api:
             return {"ok": True, "plugins": p}
         except Exception as e:
             return {"ok": False, "error": f"{e}"}
+
+    def finish_options(self):
+        from . import finish
+        return [{"key": k, "name": n, "hint": h, "on": k in finish.DEFAULT_ON} for k, n, h in finish.OPTIONS]
+
+    def bridge_paths(self):
+        src = os.path.join(getattr(sys, "_MEIPASS", os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "flow", "bridge", "FLOW")
+        if not os.path.isdir(src):
+            src = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bridge", "FLOW")
+        home = os.path.expanduser("~")
+        if sys.platform == "darwin":
+            dst = os.path.join(home, "Music", "Ableton", "User Library", "Remote Scripts", "FLOW")
+        elif sys.platform.startswith("win"):
+            dst = os.path.join(home, "Documents", "Ableton", "User Library", "Remote Scripts", "FLOW")
+        else:
+            dst = os.path.join(home, "Ableton", "User Library", "Remote Scripts", "FLOW")
+        return src, dst
+
+    def install_bridge(self):
+        """Copy the FLOW Bridge Remote Script into Live's User Library. Live must be restarted and the surface enabled."""
+        import shutil
+        try:
+            src, dst = self.bridge_paths()
+            if not os.path.isfile(os.path.join(src, "__init__.py")):
+                return {"ok": False, "error": "Bridge files are missing from this build."}
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            if os.path.isdir(dst):
+                shutil.rmtree(dst)
+            shutil.copytree(src, dst)
+            return {"ok": True, "path": dst,
+                    "steps": ["Quit and reopen Ableton Live.", "Settings › Link, Tempo & MIDI › Control Surface: choose FLOW.", "Open File › New Live Set and build again."]}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
 
     def ableton_status(self):
         try:
@@ -135,11 +183,12 @@ class Api:
 
         def work():
             try:
+                fin = opts.get("finish")
                 res = flowcli.run_build(
                     opts["reference"], opts["pack"], flowcli.parse_length(opts.get("length") or None) if isinstance(opts.get("length"), str) else opts.get("length"),
                     opts.get("target", "stems"), opts.get("out") or None, opts.get("style", "house"), opts.get("bpm") or None,
                     opts.get("synth") or None, opts.get("sidechain") or None, bool(opts.get("force")), progress=self._emit,
-                    work_dir=opts.get("work_dir") or None)
+                    work_dir=opts.get("work_dir") or None, finish_opts=set(fin) if isinstance(fin, list) else None)
                 res.pop("reference", None)
                 plan = res.get("plan", {})
                 from . import arrange

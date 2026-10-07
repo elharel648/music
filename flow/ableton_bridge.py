@@ -8,7 +8,8 @@ import socket
 import urllib.parse
 from typing import Callable
 
-HOST, PORT = "127.0.0.1", 9877
+HOST = "127.0.0.1"
+PORTS = (9878, 9877)  # FLOW Bridge first, then the original AbletonMCP script
 
 
 class BridgeError(RuntimeError):
@@ -16,15 +17,28 @@ class BridgeError(RuntimeError):
 
 
 class Live:
-    def __init__(self, host: str = HOST, port: int = PORT, timeout: float = 30.0):
+    def __init__(self, host: str = HOST, port: int | None = None, timeout: float = 30.0):
         self.host, self.port, self.timeout = host, port, timeout
         self._plugin_cache: dict[str, str] | None = None
 
+    def _connect(self) -> socket.socket:
+        ports = (self.port,) if self.port else PORTS
+        last = None
+        for p in ports:
+            try:
+                s = socket.create_connection((self.host, p), timeout=self.timeout)
+                self.port = p
+                return s
+            except OSError as e:
+                last = e
+        raise BridgeError("Ableton Live is not reachable. Open Live, enable the FLOW Bridge control surface (Settings › Link, Tempo & MIDI), and keep a Live Set in front.") from last
+
+    @property
+    def is_flow_bridge(self) -> bool:
+        return self.port == 9878
+
     def call(self, cmd: str, **params):
-        try:
-            s = socket.create_connection((self.host, self.port), timeout=self.timeout)
-        except OSError as e:
-            raise BridgeError("Ableton Live is not reachable. Open Live, enable the AbletonMCP control surface, and keep a Live Set in front.") from e
+        s = self._connect()
         with s:
             s.sendall(json.dumps({"type": cmd, "params": params}).encode())
             s.settimeout(self.timeout)
@@ -102,6 +116,39 @@ class Live:
                 return u
         return None
 
+    # ---- devices
+    def add_device(self, track_index: int, uri: str) -> int:
+        """Load a device at the end of the track's chain; return its device index."""
+        before = len(self.call("get_track_info", track_index=track_index).get("devices", []))
+        self.call("load_instrument_or_effect", track_index=track_index, uri=uri)
+        after = self.call("get_track_info", track_index=track_index).get("devices", [])
+        return max(before, len(after) - 1)
+
+    def set_param(self, track_index: int, device_index: int, name: str, value: float) -> bool:
+        """Set a device parameter by (case-insensitive) name. Returns False when the device has no such parameter."""
+        r = self.call("get_device_parameters", track_index=track_index, device_index=device_index)
+        params = r.get("device", {}).get("parameters") if isinstance(r, dict) and "device" in r else (r.get("parameters", r) if isinstance(r, dict) else r)
+        params = params or []
+        low = name.lower()
+        hit = None
+        for i, p in enumerate(params):
+            pname = str(p.get("name", "")).lower()
+            if pname == low:
+                hit = (p.get("index", i), p); break
+        if hit is None:
+            for i, p in enumerate(params):
+                if low in str(p.get("name", "")).lower():
+                    hit = (p.get("index", i), p); break
+        if hit is None:
+            raise BridgeError(f"parameter '{name}' not found on device {device_index}")
+        idx, p = hit
+        lo, hi = p.get("min"), p.get("max")
+        v = float(value)
+        if lo is not None and hi is not None:
+            v = min(max(v, float(lo)), float(hi))
+        self.call("set_device_parameter", track_index=track_index, device_index=device_index, parameter_index=int(idx), value=v)
+        return True
+
     # ---- writes
     def apply_plan(self, plan: dict, progress: Callable[[str, float], None] | None = None, force: bool = False) -> dict:
         prog = progress or (lambda m, p: None)
@@ -153,6 +200,12 @@ class Live:
                     b += clip_bars
                     n += 1
                 tick(f"{t['name']}: bars {s}–{e - 1}")
+            if t.get("sweeps"):
+                self.call("create_audio_clip", track_index=ti, clip_index=1, path=t["sweeps"][0][1])
+                for sb, _p in t["sweeps"]:
+                    self.call("duplicate_session_clip_to_arrangement", track_index=ti, clip_index=1, destination_time=(sb - 1) * 4.0)
+                    n += 1
+                tick(f"{t['name']}: sweep into the drop")
             for hb in t.get("hits", []):
                 self.call("duplicate_session_clip_to_arrangement", track_index=ti, clip_index=0, destination_time=(hb - 1) * 4.0)
                 n += 1

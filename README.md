@@ -53,6 +53,24 @@ clock is stored per machine in the app-data folder with an integrity check. This
 level of protection: it stops casual sharing, not a determined cracker. For stronger protection later:
 online activation with a server (Lemon Squeezy / Paddle license APIs) and per-machine seat counting.
 
+## Finish moves (0.4)
+
+After placing the clips, FLOW can make the set sound like one continuous track using Ableton's own devices,
+each move a switch the user can turn off: gain staging (Utility), clean low end (EQ Eight high-pass on
+everything but kick and bass), sidechain pump (your Kickstart/ShaperBox/LFOTool, or Auto Pan as a native
+fallback), space (Reverb/Delay on pads, atmospheres, claps, synth), drum glue (Drum Buss), and transition
+sweeps (the 8 bars before each drop rendered with a rising high-pass; this one also applies to the
+Stems + MIDI export). `flow/finish.py` looks parameters up by name at runtime, so a missing parameter
+becomes a warning, never a crash. `flow build ... --finish gain,lowcut,transitions` or `--finish none`.
+
+## The FLOW Bridge (Ableton Remote Script)
+
+Users do not have AbletonMCP. FLOW ships its own Remote Script, `flow/bridge/FLOW/` (forked from AbletonMCP,
+MIT, with mixer/master commands added, bound to 127.0.0.1:9878). The app offers "Install FLOW Bridge" when
+Live is not reachable: it copies the folder into Live's User Library › Remote Scripts, then the user restarts
+Live and picks FLOW as a Control Surface. The client tries port 9878 (FLOW) and then 9877 (AbletonMCP).
+Regenerate from upstream with `python tools/make_bridge.py <path to AbletonMCP/__init__.py>`.
+
 ## What is measured vs. what is a default
 
 Measured from the reference: BPM (or from the filename), key, bar grid, section boundaries (4-bar phrases),

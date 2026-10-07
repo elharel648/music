@@ -86,6 +86,62 @@ def scan_pack(folder: str, bpm: float | None = None, max_files: int = 2000) -> d
 SF_DATALESS = 0x40000000  # macOS: file content lives in iCloud, not on disk
 
 
+def dataless_files(folder: str) -> list[str]:
+    out = []
+    for base in [f for f in str(folder).split(os.pathsep) if f.strip()]:
+        for root, _dirs, files in os.walk(base):
+            for fn in files:
+                if fn.lower().endswith(audio.AUDIO_EXT) and _is_dataless(os.path.join(root, fn)):
+                    out.append(os.path.join(root, fn))
+    return out
+
+
+def download_icloud(folder: str, progress=None, timeout: float = 600.0) -> dict:
+    """macOS: ask iCloud to download every placeholder in the folder(s) and wait until they are local."""
+    import subprocess, time, platform
+    files = dataless_files(folder)
+    if not files:
+        return {"requested": 0, "remaining": 0}
+    if platform.system() != "Darwin":
+        return {"requested": len(files), "remaining": len(files), "error": "Automatic download is only available on macOS."}
+    for i, f in enumerate(files):
+        try:
+            subprocess.run(["brctl", "download", f], check=False, capture_output=True, timeout=30)
+        except Exception:
+            pass
+        if progress and i % 10 == 0:
+            progress(f"Asking iCloud for {len(files)} files…", 0.05)
+    t0 = time.time()
+    remaining = files
+    while remaining and time.time() - t0 < timeout:
+        time.sleep(1.5)
+        remaining = [f for f in files if _is_dataless(f)]
+        if progress:
+            progress(f"Downloading from iCloud: {len(files) - len(remaining)}/{len(files)}", 1 - len(remaining) / len(files))
+    return {"requested": len(files), "remaining": len(remaining)}
+
+
+def copy_pack_local(folder: str, dest_root: str | None = None, progress=None) -> str:
+    """Copy the pack to a folder that iCloud does not evict (default ~/Music/FLOW Samples/<name>). Returns the new path(s)."""
+    import shutil
+    dest_root = dest_root or os.path.join(os.path.expanduser("~"), "Music", "FLOW Samples")
+    os.makedirs(dest_root, exist_ok=True)
+    outs = []
+    for base in [f for f in str(folder).split(os.pathsep) if f.strip()]:
+        name = os.path.basename(base.rstrip("/\\")) or "Pack"
+        dst = os.path.join(dest_root, name)
+        if os.path.abspath(dst) == os.path.abspath(base):
+            outs.append(base)
+            continue
+        if os.path.isdir(dst):
+            shutil.rmtree(dst)
+        if progress:
+            progress(f"Copying {name} to {dest_root}", 0.5)
+        shutil.copytree(base, dst, ignore=shutil.ignore_patterns(".*", "*.asd"))
+        outs.append(dst)
+    return os.pathsep.join(outs)
+
+
 def _is_dataless(path: str) -> bool:
     try:
         st = os.stat(path)

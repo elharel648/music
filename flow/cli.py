@@ -25,13 +25,19 @@ def parse_length(s) -> float | None:
 
 def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, out: str | None, style: str = "house",
               bpm: float | None = None, midi_synth: str | None = None, sidechain: str | None = None, force: bool = False,
-              progress=None, work_dir: str | None = None) -> dict:
+              progress=None, work_dir: str | None = None, finish_opts: set[str] | None = None) -> dict:
+    from . import finish as finishmod, transitions
+    finish_opts = set(finish_opts) if finish_opts is not None else set(finishmod.DEFAULT_ON)
     prog = progress or (lambda m, p: print(f"[{p * 100:5.1f}%] {m}"))
     ok, st = lic.can_build()
     if not ok:
         raise SystemExit(f"License: {st.get('reason')}")
     prog("Analyzing the reference", 0.02)
     pk = packmod.scan_pack(pack_dir)
+    if any("iCloud" in w for w in pk.get("warnings", [])):
+        prog("Some sounds are still in iCloud. Downloading them now…", 0.03)
+        packmod.download_icloud(pack_dir, progress=lambda m, p: prog(m, 0.03 + 0.07 * p))
+        pk = packmod.scan_pack(pack_dir)
     ref = analysis.analyze_reference(ref_path, bpm_hint=bpm or pk.get("bpm_hint"))
     bpm = bpm or ref["bpm"]
     prog(f"Reference: {ref['bpm']:.0f} BPM, {ref['key']['tonic']} {ref['key']['mode']}, {ref['bars']} bars, {len(ref['sections'])} sections", 0.15)
@@ -51,13 +57,24 @@ def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, o
     midi_roles = {}
     if midi_synth:
         midi_roles = {"bass": {"name": midi_synth}, "synth": {"name": midi_synth}}
-    plan = arrange.build_plan(ref, kit, loops, bpm=bpm, length_seconds=length, style=style, midi_roles=midi_roles, sidechain=sidechain)
+    plan = arrange.build_plan(ref, kit, loops, bpm=bpm, length_seconds=length, style=style, midi_roles=midi_roles,
+                              sidechain=None)  # ducking is a finish move now
+    if "transitions" in finish_opts:
+        n_sw = transitions.add_sweeps(plan, work, progress=lambda m, p: prog(m, 0.38))
+        prog(f"Transition sweeps rendered: {n_sw}", 0.39)
+    plan["finish"] = sorted(finish_opts)
     prog(f"Plan: {plan['bars']} bars, {len(plan['tracks'])} tracks", 0.4)
     result = {"reference": {k: v for k, v in ref.items() if k != "bar_features"}, "plan": plan, "kit": {k: v["name"] for k, v in kit.items()}}
     if target == "ableton":
         from .ableton_bridge import Live
         live = Live()
-        rep = live.apply_plan(plan, progress=lambda m, p: prog(m, 0.4 + 0.6 * p), force=force)
+        base = live.session()["track_count"]
+        rep = live.apply_plan(plan, progress=lambda m, p: prog(m, 0.4 + 0.45 * p), force=force)
+        moves = finish_opts - {"transitions"}
+        if moves:
+            warns = finishmod.apply(live, plan, base, moves, sidechain, progress=lambda m, p: prog(m, 0.85 + 0.15 * p))
+            rep.setdefault("warnings", []).extend(warns)
+            rep["finish"] = sorted(moves)
         result["ableton"] = rep
     else:
         out_dir = out or os.path.join(os.path.dirname(ref_path), "FLOW export")
@@ -83,6 +100,7 @@ def main(argv=None) -> int:
     b.add_argument("--synth", help="installed synth to drive bass/synth as MIDI (Ableton target), e.g. Serum")
     b.add_argument("--sidechain", help="sidechain plug-in to load on every non-kick track, e.g. 'Kickstart 2'")
     b.add_argument("--force", action="store_true", help="write even if the Live Set in front is not empty")
+    b.add_argument("--finish", help="comma-separated finish moves (gain,lowcut,duck,space,glue,transitions); 'none' for a bare skeleton")
     sub.add_parser("plugins", help="List installed plug-ins FLOW recognizes")
     sub.add_parser("license", help="Show trial / license status")
     k = sub.add_parser("activate", help="Activate with a license key")
@@ -95,7 +113,8 @@ def main(argv=None) -> int:
         print(json.dumps(r, indent=1))
         return 0
     if args.cmd == "build":
-        r = run_build(args.ref, args.pack, parse_length(args.length), args.target, args.out, args.style, args.bpm, args.synth, args.sidechain, args.force)
+        fin = None if args.finish is None else (set() if args.finish == "none" else {x.strip() for x in args.finish.split(",") if x.strip()})
+        r = run_build(args.ref, args.pack, parse_length(args.length), args.target, args.out, args.style, args.bpm, args.synth, args.sidechain, args.force, finish_opts=fin)
         print(json.dumps({k: v for k, v in r.items() if k != "plan"}, indent=1, default=str))
         for line in arrange.describe(r["plan"]):
             print(" -", line)

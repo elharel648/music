@@ -43,6 +43,13 @@ def render_stems(plan: dict, out_dir: str, sr: int = 48000, progress=None, tail_
             i0 = int((hb - 1) * bar_len * sr)
             i1 = min(n, i0 + y.shape[1])
             buf[:, i0:i1] += y[:, : i1 - i0]
+        for sb, sp in t.get("sweeps", []):
+            sw, _ = audio.load(sp, sr=sr)
+            if sw.shape[0] == 1:
+                sw = np.vstack([sw, sw])
+            i0 = int((sb - 1) * bar_len * sr)
+            i1 = min(n, i0 + sw.shape[1])
+            buf[:, i0:i1] += sw[:, : i1 - i0]
         peak = float(np.abs(buf).max())
         if peak > 0.98:
             buf *= 0.98 / peak
