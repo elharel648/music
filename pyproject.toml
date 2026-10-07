@@ -1,6 +1,6 @@
 [project]
 name = "flow-producer"
-version = "0.2.0"
+version = "0.3.0"
 description = "FLOW — AI Producer Layer: reference in, your sounds in, an editable arrangement out."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -28,7 +28,7 @@ build-backend = "setuptools.build_meta"
 packages = ["flow"]
 
 [tool.setuptools.package-data]
-flow = ["ui/*.html"]
+flow = ["ui/*.html", "ui/fonts/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

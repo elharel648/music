@@ -4,89 +4,135 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FLOW</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root { --bg:#F5F4F0; --card:#FFFFFF; --well:#FAFAF8; --ink:#15151A; --sec:#66666F; --mut:#8E8E97; --line:rgba(20,20,30,.08); --line2:rgba(20,20,30,.05);
-          --acc:#5C5BE0; --acc-ink:#4442C8; --tint:#EFEEFC; --tint2:#DFDEF8; --track:#ECEBE6; --ok:#2E8B5F; --warn:#9A6A12; --err:#8A2A1E; }
+          --acc:#5C5BE0; --acc-ink:#4442C8; --tint:#EFEEFC; --tint2:#DFDEF8; --track:#ECEBE6; --ok:#2E8B5F; --warn:#9A6A12; --err:#8A2A1E;
+          --ease:cubic-bezier(.2,.8,.2,1); }
   * { box-sizing:border-box; }
-  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif; font-size:14px; -webkit-font-smoothing:antialiased; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:Geist,-apple-system,system-ui,"Segoe UI",sans-serif; font-size:14px; -webkit-font-smoothing:antialiased; font-feature-settings:"ss01","cv11"; }
   button, input, select { font-family:inherit; }
+  .mono { font-family:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace; }
   .top { height:64px; display:flex; align-items:center; gap:16px; padding:0 40px; }
-  .brand { font-weight:800; letter-spacing:.24em; font-size:15px; }
-  .brand small { font-weight:700; letter-spacing:.2em; font-size:10px; color:var(--sec); margin-left:12px; }
+  .brand { font-weight:700; letter-spacing:.26em; font-size:14px; }
+  .brand small { font-weight:600; letter-spacing:.18em; font-size:10px; color:var(--sec); margin-left:12px; }
   .spacer { flex:1; }
-  .steps { display:flex; gap:22px; font-size:10.5px; font-weight:700; letter-spacing:.16em; color:#B9B9C1; }
-  .steps span { display:inline-flex; align-items:center; gap:7px; }
+  .steps { display:flex; gap:22px; font-size:10.5px; font-weight:600; letter-spacing:.14em; color:#B9B9C1; }
+  .steps span { display:inline-flex; align-items:center; gap:7px; transition:color .3s; }
   .steps i { width:5px; height:5px; border-radius:50%; background:currentColor; display:inline-block; }
   .steps .done { color:var(--ink);} .steps .cur { color:var(--acc-ink);}
-  .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:var(--tint); color:var(--acc-ink); font-size:12px; font-weight:600; }
+  .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:var(--tint); color:var(--acc-ink); font-size:12px; font-weight:500; }
   .pill i { width:7px; height:7px; border-radius:50%; background:var(--acc); display:inline-block; }
-  .wrap { max-width:960px; margin:0 auto; padding:36px 32px 72px; display:flex; flex-direction:column; gap:28px; }
-  .eyebrow { font-size:10.5px; font-weight:700; letter-spacing:.18em; color:var(--sec); }
-  h1 { font-size:40px; font-weight:800; letter-spacing:-.025em; line-height:1.05; margin:6px 0 8px; }
-  .lead { font-size:15px; color:var(--sec); line-height:1.55; margin:0; max-width:640px; }
+  .wrap { max-width:960px; margin:0 auto; padding:36px 32px 72px; }
+  .view { display:flex; flex-direction:column; gap:24px; opacity:0; transform:translateY(10px); transition:opacity .28s ease, transform .36s var(--ease); }
+  .view.in { opacity:1; transform:none; }
+  .in [data-rv] { animation:rise .55s var(--ease) both; animation-delay:calc(var(--i,0)*70ms); }
+  @keyframes rise { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:none;} }
+  .eyebrow { font-size:11px; font-weight:600; letter-spacing:.14em; color:var(--sec); }
+  h1 { font-size:44px; font-weight:700; letter-spacing:-.03em; line-height:1.02; margin:8px 0 10px; }
+  .lead { font-size:15px; color:var(--sec); line-height:1.55; margin:0; max-width:640px; font-weight:400; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:0 1px 2px rgba(20,20,30,.04); }
   .well { display:flex; align-items:center; gap:16px; padding:18px 20px; }
-  .well .ic { width:40px; height:40px; border-radius:11px; background:var(--tint); display:flex; align-items:center; justify-content:center; flex:0 0 40px; }
-  .well .name { font-size:15px; font-weight:700; }
+  .ic { width:40px; height:40px; border-radius:11px; background:var(--tint); display:flex; align-items:center; justify-content:center; flex:0 0 40px; }
+  .well .name { font-size:15px; font-weight:600; }
   .well .meta { font-size:12px; color:var(--sec); word-break:break-all; margin-top:2px; }
   .well .body { flex:1; min-width:0; }
   .empty { padding:48px 24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:14px; }
-  .empty .ic { width:52px; height:52px; border-radius:16px; background:var(--tint); display:flex; align-items:center; justify-content:center; }
-  .empty .t { font-size:17px; font-weight:700; }
+  .empty .ic { width:52px; height:52px; border-radius:16px; }
+  .empty .t { font-size:17px; font-weight:600; }
   .empty .s { font-size:13px; color:var(--sec); max-width:420px; }
   .tiles { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
   .tile { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
-  .tile .v { font-size:21px; font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
-  .tile .l { font-size:10.5px; font-weight:700; letter-spacing:.16em; color:var(--sec); margin-top:4px; }
+  .tile .v { font-size:22px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .tile .l { font-size:10.5px; font-weight:600; letter-spacing:.14em; color:var(--sec); margin-top:4px; }
   .section { display:flex; flex-direction:column; gap:12px; }
-  .section h2 { margin:0; font-size:10.5px; font-weight:700; letter-spacing:.18em; color:var(--sec); }
+  .section h2 { margin:0; font-size:11px; font-weight:600; letter-spacing:.14em; color:var(--sec); }
   .strip { display:flex; gap:6px; align-items:flex-end; height:100px; }
   .strip .col { display:flex; flex-direction:column; justify-content:flex-end; min-width:0; height:100%; }
-  .strip .bar { border-radius:10px; background:var(--tint2); }
+  .strip .bar { border-radius:10px; background:var(--tint2); height:0; transition:height .7s var(--ease); }
   .strip .bar.hi { background:linear-gradient(180deg,#6F6EE6,#5C5BE0); }
   .labels { display:flex; gap:6px; }
   .labels .col { min-width:0; text-align:center; }
-  .labels .n { font-size:10px; font-weight:700; letter-spacing:.12em; color:var(--sec); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .labels .n { font-size:10px; font-weight:600; letter-spacing:.12em; color:var(--sec); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .labels .b { font-size:11px; color:var(--mut); font-variant-numeric:tabular-nums; margin-top:3px; }
   .rows { display:flex; flex-direction:column; }
   .row { display:grid; grid-template-columns:220px minmax(0,1fr); gap:24px; align-items:center; padding:18px 22px; border-top:1px solid var(--line2); }
   .row:first-child { border-top:0; }
-  .row .k { font-size:13.5px; font-weight:700; }
+  .row .k { font-size:13.5px; font-weight:600; }
   .row .h { font-size:12px; color:var(--sec); margin-top:3px; line-height:1.45; }
   .row .c { display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end; }
   .seg { display:inline-flex; background:var(--track); border-radius:10px; padding:3px; }
-  .seg button { border:0; background:transparent; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; color:var(--sec); cursor:pointer; }
-  .seg button.on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(20,20,30,.12); }
-  input[type=range] { -webkit-appearance:none; width:260px; height:4px; border-radius:999px; background:var(--track); outline:none; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:1px solid rgba(20,20,30,.15); box-shadow:0 1px 3px rgba(20,20,30,.2); cursor:pointer; }
-  .readout { font-size:14px; font-weight:700; font-variant-numeric:tabular-nums; min-width:150px; text-align:right; }
-  .readout small { color:var(--sec); font-weight:600; margin-left:6px; }
+  .seg button { border:0; background:transparent; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:500; color:var(--sec); cursor:pointer; transition:all .2s var(--ease); }
+  .seg button.on { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(20,20,30,.12); font-weight:600; }
+  input[type=range] { -webkit-appearance:none; width:250px; height:4px; border-radius:999px; background:linear-gradient(90deg,var(--acc) var(--p,50%),var(--track) var(--p,50%)); outline:none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:1px solid rgba(20,20,30,.15); box-shadow:0 1px 3px rgba(20,20,30,.2); cursor:pointer; transition:transform .15s var(--ease); }
+  input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.08); }
+  .readout { font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; min-width:150px; text-align:right; }
+  .readout small { color:var(--sec); font-weight:500; margin-left:6px; }
   .presets { display:inline-flex; gap:6px; }
-  .presets button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer; color:var(--ink); }
+  .presets button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:500; cursor:pointer; color:var(--ink); transition:all .18s var(--ease); }
   .presets button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
-  select, input[type=text] { font-size:13.5px; font-weight:600; padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink); min-width:220px; }
-  .btn { display:inline-flex; align-items:center; gap:10px; height:44px; padding:0 20px; border-radius:999px; border:0; background:var(--ink); color:#fff; font-size:13px; font-weight:700; letter-spacing:.06em; cursor:pointer; }
+  select, input[type=text] { font-size:13.5px; font-weight:500; padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink); min-width:220px; }
+  .btn { display:inline-flex; align-items:center; gap:10px; height:44px; padding:0 20px; border-radius:999px; border:0; background:var(--ink); color:#fff; font-size:13px; font-weight:600; letter-spacing:.04em; cursor:pointer; transition:transform .18s var(--ease), box-shadow .18s var(--ease), opacity .18s; }
+  .btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(20,20,30,.14); }
+  .btn:active { transform:translateY(0) scale(.98); box-shadow:none; }
   .btn.acc { height:52px; padding:0 30px; background:linear-gradient(180deg,#6A69E6,#5C5BE0); box-shadow:0 12px 30px rgba(92,91,224,.26); font-size:14px; }
+  .btn.acc:hover { box-shadow:0 16px 36px rgba(92,91,224,.34); }
   .btn.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .btn.ghost:hover { box-shadow:0 6px 16px rgba(20,20,30,.08); }
   .btn.sm { height:36px; padding:0 14px; font-size:12px; }
-  .btn:disabled { opacity:.4; cursor:default; box-shadow:none; }
+  .btn:disabled { opacity:.4; cursor:default; box-shadow:none; transform:none; }
   .chips { display:flex; gap:8px; flex-wrap:wrap; }
-  .chip { padding:6px 11px; border-radius:999px; background:#fff; border:1px solid var(--line); font-size:12px; font-weight:600; color:var(--ink); }
+  .chip { padding:6px 11px; border-radius:999px; background:#fff; border:1px solid var(--line); font-size:12px; font-weight:500; color:var(--ink); }
   .chip.dark { background:var(--ink); color:#fff; border-color:var(--ink); }
-  .alert { display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:12px; background:#FDF3F1; border:1px solid #F1CFC8; color:var(--err); font-size:13px; font-weight:600; line-height:1.45; }
+  .alert { display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:12px; background:#FDF3F1; border:1px solid #F1CFC8; color:var(--err); font-size:13px; font-weight:500; line-height:1.5; }
   .alert.ok { background:#EEF8F2; border-color:#CBE7D6; color:var(--ok); }
   .alert.warn { background:#FBF5E8; border-color:#F0DFB8; color:var(--warn); }
   .foot { display:flex; align-items:center; gap:12px; padding-top:8px; }
-  .progress { height:6px; border-radius:999px; background:var(--tint); overflow:hidden; }
-  .progress > div { height:100%; background:var(--acc); border-radius:999px; transition:width .35s ease; width:0; }
-  .log { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; color:var(--sec); background:var(--well); border:1px solid var(--line2); border-radius:12px; padding:14px 16px; max-height:200px; overflow:auto; white-space:pre-wrap; line-height:1.5; }
-  ol.list { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:7px; font-size:13.5px; line-height:1.45; }
   .tiny { font-size:12px; color:var(--mut); }
   .hidden { display:none !important; }
-  .gatebox { max-width:560px; display:flex; flex-direction:column; gap:14px; }
   footer { padding:0 40px 24px; font-size:11.5px; color:var(--mut); }
+
+  /* build */
+  .stages { display:flex; flex-direction:column; }
+  .stage { display:grid; grid-template-columns:36px minmax(0,1fr) auto; gap:16px; align-items:center; padding:16px 22px; border-top:1px solid var(--line2); transition:background .3s; }
+  .stage:first-child { border-top:0; }
+  .stage .n { font-size:14px; font-weight:600; color:var(--mut); transition:color .3s; }
+  .stage .d { font-size:12px; color:var(--mut); margin-top:2px; }
+  .stage.active .n, .stage.done .n { color:var(--ink); }
+  .stage.active .d { color:var(--sec); }
+  .dot { width:28px; height:28px; border-radius:50%; border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center; position:relative; transition:all .3s var(--ease); }
+  .stage.active .dot { border-color:transparent; }
+  .stage.active .dot::before { content:""; position:absolute; inset:-1.5px; border-radius:50%; background:conic-gradient(var(--acc) 0 25%, var(--tint2) 25% 100%); animation:spin 1s linear infinite; -webkit-mask:radial-gradient(circle, transparent 60%, #000 62%); mask:radial-gradient(circle, transparent 60%, #000 62%); }
+  .stage.active .dot::after { content:""; width:8px; height:8px; border-radius:50%; background:var(--acc); animation:pulse 1.2s ease-in-out infinite; }
+  .stage.done .dot { background:var(--acc); border-color:var(--acc); }
+  .stage.done .dot svg path { stroke-dasharray:24; stroke-dashoffset:24; animation:draw .5s var(--ease) forwards; }
+  .stage.error .dot { border-color:#D9A39A; background:#FDF3F1; }
+  @keyframes spin { to { transform:rotate(360deg);} }
+  @keyframes pulse { 0%,100% { transform:scale(.85); opacity:.7;} 50% { transform:scale(1.1); opacity:1;} }
+  @keyframes draw { to { stroke-dashoffset:0; } }
+  .eq { display:none; gap:3px; align-items:flex-end; height:22px; }
+  .stage.active .eq { display:flex; }
+  .eq i { width:3px; border-radius:2px; background:var(--acc); animation:eq 1s ease-in-out infinite; height:30%; }
+  .eq i:nth-child(2){animation-delay:.1s} .eq i:nth-child(3){animation-delay:.25s} .eq i:nth-child(4){animation-delay:.05s} .eq i:nth-child(5){animation-delay:.35s} .eq i:nth-child(6){animation-delay:.15s} .eq i:nth-child(7){animation-delay:.3s} .eq i:nth-child(8){animation-delay:.2s}
+  @keyframes eq { 0%,100% { height:25%;} 50% { height:100%;} }
+  .progress { height:6px; border-radius:999px; background:var(--tint); overflow:hidden; position:relative; }
+  .progress > div { height:100%; background:var(--acc); border-radius:999px; transition:width .45s var(--ease); width:0; position:relative; overflow:hidden; }
+  .progress > div::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.45), transparent); transform:translateX(-100%); animation:sheen 1.6s ease-in-out infinite; }
+  @keyframes sheen { to { transform:translateX(100%);} }
+  .progress.done > div::after { animation:none; }
+  .details { display:flex; align-items:center; gap:10px; }
+  .link { background:none; border:0; color:var(--sec); font-size:12.5px; font-weight:500; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:3px; }
+  .log { font-family:"Geist Mono",ui-monospace,Menlo,monospace; font-size:12px; color:var(--sec); background:var(--well); border:1px solid var(--line2); border-radius:12px; padding:14px 16px; max-height:200px; overflow:auto; white-space:pre-wrap; line-height:1.55; }
+  ol.list { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:7px; font-size:13.5px; line-height:1.45; }
+  ol.list li { animation:rise .5s var(--ease) both; animation-delay:calc(var(--i,0)*60ms); }
+  .stopbox { display:flex; flex-direction:column; gap:14px; padding:22px 24px; }
+  .stopbox .t { font-size:16px; font-weight:600; }
+  .stopbox .m { font-size:13.5px; color:var(--sec); line-height:1.55; }
+  .resume { display:flex; align-items:center; gap:16px; padding:16px 20px; border-color:var(--tint2); background:#FBFBFE; }
+  .resume .body { flex:1; min-width:0; }
+  .resume .t { font-size:13.5px; font-weight:600; }
+  .resume .m { font-size:12px; color:var(--sec); margin-top:2px; }
 </style>
 </head>
 <body>
@@ -99,20 +145,22 @@
 
 <div class="wrap">
 
-  <!-- LICENSE GATE -->
-  <section class="hidden gatebox" id="gate">
-    <div class="eyebrow">LICENSE</div>
-    <h1>Your trial has ended.</h1>
-    <p class="lead">Enter the license key you received after purchase. Keys are verified on this computer; nothing is sent anywhere.</p>
+  <section class="view hidden" id="gate" style="max-width:560px">
+    <div><div class="eyebrow">LICENSE</div><h1>Your trial has ended.</h1><p class="lead">Enter the license key you received after purchase. Keys are verified on this computer; nothing is sent anywhere.</p></div>
     <div class="card" style="padding:18px 20px;display:flex;gap:10px;align-items:center"><input type="text" id="keyInput" placeholder="FLOW-…" style="flex:1;min-width:0"><button class="btn" id="activateBtn">ACTIVATE</button></div>
     <div id="gateMsg" class="alert hidden"></div>
     <div class="tiny" id="gateMeta"></div>
   </section>
 
   <!-- STEP 1 -->
-  <section id="s1" class="hidden" style="display:flex;flex-direction:column;gap:24px">
-    <div><div class="eyebrow">STEP 1 OF 4</div><h1>Reference</h1><p class="lead">The track whose world your song should belong in. FLOW measures its tempo, key, sections and energy. The audio never leaves your computer.</p></div>
-    <div class="card" id="refCard">
+  <section id="s1" class="view hidden">
+    <div data-rv style="--i:0"><div class="eyebrow">STEP 1 OF 4</div><h1>Reference</h1><p class="lead">The track whose world your song should belong in. FLOW measures its tempo, key, sections and energy. The audio never leaves your computer.</p></div>
+    <div class="card resume hidden" id="resumeCard" data-rv style="--i:1">
+      <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9"/><path d="M3 3v6h6"/></svg></div>
+      <div class="body"><div class="t">Pick up where you left off</div><div class="m" id="resumeMeta"></div></div>
+      <button class="btn ghost sm" id="resumeNo">START FRESH</button><button class="btn sm" id="resumeYes">RESUME</button>
+    </div>
+    <div class="card" id="refCard" data-rv style="--i:2">
       <div class="empty" id="refEmpty">
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
         <div class="t">Choose a reference track</div>
@@ -129,10 +177,7 @@
     <div class="section hidden" id="refResult">
       <h2>WHAT FLOW HEARD</h2>
       <div class="tiles" id="refTiles"></div>
-      <div class="card" style="padding:20px 22px 16px">
-        <div class="strip" id="refStrip"></div>
-        <div class="labels" id="refLabels" style="margin-top:10px"></div>
-      </div>
+      <div class="card" style="padding:20px 22px 16px"><div class="strip" id="refStrip"></div><div class="labels" id="refLabels" style="margin-top:10px"></div></div>
       <div class="rows card">
         <div class="row"><div><div class="k">Tempo</div><div class="h">Detected from the audio. Override only if the grid looks wrong.</div></div>
           <div class="c"><input type="text" id="bpmIn" placeholder="auto" style="min-width:110px;width:110px;text-align:right"><button class="btn ghost sm" id="analyzeBtn">RE-ANALYZE</button></div></div>
@@ -142,9 +187,9 @@
   </section>
 
   <!-- STEP 2 -->
-  <section id="s2" class="hidden" style="display:flex;flex-direction:column;gap:24px">
-    <div><div class="eyebrow">STEP 2 OF 4</div><h1>Your sounds</h1><p class="lead">Choose the pack's top folder, or Cmd-click several folders. A messy folder is fine: FLOW reads every file and works out what it is.</p></div>
-    <div class="card" id="packCard">
+  <section id="s2" class="view hidden">
+    <div data-rv style="--i:0"><div class="eyebrow">STEP 2 OF 4</div><h1>Your sounds</h1><p class="lead">Choose the pack's top folder, or Cmd-click several folders. A messy folder is fine: FLOW reads every file and works out what it is.</p></div>
+    <div class="card" id="packCard" data-rv style="--i:1">
       <div class="empty" id="packEmpty">
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
         <div class="t">Choose your sample folder</div>
@@ -163,19 +208,19 @@
   </section>
 
   <!-- STEP 3 -->
-  <section id="s3" class="hidden" style="display:flex;flex-direction:column;gap:24px">
-    <div><div class="eyebrow">STEP 3 OF 4</div><h1>Direction</h1><p class="lead">Style decides which layers live in which section. Length rescales the reference's structure in 8-bar phrases. Everything else is measured.</p></div>
-    <div class="rows card">
+  <section id="s3" class="view hidden">
+    <div data-rv style="--i:0"><div class="eyebrow">STEP 3 OF 4</div><h1>Direction</h1><p class="lead">Style decides which layers live in which section. Length rescales the reference's structure in 8-bar phrases. Everything else is measured.</p></div>
+    <div class="rows card" data-rv style="--i:1">
       <div class="row"><div><div class="k">Style</div><div class="h">Which layers enter in which section.</div></div>
         <div class="c"><div class="seg" id="styleSeg"><button data-v="house" class="on">House</button><button data-v="afro">Afro House</button><button data-v="techno">Techno</button></div></div></div>
-      <div class="row"><div><div class="k">Length</div><div class="h" id="lenHint">Never shorter than 2:00. Sections scale with the track; builds and breakdowns stay tight.</div></div>
+      <div class="row"><div><div class="k">Length</div><div class="h">Never shorter than 2:00. Sections scale with the track; builds and breakdowns stay tight.</div></div>
         <div class="c"><div class="presets" id="lenPresets"><button data-v="180">3:00</button><button data-v="270">4:30</button><button data-v="360">6:00</button><button data-v="450">7:30</button></div><input type="range" id="lenRange" min="120" max="600" step="15" value="270"><div class="readout" id="lenOut">4:30</div></div></div>
       <div class="row"><div><div class="k">Build in</div><div class="h" id="targetHint"></div></div>
         <div class="c"><div class="seg" id="targetSeg"><button data-v="ableton" class="on">Ableton Live</button><button data-v="stems">Stems + MIDI</button></div></div></div>
       <div class="row hidden" id="outRow"><div><div class="k">Output folder</div><div class="h">Stems, a MIDI file with markers, and the Blueprint report.</div></div>
         <div class="c"><span class="tiny" id="outPath">Next to the reference</span><button class="btn ghost sm" id="pickOut">CHOOSE</button></div></div>
     </div>
-    <div class="section">
+    <div class="section" data-rv style="--i:2">
       <h2>YOUR PLUG-INS · ABLETON ONLY</h2>
       <div class="rows card" id="plugCard">
         <div class="row"><div><div class="k">Bass and lead</div><div class="h">Drive your own synth as MIDI. Pick a preset in Live afterwards.</div></div>
@@ -189,15 +234,28 @@
   </section>
 
   <!-- STEP 4 -->
-  <section id="s4" class="hidden" style="display:flex;flex-direction:column;gap:24px">
-    <div><div class="eyebrow">STEP 4 OF 4</div><h1 id="buildTitle">Building</h1><p class="lead" id="buildLead">Measuring, choosing sounds, rendering patterns, placing every clip.</p></div>
-    <div class="progress"><div id="bar"></div></div>
-    <div class="log" id="log"></div>
+  <section id="s4" class="view hidden">
+    <div data-rv style="--i:0"><div class="eyebrow">STEP 4 OF 4</div><h1 id="buildTitle">Building</h1><p class="lead" id="buildLead">Measuring, choosing sounds, rendering patterns, placing every clip.</p></div>
+    <div class="progress" id="progress" data-rv style="--i:1"><div id="bar"></div></div>
+    <div class="card stages" id="stages" data-rv style="--i:2">
+      <div class="stage" data-i="0"><div class="dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div><div><div class="n">Listening to the reference</div><div class="d">Tempo, key, bar grid, sections, where the kick leaves and returns</div></div><div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="stage" data-i="1"><div class="dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div><div><div class="n">Choosing your sounds</div><div class="d">One sample per role, picked by what it sounds like</div></div><div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="stage" data-i="2"><div class="dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div><div><div class="n">Rendering patterns</div><div class="d">Kick, clap, hats, toms, bass and a motif in the reference's key</div></div><div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="stage" data-i="3"><div class="dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div><div><div class="n">Placing every clip</div><div class="d" id="stage3d">Track by track, bar by bar, on the reference's structure</div></div><div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="stage" data-i="4"><div class="dot"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div><div><div class="n">Finishing</div><div class="d">Locators, sidechain, your synths</div></div><div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+    </div>
+    <div class="details"><button class="link" id="toggleLog">Show details</button></div>
+    <div class="log hidden" id="log"></div>
+    <div class="card stopbox hidden" id="stopCard">
+      <div class="t" id="stopTitle">The build stopped</div>
+      <div class="m" id="stopMsg"></div>
+      <div class="foot" style="padding-top:4px"><button class="btn" id="retryBtn">CHECK AGAIN AND RETRY</button><button class="btn ghost" id="again2">BUILD ANOTHER</button></div>
+    </div>
     <div id="doneWarn" class="alert warn hidden"></div>
     <div class="section hidden" id="doneCard">
       <div class="tiles" id="doneTiles"></div>
       <div class="card" style="padding:20px 22px 16px"><div class="strip" id="doneStrip"></div><div class="labels" id="doneLabels" style="margin-top:10px"></div></div>
-      <div class="card" style="padding:20px 22px"><h2 style="margin:0 0 12px;font-size:10.5px;letter-spacing:.18em;color:var(--sec)">BUILD STEPS</h2><ol class="list" id="doneSteps"></ol></div>
+      <div class="card" style="padding:20px 22px"><h2 style="margin:0 0 12px;font-size:11px;letter-spacing:.14em;color:var(--sec);font-weight:600">BUILD STEPS</h2><ol class="list" id="doneSteps"></ol></div>
       <div class="tiny" id="donePlace"></div>
     </div>
     <div class="foot"><button class="btn ghost hidden" id="again">BUILD ANOTHER</button><button class="btn ghost hidden" id="openOut">OPEN FOLDER</button><div class="spacer"></div><span class="tiny" id="saveNote"></span></div>
@@ -207,76 +265,100 @@
 <footer>© 2026 Harel Eliyahu · FLOW</footer>
 
 <script>
-const S = { step:1, ref:null, refPath:null, pack:null, packPath:null, style:'house', target:'ableton', out:null, len:270, licensed:false };
+const S = { step:1, ref:null, refPath:null, pack:null, packPath:null, style:'house', target:'ableton', out:null, len:270, licensed:false, lastOpts:null };
 const $ = id => document.getElementById(id);
 const api = () => window.pywebview.api;
 const fmt = sec => `${Math.floor(sec/60)}:${String(Math.round(sec%60)).padStart(2,'0')}`;
-function show(step){ S.step=step; for(const i of [1,2,3,4]) $('s'+i).classList.toggle('hidden', i!==step);
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+function show(step){ S.step=step; for(const i of [1,2,3,4]){ const el=$('s'+i); if(i!==step){ el.classList.remove('in'); el.classList.add('hidden'); } }
+  const el=$('s'+step); el.classList.remove('hidden'); requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('in')));
   document.querySelectorAll('#stepper span').forEach(sp=>{ const n=+sp.dataset.s; sp.className = n<step?'done':(n===step?'cur':''); }); window.scrollTo(0,0); }
 function alertBox(el, msg, kind){ if(!msg){ el.classList.add('hidden'); return; } el.className = 'alert' + (kind?' '+kind:''); el.textContent = msg; }
-function tiles(el, items){ el.innerHTML = items.map(([v,l])=>`<div class="tile"><div class="v">${v}</div><div class="l">${l}</div></div>`).join(''); }
+function tiles(el, items, animate){ el.innerHTML = items.map(([v,l],i)=>`<div class="tile" data-rv style="--i:${i}"><div class="v" data-v="${String(v).replace(/"/g,'')}">${animate && /^\d+$/.test(String(v)) ? '0' : v}</div><div class="l">${l}</div></div>`).join('');
+  if(animate) el.querySelectorAll('.v').forEach(n=>{ const target=n.dataset.v; if(!/^\d+$/.test(target)) return; const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(+target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }); }
 function strip(el, labelsEl, sections, total){
   const hi = s => /^Drop|Return/.test(s.label); const h = s => hi(s)?100: (/Break|Build|Outro/.test(s.label)?38:62);
-  el.innerHTML = sections.map(s=>`<div class="col" style="flex:0 0 ${((s.end-s.start)/total*100).toFixed(2)}%"><div class="bar ${hi(s)?'hi':''}" style="height:${h(s)}px"></div></div>`).join('');
+  el.innerHTML = sections.map((s,i)=>`<div class="col" style="flex:0 0 ${((s.end-s.start)/total*100).toFixed(2)}%"><div class="bar ${hi(s)?'hi':''}" data-h="${h(s)}" style="transition-delay:${i*90}ms"></div></div>`).join('');
   labelsEl.innerHTML = sections.map(s=>`<div class="col" style="flex:0 0 ${((s.end-s.start)/total*100).toFixed(2)}%"><div class="n">${s.label.toUpperCase()}</div><div class="b">${s.start}–${s.end-1}</div></div>`).join('');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.querySelectorAll('.bar').forEach(b=>b.style.height=b.dataset.h+'px')));
 }
 async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed${st.email?' · '+st.email:''}`:(st.state==='trial'?`Trial · ${st.days_left} days left`:'Trial ended');
-  S.licensed = st.state!=='expired'; $('gate').classList.toggle('hidden', S.licensed); if(!S.licensed){ for(const i of [1,2,3,4]) $('s'+i).classList.add('hidden'); $('gateMeta').textContent=`FLOW ${st.version} · machine ${st.machine}`; } return st; }
-window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(S.licensed) show(1); });
+  S.licensed = st.state!=='expired'; const g=$('gate'); if(!S.licensed){ g.classList.remove('hidden'); requestAnimationFrame(()=>g.classList.add('in')); for(const i of [1,2,3,4]) $('s'+i).classList.add('hidden'); $('gateMeta').textContent=`FLOW ${st.version} · machine ${st.machine}`; } else { g.classList.add('hidden'); } return st; }
+window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; const last = await api().load_session(); if(last){ S.lastOpts=last; const packs=String(last.pack).split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('resumeMeta').textContent = `${last.reference.split(/[\\/]/).pop()} · ${packs.length>1?packs.length+' folders':packs[0].split(/[\\/]/).pop()} · ${last.length?fmt(last.length):'reference length'} · ${last.target==='ableton'?'Ableton Live':'Stems + MIDI'}`; $('resumeCard').classList.remove('hidden'); } show(1); });
 $('activateBtn').onclick = async ()=>{ const r = await api().activate($('keyInput').value.trim()); if(r.ok){ alertBox($('gateMsg'), null); await refreshStatus(); show(1);} else alertBox($('gateMsg'), r.error); };
+$('resumeNo').onclick = ()=>$('resumeCard').classList.add('hidden');
+$('resumeYes').onclick = async ()=>{ const l=S.lastOpts; $('resumeCard').classList.add('hidden'); S.refPath=l.reference; setRefWell(); await analyze(); S.packPath=l.pack; await scanPack(); S.style=l.style||'house'; S.target=l.target||'ableton'; S.out=l.out||null; if(S.out) $('outPath').textContent=S.out;
+  document.querySelectorAll('#styleSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.style)); document.querySelectorAll('#targetSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.target));
+  if(l.length){ $('lenRange').value=l.length; } updateLen(); if(l.bpm) $('bpmIn').value=l.bpm;
+  if(l.synth||l.sidechain){ await scanPlugins(); $('synthSel').value=l.synth||''; $('scSel').value=l.sidechain||''; }
+  show(3); checkTarget(); };
 
 // ---- step 1
-async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; $('refName').textContent=p.split(/[\\/]/).pop(); $('refPath').textContent=p; $('refEmpty').classList.add('hidden'); $('refWell').classList.remove('hidden'); $('refResult').classList.add('hidden'); $('to2').disabled=true; analyze(); }
+function setRefWell(){ $('refName').textContent=S.refPath.split(/[\\/]/).pop(); $('refPath').textContent=S.refPath; $('refEmpty').classList.add('hidden'); $('refWell').classList.remove('hidden'); }
+async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; setRefWell(); $('refResult').classList.add('hidden'); $('to2').disabled=true; analyze(); }
 $('pickRef').onclick = pickRef; $('pickRef2').onclick = pickRef;
 async function analyze(){ alertBox($('refMsg'), 'Listening…', 'ok'); const bpm=parseFloat($('bpmIn').value)||null;
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ alertBox($('refMsg'), r.error); return; }
   S.ref=r.ref; alertBox($('refMsg'), null); const k=r.ref.key;
-  tiles($('refTiles'), [[`${r.ref.bpm.toFixed(0)}`, r.ref.tempo_info.source==='estimated'?'BPM · DETECTED':'BPM'], [`${k.tonic} ${k.mode==='minor'?'min':'maj'}`, k.confidence<0.6?'KEY · UNSURE':'KEY'], [fmt(r.ref.duration),'LENGTH'], [`${r.ref.bars}`,'BARS'], [`${r.ref.sections.length}`,'SECTIONS']]);
-  strip($('refStrip'), $('refLabels'), r.ref.sections, r.ref.bars); $('refResult').classList.remove('hidden'); $('to2').disabled=false;
+  $('refResult').classList.remove('hidden');
+  tiles($('refTiles'), [[`${r.ref.bpm.toFixed(0)}`, r.ref.tempo_info.source==='estimated'?'BPM · DETECTED':'BPM'], [`${k.tonic} ${k.mode==='minor'?'min':'maj'}`, k.confidence<0.6?'KEY · UNSURE':'KEY'], [fmt(r.ref.duration),'LENGTH'], [`${r.ref.bars}`,'BARS'], [`${r.ref.sections.length}`,'SECTIONS']], true);
+  strip($('refStrip'), $('refLabels'), r.ref.sections, r.ref.bars); $('to2').disabled=false;
   S.len = Math.max(150, Math.min(600, Math.ceil(r.ref.duration/30)*30)); $('lenRange').value = S.len; updateLen(); }
 $('analyzeBtn').onclick = analyze;
 $('to2').onclick=()=>show(2); $('back1').onclick=()=>show(1);
 
 // ---- step 2
-async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; const parts=p.split(/:(?=\/)|;(?=[A-Za-z]:\\)/);
+async function scanPack(){ const p=S.packPath; const parts=p.split(/:(?=\/)|;(?=[A-Za-z]:\\)/);
   $('packName').textContent = parts.length>1 ? `${parts.length} folders` : parts[0].split(/[\\/]/).pop(); $('packPath').textContent = parts.join('  +  ');
   $('packEmpty').classList.add('hidden'); $('packWell').classList.remove('hidden'); alertBox($('packMsg'), 'Reading every file…', 'ok'); $('packResult').classList.add('hidden'); $('to3').disabled=true;
   const r = await api().scan_pack(p); if(!r.ok){ alertBox($('packMsg'), r.error); return; } S.pack=r.pack;
   const warn = (r.pack.warnings||[]); if(warn.length) alertBox($('packMsg'), warn.join(' ')); else alertBox($('packMsg'), `${r.pack.count} sounds · kick found · ready to build`, 'ok');
-  const roles = Object.entries(r.pack.by_role).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span class="chip">${k.toUpperCase()} · ${v}</span>`).join('');
-  $('packChips').innerHTML = `<span class="chip dark">${r.pack.count} SOUNDS</span>` + roles + (r.pack.bpm_hint?`<span class="chip">${r.pack.bpm_hint} BPM LOOPS</span>`:''); $('packResult').classList.remove('hidden'); $('to3').disabled = warn.length>0; }
+  const roles = Object.entries(r.pack.by_role).sort((a,b)=>b[1]-a[1]).map(([k,v],i)=>`<span class="chip" data-rv style="--i:${i+1}">${k.toUpperCase()} · ${v}</span>`).join('');
+  $('packChips').innerHTML = `<span class="chip dark" data-rv style="--i:0">${r.pack.count} SOUNDS</span>` + roles + (r.pack.bpm_hint?`<span class="chip">${r.pack.bpm_hint} BPM LOOPS</span>`:''); $('packResult').classList.remove('hidden'); $('to3').disabled = warn.length>0; }
+async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; await scanPack(); }
 $('pickPack').onclick = pickPack; $('pickPack2').onclick = pickPack;
 $('to3').onclick=()=>{ show(3); checkTarget(); }; $('back2').onclick=()=>show(2);
 
 // ---- step 3
 function seg(id, key, cb){ document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{ document.querySelectorAll(`#${id} button`).forEach(x=>x.classList.remove('on')); b.classList.add('on'); S[key]=b.dataset.v; if(cb) cb(); }); }
 seg('styleSeg','style'); seg('targetSeg','target', checkTarget);
-function updateLen(){ S.len = +$('lenRange').value; const bpm = S.ref ? S.ref.bpm : 120; const bars = Math.max(64, Math.round(S.len*bpm/240/8)*8); $('lenOut').innerHTML = `${fmt(S.len)}<small>≈ ${bars} bars</small>`;
+function updateLen(){ const r=$('lenRange'); S.len = +r.value; r.style.setProperty('--p', `${(S.len-120)/(600-120)*100}%`); const bpm = S.ref ? S.ref.bpm : 120; const bars = Math.max(64, Math.round(S.len*bpm/240/8)*8); $('lenOut').innerHTML = `${fmt(S.len)}<small>≈ ${bars} bars</small>`;
   document.querySelectorAll('#lenPresets button').forEach(b=>b.classList.toggle('on', +b.dataset.v===S.len)); }
 $('lenRange').oninput = updateLen; document.querySelectorAll('#lenPresets button').forEach(b=>b.onclick=()=>{ $('lenRange').value=b.dataset.v; updateLen(); }); updateLen();
 async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!=='stems'); $('plugCard').style.opacity = S.target==='ableton'?1:.45;
-  if(S.target==='ableton'){ const r = await api().ableton_status(); $('targetHint').innerHTML = r.ok ? (r.fresh?`<span style="color:var(--ok);font-weight:700">Live is ready · empty set in front</span>`:`<span style="color:var(--warn);font-weight:700">Live has ${r.tracks} tracks open. File › New Live Set first.</span>`) : `<span style="color:var(--warn);font-weight:700">${r.reason}</span>`; }
-  else $('targetHint').textContent = 'Full-length stems and a MIDI file with markers. Logic, FL Studio, Cubase, Studio One, Bitwig, Reaper.'; }
+  if(S.target==='ableton'){ $('targetHint').textContent='Checking Live…'; const r = await api().ableton_status(); $('targetHint').innerHTML = r.ok ? (r.fresh?`<span style="color:var(--ok);font-weight:600">Live is ready · empty set in front</span>`:`<span style="color:var(--warn);font-weight:600">Live has ${r.tracks} tracks open. File › New Live Set first.</span>`) : `<span style="color:var(--warn);font-weight:600">${r.reason}</span>`; return r; }
+  $('targetHint').textContent = 'Full-length stems and a MIDI file with markers. Logic, FL Studio, Cubase, Studio One, Bitwig, Reaper.'; return {ok:true, fresh:true}; }
 $('pickOut').onclick = async ()=>{ const p = await api().pick_folder(); if(p){ S.out=p; $('outPath').textContent=p; } };
-$('scanPlug').onclick = async ()=>{ $('plugMsg').textContent='Scanning this computer…'; const r = await api().scan_plugins(); if(!r.ok){ $('plugMsg').textContent=r.error; return; }
+async function scanPlugins(){ $('plugMsg').textContent='Scanning this computer…'; const r = await api().scan_plugins(); if(!r.ok){ $('plugMsg').textContent=r.error; return; }
   $('plugMsg').textContent = `${r.plugins.count} plug-ins found · synths: ${r.plugins.synths.join(', ')||'none recognized'} · sidechain: ${r.plugins.sidechain.join(', ')||'none'}`;
   $('synthSel').innerHTML = '<option value="">Sample shots (default)</option>' + r.plugins.synths.map(n=>`<option>${n}</option>`).join('');
-  $('scSel').innerHTML = '<option value="">None</option>' + r.plugins.sidechain.map(n=>`<option>${n}</option>`).join(''); };
+  $('scSel').innerHTML = '<option value="">None</option>' + r.plugins.sidechain.map(n=>`<option>${n}</option>`).join(''); }
+$('scanPlug').onclick = scanPlugins;
 
 // ---- step 4
-$('buildBtn').onclick = async ()=>{ show(4); $('log').textContent=''; $('bar').style.width='0%'; $('doneCard').classList.add('hidden'); alertBox($('doneWarn'), null); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('buildTitle').textContent='Building'; $('buildLead').textContent='Measuring, choosing sounds, rendering patterns, placing every clip.'; $('saveNote').textContent='';
-  const opts = { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, force:false };
-  const r = await api().build(opts); if(!r.ok){ window.flowError(r.error); } };
-window.flowProgress = (msg,pct)=>{ $('bar').style.width = `${Math.round(pct*100)}%`; $('log').textContent += msg+'\n'; $('log').scrollTop=1e9; };
-window.flowError = (msg)=>{ $('buildTitle').textContent='Stopped'; $('buildLead').textContent='Something stopped the build. Nothing was lost.'; alertBox($('doneWarn'), msg); $('again').classList.remove('hidden'); };
-window.flowDone = (sum)=>{ $('buildTitle').textContent='Your track is ready'; $('buildLead').textContent = sum.ableton ? 'It is in the Live Set in front of you. Press Cmd+S now: what FLOW wrote lives in memory until you save.' : 'Open the folder: full-length stems, a MIDI file with the markers, and your Blueprint.';
-  tiles($('doneTiles'), [[`${sum.bpm.toFixed(0)}`,'BPM'],[`${sum.bars}`,'BARS'],[fmt(sum.bars*240/sum.bpm),'LENGTH'],[`${sum.tracks}`,'TRACKS'],[`${sum.sections.length}`,'SECTIONS']]);
-  strip($('doneStrip'), $('doneLabels'), sum.sections, sum.bars); $('doneSteps').innerHTML = sum.steps.map(s=>`<li>${s}</li>`).join('');
+function setStage(i, state){ document.querySelectorAll('.stage').forEach(s=>{ const n=+s.dataset.i; s.classList.remove('active','done','error'); if(n<i) s.classList.add('done'); else if(n===i) s.classList.add(state||'active'); }); }
+function resetBuild(){ $('log').textContent=''; $('bar').style.width='0%'; $('progress').classList.remove('done'); $('doneCard').classList.add('hidden'); alertBox($('doneWarn'), null); $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('stages').classList.remove('hidden'); $('buildTitle').textContent='Building'; $('buildLead').textContent='Measuring, choosing sounds, rendering patterns, placing every clip.'; $('saveNote').textContent=''; setStage(0); }
+function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, force:false }; }
+async function startBuild(){ resetBuild(); show(4);
+  if(S.target==='ableton'){ const st = await api().ableton_status(); if(!st.ok || !st.fresh){ await sleep(350); window.flowError(st.ok ? `The Live Set in front has ${st.tracks} tracks. In Ableton: File › New Live Set, then press Retry.` : st.reason); return; } }
+  S.lastOpts = currentOpts(); const r = await api().build(S.lastOpts); if(!r.ok){ window.flowError(r.error); } }
+$('buildBtn').onclick = startBuild; $('retryBtn').onclick = startBuild;
+$('toggleLog').onclick = ()=>{ const l=$('log'); l.classList.toggle('hidden'); $('toggleLog').textContent = l.classList.contains('hidden')?'Show details':'Hide details'; };
+window.flowProgress = (msg,pct)=>{ $('bar').style.width = `${Math.round(pct*100)}%`; $('log').textContent += msg+'\n'; $('log').scrollTop=1e9;
+  const i = pct<0.15?0 : pct<0.3?1 : pct<0.4?2 : pct<0.98?3 : 4; setStage(i); if(i===3 && /:\s*bars|hit at bar|Track /.test(msg)) $('stage3d').textContent = msg; };
+window.flowError = (msg)=>{ $('buildTitle').textContent='Stopped'; $('buildLead').textContent='Nothing was lost. Fix the cause and retry; your settings are kept, even after a restart.';
+  const cur = document.querySelector('.stage.active'); if(cur){ cur.classList.remove('active'); cur.classList.add('error'); }
+  $('progress').classList.add('done'); $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
+  $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; };
+window.flowDone = async (sum)=>{ setStage(5); $('progress').classList.add('done'); $('buildTitle').textContent='Your track is ready'; $('buildLead').textContent = sum.ableton ? 'It is in the Live Set in front of you. Press Cmd+S now: what FLOW wrote lives in memory until you save.' : 'Open the folder: full-length stems, a MIDI file with the markers, and your Blueprint.';
+  await sleep(500); $('stages').classList.add('hidden'); $('doneCard').classList.remove('hidden');
+  tiles($('doneTiles'), [[`${sum.bpm.toFixed(0)}`,'BPM'],[`${sum.bars}`,'BARS'],[fmt(sum.bars*240/sum.bpm),'LENGTH'],[`${sum.tracks}`,'TRACKS'],[`${sum.sections.length}`,'SECTIONS']], true);
+  strip($('doneStrip'), $('doneLabels'), sum.sections, sum.bars); $('doneSteps').innerHTML = sum.steps.map((s,i)=>`<li style="--i:${i}">${s}</li>`).join('');
   $('donePlace').textContent = sum.placeholders.length ? `Placeholders to replace by ear: ${sum.placeholders.join(', ')}. Structure and drums follow the reference; bass and synth patterns are starting points.` : '';
   const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length) alertBox($('doneWarn'), warns.join('  ·  '), 'warn');
-  $('doneCard').classList.remove('hidden'); $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
+  $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
   $('saveNote').textContent = sum.ableton ? 'Cmd+S in Live' : ''; refreshStatus(); };
-$('again').onclick=()=>show(1);
+$('again').onclick=()=>show(1); $('again2').onclick=()=>show(1);
 </script>
 </body>
 </html>

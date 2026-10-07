@@ -43,6 +43,35 @@ class Api:
         except ValueError as e:
             return {"ok": False, "error": str(e)}
 
+    # ---- last session (so a closed app can resume where it stopped)
+    def _session_path(self) -> str:
+        return os.path.join(lic.data_dir(), "last_session.json")
+
+    def save_session(self, opts: dict):
+        try:
+            keep = {k: opts.get(k) for k in ("reference", "pack", "length", "target", "out", "style", "bpm", "synth", "sidechain")}
+            with open(self._session_path(), "w") as f:
+                json.dump(keep, f)
+            return {"ok": True}
+        except Exception as e:
+            return {"ok": False, "error": str(e)}
+
+    def load_session(self):
+        try:
+            p = self._session_path()
+            if not os.path.exists(p):
+                return None
+            with open(p) as f:
+                s = json.load(f)
+            if not s.get("reference") or not os.path.exists(s["reference"]):
+                return None
+            packs = [x for x in str(s.get("pack") or "").split(os.pathsep) if x]
+            if not packs or not all(os.path.isdir(x) for x in packs):
+                return None
+            return s
+        except Exception:
+            return None
+
     # ---- file pickers
     def pick_reference(self):
         r = self.window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False,
@@ -101,6 +130,7 @@ class Api:
         ok, st = lic.can_build()
         if not ok:
             return {"ok": False, "error": st.get("reason") or "License required"}
+        self.save_session(opts)
         self._busy = True
 
         def work():
