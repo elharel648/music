@@ -1,0 +1,34 @@
+[project]
+name = "flow-producer"
+version = "0.1.0"
+description = "FLOW — AI Producer Layer: reference in, your sounds in, an editable arrangement out."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Harel Eliyahu" }]
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "soundfile>=0.12",
+  "pywebview>=5.0",
+  "cryptography>=42",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pyinstaller>=6"]
+
+[project.scripts]
+flow = "flow.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["flow"]
+
+[tool.setuptools.package-data]
+flow = ["ui/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

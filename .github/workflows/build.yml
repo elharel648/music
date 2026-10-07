@@ -1,0 +1,47 @@
+name: Build FLOW (macOS + Windows)
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-14
+            artifact: FLOW-mac
+          - os: windows-latest
+            artifact: FLOW-windows
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy scipy soundfile pywebview cryptography pytest pyinstaller
+      - name: Tests
+        run: python -m pytest -q
+      - name: Icons
+        run: python packaging/make_icon.py
+      - name: Build (PyInstaller)
+        run: pyinstaller flow.spec --noconfirm
+      - name: Package macOS DMG
+        if: runner.os == 'macOS'
+        run: |
+          mkdir stage && cp -R dist/FLOW.app stage/ && ln -s /Applications stage/Applications
+          hdiutil create -volname FLOW -srcfolder stage -ov -format UDZO dist/FLOW-mac.dmg
+      - name: Package Windows zip
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist/FLOW/* -DestinationPath dist/FLOW-windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            dist/*.dmg
+            dist/*.zip

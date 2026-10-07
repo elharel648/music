@@ -1,0 +1,220 @@
+118 INFO: PyInstaller: 6.22.3, contrib hooks: 2026.8
+118 INFO: Python: 3.12.14
+129 INFO: Platform: macOS-26.0-arm64-arm-64bit
+129 INFO: Python environment: /Users/harel/projects/flow/.venv
+2593 INFO: Module search paths (PYTHONPATH):
+['/Users/harel/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python312.zip',
+ '/Users/harel/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/python3.12',
+ '/Users/harel/.local/share/uv/python/cpython-3.12-macos-aarch64-none/lib/python3.12/lib-dynload',
+ '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages',
+ '/Users/harel/projects/flow']
+2899 INFO: Appending 'datas' from .spec
+2899 INFO: checking Analysis
+2899 INFO: Building Analysis because Analysis-00.toc is non existent
+2899 INFO: Looking for Python shared library...
+2911 INFO: Using Python shared library: /Users/harel/.local/share/uv/python/cpython-3.12.14-macos-aarch64-none/lib/libpython3.12.dylib
+2911 INFO: Running Analysis Analysis-00.toc
+2911 INFO: Target bytecode optimization level: 0
+2911 INFO: Initializing module dependency graph...
+2911 INFO: Initializing module graph hook caches...
+2923 INFO: Analyzing modules for base_library.zip ...
+3438 INFO: Processing standard module hook 'hook-encodings.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+3725 INFO: Processing standard module hook 'hook-math.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+4077 INFO: Processing standard module hook 'hook-pickle.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+4686 INFO: Processing standard module hook 'hook-heapq.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+4876 INFO: Caching module dependency graph...
+4897 INFO: Analyzing /Users/harel/projects/flow/run_flow.py
+4932 INFO: Processing standard module hook 'hook-numpy.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+5071 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+5073 INFO: SetuptoolsInfo: initializing cached setuptools info...
+5557 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+5636 INFO: Processing standard module hook 'hook-xml.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+5757 INFO: Processing standard module hook 'hook-_ctypes.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+6068 INFO: Processing standard module hook 'hook-platform.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+6143 INFO: Processing standard module hook 'hook-sysconfig.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+6151 INFO: Processing standard module hook 'hook-_osx_support.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+6232 INFO: Processing standard module hook 'hook-webbrowser.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+6719 INFO: Processing standard module hook 'hook-difflib.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+7132 INFO: Processing standard module hook 'hook-soundfile.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+7149 INFO: Processing standard module hook 'hook-scipy.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+7601 INFO: Processing standard module hook 'hook-pytest.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+7846 INFO: Processing standard module hook 'hook-pygments.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+8414 INFO: Processing standard module hook 'hook-py.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+8527 INFO: Processing pre-safe-import-module hook 'hook-packaging.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8610 INFO: Processing pre-safe-import-module hook 'hook-tomli.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8610 INFO: Setuptools: 'tomli' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.tomli'!
+8613 INFO: Processing standard module hook 'hook-setuptools.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+8619 INFO: Processing pre-safe-import-module hook 'hook-distutils.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8632 INFO: Processing pre-safe-import-module hook 'hook-jaraco.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8632 INFO: Setuptools: 'jaraco' appears to be a full setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco'!
+8637 INFO: Processing pre-safe-import-module hook 'hook-more_itertools.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8638 INFO: Setuptools: 'more_itertools' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.more_itertools'!
+8860 INFO: Processing standard module hook 'hook-setuptools._vendor.jaraco.text.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+8862 INFO: Processing pre-safe-import-module hook 'hook-importlib_resources.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8866 INFO: Processing pre-safe-import-module hook 'hook-backports.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8866 INFO: Setuptools: 'backports' appears to be a full setuptools-vendored copy - creating alias to 'setuptools._vendor.backports'!
+9333 INFO: Processing pre-safe-import-module hook 'hook-wheel.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+9333 INFO: Setuptools: 'wheel' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.wheel'!
+9806 INFO: Processing standard module hook 'hook-pycparser.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+10156 INFO: Processing standard module hook 'hook-scipy.linalg.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+10219 INFO: Processing standard module hook 'hook-scipy.special._ufuncs.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+11203 INFO: Processing standard module hook 'hook-scipy.spatial._ckdtree.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+11489 INFO: Processing standard module hook 'hook-scipy.spatial.transform.rotation.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+11981 INFO: Processing standard module hook 'hook-scipy.stats._stats.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+12250 INFO: Processing standard module hook 'hook-scipy.sparse.csgraph.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+12680 INFO: Processing standard module hook 'hook-scipy.special._ellip_harm_2.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+13027 INFO: Processing standard module hook 'hook-cryptography.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+13444 INFO: hook-cryptography: cryptography does not seem to be using dynamically linked OpenSSL.
+13472 INFO: Processing standard module hook 'hook-webview.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/webview/__pyinstaller'
+13672 INFO: Processing pre-safe-import-module hook 'hook-gi.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/pre_safe_import_module'
+13857 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks'
+14584 INFO: Analyzing hidden import 'scipy.signal.tests'
+14584 INFO: Analyzing hidden import 'scipy.signal.tests._scipy_spectral_test_shim'
+14589 INFO: Analyzing hidden import 'scipy.signal.tests.mpsig'
+14592 INFO: Analyzing hidden import 'scipy.signal.tests.test_array_tools'
+14594 INFO: Analyzing hidden import 'scipy.signal.tests.test_bsplines'
+14603 INFO: Analyzing hidden import 'scipy.signal.tests.test_cont2discrete'
+14611 INFO: Analyzing hidden import 'scipy.signal.tests.test_czt'
+14616 INFO: Analyzing hidden import 'scipy.signal.tests.test_dltisys'
+14629 INFO: Analyzing hidden import 'scipy.signal.tests.test_filter_design'
+14743 INFO: Analyzing hidden import 'scipy.signal.tests.test_fir_filter_design'
+14765 INFO: Analyzing hidden import 'scipy.signal.tests.test_ltisys'
+14794 INFO: Analyzing hidden import 'scipy.signal.tests.test_max_len_seq'
+14796 INFO: Analyzing hidden import 'scipy.signal.tests.test_peak_finding'
+14816 INFO: Analyzing hidden import 'scipy.signal.tests.test_result_type'
+14818 INFO: Analyzing hidden import 'scipy.signal.tests.test_savitzky_golay'
+14826 INFO: Analyzing hidden import 'scipy.signal.tests.test_short_time_fft'
+14852 INFO: Analyzing hidden import 'scipy.signal.tests.test_signaltools'
+14971 INFO: Analyzing hidden import 'scipy.signal.tests.test_spectral'
+15017 INFO: Analyzing hidden import 'scipy.signal.tests.test_splines'
+15025 INFO: Analyzing hidden import 'scipy.signal.tests.test_upfirdn'
+15032 INFO: Analyzing hidden import 'scipy.signal.tests.test_waveforms'
+15042 INFO: Analyzing hidden import 'scipy.signal.tests.test_wavelets'
+15044 INFO: Analyzing hidden import 'scipy.signal.tests.test_whittaker'
+15053 INFO: Analyzing hidden import 'scipy.signal.tests.test_windows'
+15078 INFO: Analyzing hidden import 'scipy.special._add_newdocs'
+15084 INFO: Analyzing hidden import 'scipy.special._mptestutils'
+15098 INFO: Analyzing hidden import 'scipy.special._precompute'
+15098 INFO: Analyzing hidden import 'scipy.special._precompute.cosine_cdf'
+15099 INFO: Analyzing hidden import 'scipy.special._precompute.expn_asy'
+15100 INFO: Analyzing hidden import 'scipy.special._precompute.gammainc_asy'
+15104 INFO: Analyzing hidden import 'scipy.special._precompute.gammainc_data'
+15106 INFO: Analyzing hidden import 'scipy.special._precompute.hyp2f1_data'
+15133 INFO: Analyzing hidden import 'scipy.special._precompute.lambertw'
+15135 INFO: Analyzing hidden import 'scipy.special._precompute.loggamma'
+15136 INFO: Analyzing hidden import 'scipy.special._precompute.struve_convergence'
+15138 INFO: Analyzing hidden import 'scipy.special._precompute.wright_bessel'
+15145 INFO: Analyzing hidden import 'scipy.special._precompute.wright_bessel_data'
+15149 INFO: Analyzing hidden import 'scipy.special._precompute.wrightomega'
+15149 INFO: Analyzing hidden import 'scipy.special._precompute.zetac'
+15150 INFO: Analyzing hidden import 'scipy.special._test_internal'
+15151 INFO: Analyzing hidden import 'scipy.special._ufuncs_cxx'
+15151 INFO: Analyzing hidden import 'scipy.special.cython_special'
+15151 INFO: Analyzing hidden import 'scipy.special.tests.data'
+15151 INFO: Analyzing hidden import 'scipy.special.tests.test_basic'
+15265 INFO: Analyzing hidden import 'scipy.special.tests.test_bdtr'
+15269 INFO: Analyzing hidden import 'scipy.special.tests.test_boost_ufuncs'
+15271 INFO: Analyzing hidden import 'scipy.special.tests.test_boxcox'
+15274 INFO: Analyzing hidden import 'scipy.special.tests.test_cdflib'
+15290 INFO: Analyzing hidden import 'scipy.special.tests.test_cdft_asymptotic'
+15292 INFO: Analyzing hidden import 'scipy.special.tests.test_cephes_intp_cast'
+15293 INFO: Analyzing hidden import 'scipy.special.tests.test_cosine_distr'
+15294 INFO: Analyzing hidden import 'scipy.special.tests.test_cython_abi'
+15295 INFO: Analyzing hidden import 'scipy.special.tests.test_cython_special'
+15307 INFO: Analyzing hidden import 'scipy.special.tests.test_data'
+15319 INFO: Analyzing hidden import 'scipy.special.tests.test_dd'
+15320 INFO: Analyzing hidden import 'scipy.special.tests.test_digamma'
+15321 INFO: Analyzing hidden import 'scipy.special.tests.test_ellip_harm'
+15330 INFO: Analyzing hidden import 'scipy.special.tests.test_erfinv'
+15332 INFO: Analyzing hidden import 'scipy.special.tests.test_exponential_integrals'
+15333 INFO: Analyzing hidden import 'scipy.special.tests.test_extending'
+15334 INFO: Analyzing hidden import 'scipy.special.tests.test_faddeeva'
+15336 INFO: Analyzing hidden import 'scipy.special.tests.test_gamma'
+15336 INFO: Analyzing hidden import 'scipy.special.tests.test_gammainc'
+15339 INFO: Analyzing hidden import 'scipy.special.tests.test_gen_harmonic'
+15341 INFO: Analyzing hidden import 'scipy.special.tests.test_hypergeometric'
+15344 INFO: Analyzing hidden import 'scipy.special.tests.test_iv_ratio'
+15348 INFO: Analyzing hidden import 'scipy.special.tests.test_kolmogorov'
+15358 INFO: Analyzing hidden import 'scipy.special.tests.test_lambertw'
+15361 INFO: Analyzing hidden import 'scipy.special.tests.test_legendre'
+15394 INFO: Analyzing hidden import 'scipy.special.tests.test_log1mexp'
+15396 INFO: Analyzing hidden import 'scipy.special.tests.test_loggamma'
+15398 INFO: Analyzing hidden import 'scipy.special.tests.test_logit'
+15400 INFO: Analyzing hidden import 'scipy.special.tests.test_logsumexp'
+15412 INFO: Analyzing hidden import 'scipy.special.tests.test_mpmath'
+15450 INFO: Analyzing hidden import 'scipy.special.tests.test_nan_inputs'
+15452 INFO: Analyzing hidden import 'scipy.special.tests.test_ndtr'
+15453 INFO: Analyzing hidden import 'scipy.special.tests.test_ndtri_exp'
+15455 INFO: Analyzing hidden import 'scipy.special.tests.test_orthogonal'
+15480 INFO: Analyzing hidden import 'scipy.special.tests.test_orthogonal_eval'
+15488 INFO: Analyzing hidden import 'scipy.special.tests.test_owens_t'
+15489 INFO: Analyzing hidden import 'scipy.special.tests.test_pcf'
+15490 INFO: Analyzing hidden import 'scipy.special.tests.test_pdtr'
+15491 INFO: Analyzing hidden import 'scipy.special.tests.test_powm1'
+15492 INFO: Analyzing hidden import 'scipy.special.tests.test_precompute_expn_asy'
+15493 INFO: Analyzing hidden import 'scipy.special.tests.test_precompute_gammainc'
+15496 INFO: Analyzing hidden import 'scipy.special.tests.test_precompute_utils'
+15497 INFO: Analyzing hidden import 'scipy.special.tests.test_round'
+15497 INFO: Analyzing hidden import 'scipy.special.tests.test_sf_error'
+15501 INFO: Analyzing hidden import 'scipy.special.tests.test_sici'
+15502 INFO: Analyzing hidden import 'scipy.special.tests.test_specfun'
+15503 INFO: Analyzing hidden import 'scipy.special.tests.test_spence'
+15504 INFO: Analyzing hidden import 'scipy.special.tests.test_spfun_stats'
+15505 INFO: Analyzing hidden import 'scipy.special.tests.test_sph_harm'
+15507 INFO: Analyzing hidden import 'scipy.special.tests.test_spherical_bessel'
+15516 INFO: Analyzing hidden import 'scipy.special.tests.test_support_alternative_backends'
+15524 INFO: Analyzing hidden import 'scipy.special.tests.test_trig'
+15525 INFO: Analyzing hidden import 'scipy.special.tests.test_ufunc_infra'
+15526 INFO: Analyzing hidden import 'scipy.special.tests.test_ufunc_signatures'
+15528 INFO: Analyzing hidden import 'scipy.special.tests.test_wright_bessel'
+15531 INFO: Analyzing hidden import 'scipy.special.tests.test_wrightomega'
+15533 INFO: Analyzing hidden import 'scipy.special.tests.test_zeta'
+15536 INFO: Processing module hooks (post-graph stage)...
+15539 WARNING: Hidden import "pycparser.lextab" not found!
+15539 WARNING: Hidden import "pycparser.yacctab" not found!
+15590 WARNING: Hidden import "scipy.special._cdflib" not found!
+16721 INFO: Performing binary vs. data reclassification (22 entries)
+16732 INFO: Looking for ctypes DLLs
+16815 INFO: Analyzing run-time hooks ...
+16820 INFO: Including run-time hook 'pyi_rth_inspect.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/rthooks'
+16821 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/rthooks'
+16822 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/rthooks'
+16823 INFO: Including run-time hook 'pyi_rth_cryptography_openssl.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/_pyinstaller_hooks_contrib/rthooks'
+16823 INFO: Including run-time hook 'pyi_rth_setuptools.py' from '/Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/hooks/rthooks'
+16836 INFO: Creating base_library.zip...
+16847 INFO: Looking for dynamic libraries
+17329 INFO: Warnings written to /Users/harel/projects/flow/build/flow/warn-flow.txt
+17373 INFO: Graph cross-reference written to /Users/harel/projects/flow/build/flow/xref-flow.html
+17458 INFO: checking PYZ
+17458 INFO: Building PYZ because PYZ-00.toc is non existent
+17458 INFO: Building PYZ (ZlibArchive) /Users/harel/projects/flow/build/flow/PYZ-00.pyz
+18521 INFO: Building PYZ (ZlibArchive) /Users/harel/projects/flow/build/flow/PYZ-00.pyz completed successfully.
+18536 INFO: EXE target arch: arm64
+18536 INFO: Code signing identity: None
+18542 INFO: checking PKG
+18542 INFO: Building PKG because PKG-00.toc is non existent
+18542 INFO: Building PKG (CArchive) FLOW.pkg
+18565 INFO: Building PKG (CArchive) FLOW.pkg completed successfully.
+18565 INFO: Bootloader /Users/harel/projects/flow/.venv/lib/python3.12/site-packages/PyInstaller/bootloader/Darwin-64bit/runw
+18565 INFO: checking EXE
+18565 INFO: Building EXE because EXE-00.toc is non existent
+18565 INFO: Building EXE from EXE-00.toc
+18566 INFO: Copying bootloader EXE to /Users/harel/projects/flow/build/flow/FLOW
+18566 INFO: Converting EXE to target arch (arm64)
+20393 INFO: Removing signature(s) from EXE
+20412 INFO: Modifying Mach-O image UUID(s) in EXE
+20422 INFO: Appending PKG archive to EXE
+20427 INFO: Fixing EXE headers for code signing
+20433 INFO: Rewriting the executable's macOS SDK version (26.2.0) to match the SDK version of the Python library (15.0.0) in order to avoid inconsistent behavior and potential UI issues in the frozen application.
+20433 INFO: Re-signing the EXE
+20470 INFO: Building EXE from EXE-00.toc completed successfully.
+20472 INFO: checking COLLECT
+20472 INFO: Building COLLECT because COLLECT-00.toc is non existent
+20472 INFO: Building COLLECT COLLECT-00.toc
+23782 INFO: Building COLLECT COLLECT-00.toc completed successfully.
+23786 INFO: checking BUNDLE
+23786 INFO: Building BUNDLE because BUNDLE-00.toc is non existent
+23786 INFO: Building BUNDLE BUNDLE-00.toc
+24012 INFO: Signing the BUNDLE...
+24178 INFO: Building BUNDLE BUNDLE-00.toc completed successfully.
+24180 INFO: Build complete! The results are available in: /Users/harel/projects/flow/dist

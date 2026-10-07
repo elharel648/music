@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FLOW</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root { --bg:#F4F3EF; --panel:#FFFFFF; --card:#F8F7F4; --ink:#15151A; --sec:#65656F; --mut:#8A8A94; --line:rgba(20,20,30,.08);
+          --acc:#5C5BE0; --acc-ink:#4442C8; --tint:#EFEEFC; --tint2:#DEDDF8; --ok:#2E9E6A; --warn:#C77A12; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:Manrope,system-ui,-apple-system,sans-serif; font-size:14px; }
+  .app { max-width:1120px; margin:0 auto; padding:28px 32px 40px; min-height:100%; display:flex; flex-direction:column; gap:22px; }
+  header { display:flex; align-items:center; gap:14px; }
+  .brand { font-weight:800; letter-spacing:.22em; font-size:17px; }
+  .sub { font-size:10.5px; font-weight:700; letter-spacing:.2em; color:var(--sec); padding-top:2px; }
+  .spacer { flex:1; }
+  .stepper { display:flex; gap:18px; font-size:10.5px; font-weight:700; letter-spacing:.16em; color:#B5B5BE; }
+  .stepper span { display:inline-flex; align-items:center; gap:7px; }
+  .stepper i { width:6px; height:6px; border-radius:50%; background:currentColor; display:inline-block; }
+  .stepper .done { color:var(--ink);} .stepper .cur { color:var(--acc-ink);}
+  .pill { display:inline-flex; align-items:center; gap:8px; padding:7px 13px; border-radius:999px; background:var(--tint); color:var(--acc-ink); font-size:12px; font-weight:600; }
+  .pill i { width:8px; height:8px; border-radius:50%; background:var(--acc); box-shadow:0 0 0 4px rgba(92,91,224,.15); display:inline-block; }
+  .panel { background:var(--panel); border-radius:28px; box-shadow:0 30px 80px rgba(20,20,40,.10), 0 0 0 1px rgba(20,20,30,.04); padding:40px 44px; flex:1; display:flex; flex-direction:column; gap:24px; }
+  h1 { font-size:38px; font-weight:800; letter-spacing:-.02em; line-height:1.05; margin:0; }
+  h2 { font-size:10.5px; font-weight:700; letter-spacing:.2em; color:var(--sec); margin:0 0 10px; }
+  p.lead { font-size:15px; color:var(--sec); max-width:620px; line-height:1.55; margin:0; }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .grid2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+  .card { background:var(--card); border:1px solid rgba(20,20,30,.05); border-radius:20px; padding:20px 22px; display:flex; flex-direction:column; gap:10px; }
+  .drop { border:2px dashed var(--tint2); border-radius:24px; background:#FBFBFE; padding:40px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .btn { display:inline-flex; align-items:center; gap:10px; min-height:48px; padding:0 22px; border-radius:999px; border:0; background:var(--ink); color:#fff; font:800 12.5px Manrope,system-ui,sans-serif; letter-spacing:.12em; cursor:pointer; }
+  .btn.acc { background:linear-gradient(180deg,#6A69E6,#5C5BE0); box-shadow:0 14px 34px rgba(92,91,224,.28); min-height:54px; padding:0 34px; font-size:14px; }
+  .btn.ghost { background:#fff; color:var(--ink); border:1px solid rgba(20,20,30,.12); font-weight:700; letter-spacing:.06em; }
+  .btn:disabled { opacity:.45; cursor:default; box-shadow:none; }
+  .chip { padding:6px 12px; border-radius:999px; background:#fff; border:1px solid var(--line); font-size:12px; font-weight:700; }
+  .chip.sel { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; }
+  .chips .chip { cursor:pointer; }
+  input[type=text], select { font:600 14px Manrope,system-ui,sans-serif; padding:12px 14px; border-radius:12px; border:1px solid rgba(20,20,30,.12); background:#fff; color:var(--ink); min-width:140px; }
+  label.f { display:flex; flex-direction:column; gap:6px; font-size:11px; font-weight:700; letter-spacing:.14em; color:var(--sec); }
+  .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; }
+  .path { color:var(--sec); font-size:12.5px; word-break:break-all; }
+  .strip { display:flex; gap:6px; align-items:flex-end; height:120px; }
+  .strip > div { display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .strip .bar { border-radius:12px; background:var(--tint2); }
+  .strip .bar.drop { background:linear-gradient(180deg,#7372E8,#5C5BE0); }
+  .strip .lab { font-size:9.5px; font-weight:700; letter-spacing:.12em; color:var(--sec); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .strip .num { font-size:10px; color:var(--mut); text-align:center; font-family:ui-monospace,monospace; }
+  .foot { display:flex; align-items:center; gap:12px; margin-top:auto; padding-top:8px; }
+  .err { color:#B42318; font-weight:600; }
+  .ok { color:var(--ok); font-weight:700; }
+  .warn { color:var(--warn); font-weight:600; }
+  .progress { height:8px; border-radius:999px; background:var(--tint); overflow:hidden; }
+  .progress > div { height:100%; background:var(--acc); border-radius:999px; transition:width .35s ease; width:0; }
+  .log { font-family:ui-monospace,monospace; font-size:12px; color:var(--sec); max-height:220px; overflow:auto; white-space:pre-wrap; }
+  ol.steps { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:6px; font-size:13.5px; }
+  .hidden { display:none !important; }
+  .tiny { font-size:11.5px; color:var(--mut); }
+  .kv { display:flex; justify-content:space-between; gap:12px; border-bottom:1px solid var(--line); padding:7px 0; font-size:13px; }
+  .kv span:last-child { font-family:ui-monospace,monospace; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">FLOW</div><div class="sub">AI PRODUCER</div>
+    <div class="spacer"></div>
+    <div class="stepper" id="stepper">
+      <span data-s="1"><i></i>REFERENCE</span><span data-s="2"><i></i>SOUNDS</span><span data-s="3"><i></i>DIRECTION</span><span data-s="4"><i></i>BUILD</span>
+    </div>
+    <div class="pill" id="status"><i></i><span id="statusText">Starting</span></div>
+  </header>
+
+  <!-- LICENSE GATE -->
+  <section class="panel hidden" id="gate">
+    <h1>Your trial has ended.</h1>
+    <p class="lead">FLOW is licensed software. Enter the license key you received after purchase to keep building. Keys are verified on this computer; nothing is sent anywhere.</p>
+    <div class="row"><input type="text" id="keyInput" placeholder="FLOW-…" style="min-width:520px"><button class="btn" id="activateBtn">ACTIVATE</button></div>
+    <div id="gateMsg" class="err"></div>
+    <div class="tiny" id="gateMeta"></div>
+  </section>
+
+  <!-- STEP 1 -->
+  <section class="panel" id="s1">
+    <div><h1>Drop a reference track</h1><p class="lead">The track whose world your song should belong in. FLOW measures its tempo, key, sections and energy. The audio never leaves your computer and is never copied.</p></div>
+    <div class="drop" id="refDrop">
+      <div style="font-size:18px;font-weight:700" id="refName">No reference yet</div>
+      <div class="path" id="refPath"></div>
+      <div class="row"><button class="btn" id="pickRef">CHOOSE A TRACK</button>
+        <label class="f">BPM (optional)<input type="text" id="bpmIn" placeholder="auto" style="min-width:100px"></label>
+        <button class="btn ghost" id="analyzeBtn" disabled>ANALYZE</button></div>
+      <div id="refMsg" class="tiny"></div>
+    </div>
+    <div class="card hidden" id="refResult">
+      <h2>WHAT FLOW HEARD</h2>
+      <div class="row" id="refChips"></div>
+      <div class="strip" id="refStrip"></div>
+      <div class="tiny" id="refNote"></div>
+    </div>
+    <div class="foot"><div class="spacer"></div><button class="btn" id="to2" disabled>CONTINUE →</button></div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="panel hidden" id="s2">
+    <div><h1>Drop your sounds</h1><p class="lead">A folder of one-shots, loops, stems. A messy folder is fine: FLOW reads every file and works out what it is. Loops are used only when their BPM matches.</p></div>
+    <div class="drop">
+      <div style="font-size:18px;font-weight:700" id="packName">No folder yet</div>
+      <div class="path" id="packPath"></div>
+      <div class="row"><button class="btn" id="pickPack">CHOOSE A FOLDER</button></div>
+      <div id="packMsg" class="tiny"></div>
+    </div>
+    <div class="card hidden" id="packResult"><h2>YOUR SOUNDS</h2><div class="row" id="packChips"></div></div>
+    <div class="foot"><button class="btn ghost" id="back1">← BACK</button><div class="spacer"></div><button class="btn" id="to3" disabled>CONTINUE →</button></div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="panel hidden" id="s3">
+    <div><h1>Direct it</h1><p class="lead">Style decides which layers live in which section. Length rescales the reference's structure in 4-bar phrases. Everything else is measured.</p></div>
+    <div class="grid3">
+      <div class="card"><h2>STYLE</h2><div class="chips" id="styleChips"><span class="chip sel" data-v="house">House</span><span class="chip" data-v="afro">Afro House</span><span class="chip" data-v="techno">Techno</span></div></div>
+      <div class="card"><h2>LENGTH</h2><div class="row"><input type="text" id="lenIn" placeholder="same as reference" style="min-width:160px"><span class="tiny">mm:ss · snaps to 8-bar blocks</span></div><div class="tiny" id="lenHint"></div></div>
+      <div class="card"><h2>WHERE TO BUILD</h2>
+        <div class="chips" id="targetChips"><span class="chip sel" data-v="ableton">Ableton Live (live set)</span><span class="chip" data-v="stems">Stems + MIDI (any DAW)</span></div>
+        <div class="tiny" id="targetHint"></div>
+        <div class="row hidden" id="outRow"><button class="btn ghost" id="pickOut">OUTPUT FOLDER</button><span class="path" id="outPath"></span></div>
+      </div>
+    </div>
+    <div class="card" id="plugCard">
+      <div class="row"><h2 style="margin:0">YOUR PLUG-INS</h2><div class="spacer"></div><button class="btn ghost" id="scanPlug">SCAN THIS COMPUTER</button></div>
+      <div class="tiny" id="plugMsg">FLOW can drive your own synth for bass and lead (as MIDI, with your preset) and put your sidechain plug-in on every track. Ableton target only.</div>
+      <div class="grid2">
+        <label class="f">BASS + SYNTH VIA<select id="synthSel"><option value="">Use the sample shots (default)</option></select></label>
+        <label class="f">SIDECHAIN ON EVERY TRACK<select id="scSel"><option value="">None</option></select></label>
+      </div>
+    </div>
+    <div class="foot"><button class="btn ghost" id="back2">← BACK</button><div class="spacer"></div><button class="btn acc" id="buildBtn">BUILD MY TRACK</button></div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="panel hidden" id="s4">
+    <div><h1 id="buildTitle">Building your track</h1><p class="lead" id="buildLead">Measuring, choosing sounds, rendering patterns, placing every clip.</p></div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="log" id="log"></div>
+    <div class="card hidden" id="doneCard">
+      <div class="row" id="doneChips"></div>
+      <div class="strip" id="doneStrip"></div>
+      <h2 style="margin-top:8px">BUILD STEPS</h2>
+      <ol class="steps" id="doneSteps"></ol>
+      <div class="tiny" id="donePlace"></div>
+      <div id="doneWarn" class="warn"></div>
+    </div>
+    <div class="foot"><button class="btn ghost hidden" id="openOut">OPEN OUTPUT FOLDER</button><button class="btn ghost hidden" id="again">BUILD ANOTHER</button><div class="spacer"></div><span class="tiny" id="saveNote"></span></div>
+  </section>
+
+  <footer class="tiny" id="foot">© 2026 Harel Eliyahu · FLOW</footer>
+</div>
+
+<script>
+const S = { step:1, ref:null, refPath:null, pack:null, packPath:null, style:'house', target:'ableton', out:null, plugins:null, licensed:false };
+const $ = id => document.getElementById(id);
+const api = () => window.pywebview.api;
+function show(step){ S.step=step; for(const i of [1,2,3,4]) $('s'+i).classList.toggle('hidden', i!==step);
+  document.querySelectorAll('#stepper span').forEach(sp=>{ const n=+sp.dataset.s; sp.className = n<step?'done':(n===step?'cur':''); }); }
+function strip(el, sections, total){ el.innerHTML=''; for(const s of sections){ const w=(s.end-s.start)/total*100; const d=document.createElement('div'); d.style.flex=`0 0 ${w.toFixed(2)}%`;
+  const drop = /^Drop|Return/.test(s.label); const h = drop?110: (/Break|Build|Outro/.test(s.label)?44:72);
+  d.innerHTML=`<div class="bar ${drop?'drop':''}" style="height:${h}px"></div><div class="lab">${s.label.toUpperCase()}</div><div class="num">${s.start}–${s.end-1}</div>`; el.appendChild(d);} }
+function fmtLen(sec){ const m=Math.floor(sec/60), s=Math.round(sec%60); return `${m}:${String(s).padStart(2,'0')}`; }
+
+async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed · ${st.email||''}`:(st.state==='trial'?`Trial · ${st.days_left} days left`:'Trial ended');
+  S.licensed = st.state!=='expired'; $('gate').classList.toggle('hidden', S.licensed); if(!S.licensed){ for(const i of [1,2,3,4]) $('s'+i).classList.add('hidden'); $('gateMeta').textContent=`FLOW ${st.version} · machine ${st.machine}`; } return st; }
+
+window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(S.licensed) show(1); });
+
+$('activateBtn').onclick = async ()=>{ const r = await api().activate($('keyInput').value.trim()); if(r.ok){ $('gateMsg').textContent=''; await refreshStatus(); show(1);} else $('gateMsg').textContent=r.error; };
+
+$('pickRef').onclick = async ()=>{ const p = await api().pick_reference(); if(!p) return; S.refPath=p; $('refName').textContent=p.split(/[\\/]/).pop(); $('refPath').textContent=p; $('analyzeBtn').disabled=false; $('refResult').classList.add('hidden'); $('to2').disabled=true; $('analyzeBtn').click(); };
+$('analyzeBtn').onclick = async ()=>{ $('refMsg').textContent='Listening…'; $('analyzeBtn').disabled=true; const bpm=parseFloat($('bpmIn').value)||null;
+  const r = await api().analyze(S.refPath, bpm); $('analyzeBtn').disabled=false; if(!r.ok){ $('refMsg').innerHTML=`<span class="err">${r.error}</span>`; return; }
+  S.ref=r.ref; $('refMsg').textContent=''; const k=r.ref.key; const chips=[`${r.ref.bpm.toFixed(0)} BPM${r.ref.tempo_info.source==='estimated'?' · detected':''}`, `${k.tonic} ${k.mode}${k.confidence<0.6?' · unsure':''}`, `${r.ref.bars} bars`, fmtLen(r.ref.duration), `${r.ref.sections.length} sections`];
+  $('refChips').innerHTML = chips.map(c=>`<span class="chip">${c}</span>`).join(''); strip($('refStrip'), r.ref.sections, r.ref.bars);
+  $('refNote').textContent = 'Section labels come from where the kick leaves and returns and from energy. Fix the BPM above if the grid looks wrong.';
+  $('refResult').classList.remove('hidden'); $('to2').disabled=false; $('lenIn').placeholder = fmtLen(r.ref.duration); };
+$('to2').onclick=()=>show(2); $('back1').onclick=()=>show(1);
+
+$('pickPack').onclick = async ()=>{ const p = await api().pick_folder(); if(!p) return; S.packPath=p; $('packName').textContent=p.split(/[\\/]/).pop(); $('packPath').textContent=p; $('packMsg').textContent='Reading every file…';
+  const r = await api().scan_pack(p); if(!r.ok){ $('packMsg').innerHTML=`<span class="err">${r.error}</span>`; return; } S.pack=r.pack; $('packMsg').textContent='';
+  const roles = Object.entries(r.pack.by_role).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span class="chip">${k.toUpperCase()} · ${v}</span>`).join('');
+  $('packChips').innerHTML = `<span class="chip sel">${r.pack.count} SOUNDS</span>` + roles + (r.pack.bpm_hint?`<span class="chip">${r.pack.bpm_hint} BPM loops</span>`:''); $('packResult').classList.remove('hidden'); $('to3').disabled=false; };
+$('to3').onclick=()=>{ show(3); checkTarget(); }; $('back2').onclick=()=>show(2);
+
+document.querySelectorAll('#styleChips .chip').forEach(c=>c.onclick=()=>{ document.querySelectorAll('#styleChips .chip').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); S.style=c.dataset.v; });
+document.querySelectorAll('#targetChips .chip').forEach(c=>c.onclick=()=>{ document.querySelectorAll('#targetChips .chip').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); S.target=c.dataset.v; checkTarget(); });
+async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!=='stems'); $('plugCard').style.opacity = S.target==='ableton'?1:.45;
+  if(S.target==='ableton'){ const r = await api().ableton_status(); $('targetHint').innerHTML = r.ok ? (r.fresh?`<span class="ok">Live is ready · empty set in front</span>`:`<span class="warn">Live is open with ${r.tracks} tracks. Open File › New Live Set first.</span>`) : `<span class="warn">${r.reason}</span>`; }
+  else $('targetHint').textContent = 'Full-length stems + a MIDI file with markers. Works in Logic, FL Studio, Cubase, Studio One, Bitwig, Reaper.'; }
+$('pickOut').onclick = async ()=>{ const p = await api().pick_folder(); if(p){ S.out=p; $('outPath').textContent=p; } };
+$('lenIn').oninput = ()=>{ const v=$('lenIn').value.trim(); if(!S.ref||!v){ $('lenHint').textContent=''; return; } const m=v.split(':'); const sec = m.length>1? (+m[0])*60+(+m[1]) : +v; const bars = Math.max(16, Math.round(sec*S.ref.bpm/240/8)*8); $('lenHint').textContent = `≈ ${bars} bars at ${S.ref.bpm.toFixed(0)} BPM`; };
+$('scanPlug').onclick = async ()=>{ $('plugMsg').textContent='Scanning…'; const r = await api().scan_plugins(); if(!r.ok){ $('plugMsg').textContent=r.error; return; } S.plugins=r.plugins;
+  $('plugMsg').textContent = `${r.plugins.count} plug-ins found · synths: ${r.plugins.synths.join(', ')||'none recognized'} · sidechain: ${r.plugins.sidechain.join(', ')||'none'}`;
+  $('synthSel').innerHTML = '<option value="">Use the sample shots (default)</option>' + r.plugins.synths.map(n=>`<option>${n}</option>`).join('');
+  $('scSel').innerHTML = '<option value="">None</option>' + r.plugins.sidechain.map(n=>`<option>${n}</option>`).join(''); };
+
+$('buildBtn').onclick = async ()=>{ show(4); $('log').textContent=''; $('bar').style.width='0%'; $('doneCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('buildTitle').textContent='Building your track'; $('saveNote').textContent='';
+  const opts = { reference:S.refPath, pack:S.packPath, length:$('lenIn').value.trim()||null, target:S.target, out:S.out, style:S.style, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, force:false };
+  const r = await api().build(opts); if(!r.ok){ window.flowError(r.error); } };
+window.flowProgress = (msg,pct)=>{ $('bar').style.width = `${Math.round(pct*100)}%`; $('log').textContent += msg+'\n'; $('log').scrollTop=1e9; };
+window.flowError = (msg)=>{ $('buildTitle').textContent='Something stopped the build'; $('log').textContent += 'ERROR: '+msg+'\n'; $('again').classList.remove('hidden'); };
+window.flowDone = (sum)=>{ $('buildTitle').textContent='Your track is ready'; $('buildLead').textContent = sum.ableton ? 'It is in the Live Set in front of you. Press Cmd+S now: what FLOW wrote lives in memory until you save.' : 'Open the folder: full-length stems, a MIDI file with the markers, and your Blueprint.';
+  $('doneChips').innerHTML = [`${sum.bpm.toFixed(0)} BPM`, `${sum.bars} bars`, `${sum.tracks} tracks`, `${sum.sections.length} sections`].map(c=>`<span class="chip">${c}</span>`).join('');
+  strip($('doneStrip'), sum.sections, sum.bars); $('doneSteps').innerHTML = sum.steps.map(s=>`<li>${s}</li>`).join('');
+  $('donePlace').textContent = sum.placeholders.length ? `Placeholders to replace by ear: ${sum.placeholders.join(', ')}. Structure and drums follow the reference; bass/synth patterns are starting points.` : '';
+  const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; $('doneWarn').innerHTML = warns.map(w=>`• ${w}`).join('<br>');
+  $('doneCard').classList.remove('hidden'); $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
+  $('saveNote').textContent = sum.ableton ? 'Cmd+S in Live' : ''; refreshStatus(); };
+$('again').onclick=()=>show(1);
+</script>
+</body>
+</html>

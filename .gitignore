@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+build/
+dist/
+*.dmg
+*.spec.bak
+keys/
+.pytest_cache/
+.DS_Store
+*.egg-info/
+FLOW loops/
+FLOW export/
