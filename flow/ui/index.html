@@ -50,16 +50,22 @@
   .stats > div:first-child { border-left:0; padding-left:0; }
   .stats .v { font-size:19px; font-weight:600; letter-spacing:-.015em; font-variant-numeric:tabular-nums; }
   .stats .l { font-size:11.5px; color:var(--sec); margin-top:3px; }
-  .tl .band { display:flex; gap:2px; height:48px; border-radius:3px; overflow:hidden; }
-  .tl .seg { min-width:0; background:#D4D3CD; opacity:0; animation:fadein .5s var(--ease) forwards; }
-  .tl .seg.hi { background:var(--ink); } .tl .seg.lo { background:#E9E8E2; }
-  @keyframes fadein { to { opacity:1; } }
-  .tl .names { display:flex; gap:2px; margin-top:10px; }
-  .tl .names > div { min-width:0; font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tl .band { display:flex; gap:3px; height:56px; border-radius:6px; overflow:hidden; position:relative; }
+  .tl .seg { min-width:0; background:var(--ink); border-radius:4px; transform-origin:left center; transform:scaleX(0); animation:grow .7s var(--ease) forwards; }
+  .tl .seg.hi { background:var(--acc); } .tl .seg.lo { background:var(--acc); opacity:.22; }
+  @keyframes grow { to { transform:scaleX(1); } }
+  .tl .scan { position:absolute; top:0; bottom:0; left:0; width:2px; background:#fff; box-shadow:0 0 12px 2px rgba(255,255,255,.9), 0 0 24px rgba(92,91,224,.6); opacity:0; animation:scan 1.6s cubic-bezier(.4,0,.2,1) .55s forwards; }
+  @keyframes scan { 0% { left:0; opacity:0; } 8% { opacity:1; } 92% { opacity:1; } 100% { left:100%; opacity:0; } }
+  .tl .names { display:flex; gap:3px; margin-top:12px; }
+  .tl .names > div { min-width:0; font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:0; animation:rise .5s var(--ease) forwards; }
+  .tl .names > div.hi { color:var(--acc-ink); }
   .tl .names small { display:block; font-family:"Geist Mono",ui-monospace,monospace; font-size:10.5px; font-weight:500; color:var(--mut); margin-top:2px; }
-  .tl .ticks { position:relative; height:18px; margin-top:10px; border-top:1px solid var(--line); }
+  .tl .ticks { position:relative; height:18px; margin-top:10px; border-top:1px solid var(--line); opacity:0; animation:fadein .6s ease .9s forwards; }
+  @keyframes fadein { to { opacity:1; } }
   .tl .ticks i { position:absolute; top:-1px; width:1px; height:5px; background:#C6C5BF; }
   .tl .ticks span { position:absolute; top:6px; font:500 10px "Geist Mono",ui-monospace,monospace; color:var(--mut); transform:translateX(-50%); }
+  table.steps tr { opacity:0; animation:rise .45s var(--ease) forwards; }
+  .stats > div .v { color:var(--ink); } .stats > div:first-child .v { color:var(--acc-ink); }
   table.steps { width:100%; border-collapse:collapse; font-size:13px; }
   table.steps td { padding:10px 0; border-top:1px solid var(--line2); vertical-align:top; line-height:1.45; }
   table.steps tr:first-child td { border-top:0; }
@@ -299,13 +305,13 @@ function stats(el, items, animate){ el.innerHTML = items.map(([v,l],i)=>`<div da
 function timeline(el, sections, total){
   const cls = s => /^Drop|Return/.test(s.label) ? 'hi' : (/Break|Build|Outro/.test(s.label) ? 'lo' : '');
   const w = s => ((s.end-s.start)/total*100).toFixed(2);
-  const band = sections.map((s,i)=>`<div class="seg ${cls(s)}" style="flex:0 0 ${w(s)}%;animation-delay:${i*70}ms" title="${s.label} · ${s.start}–${s.end-1}"></div>`).join('');
-  const names = sections.map(s=>`<div style="flex:0 0 ${w(s)}%">${s.label}<small>${s.start}–${s.end-1}</small></div>`).join('');
+  const band = sections.map((s,i)=>`<div class="seg ${cls(s)}" style="flex:0 0 ${w(s)}%;animation-delay:${i*110}ms" title="${s.label} · ${s.start}–${s.end-1}"></div>`).join('') + '<div class="scan"></div>';
+  const names = sections.map((s,i)=>`<div class="${cls(s)==='hi'?'hi':''}" style="flex:0 0 ${w(s)}%;animation-delay:${200+i*110}ms">${s.label}<small>${s.start}–${s.end-1}</small></div>`).join('');
   const step = total > 160 ? 32 : (total > 80 ? 16 : 8); let ticks = '';
   for(let b=1; b<=total; b+=step){ const x=((b-1)/total*100).toFixed(2); ticks += `<i style="left:${x}%"></i><span style="left:${x}%">${b}</span>`; }
   el.innerHTML = `<div class="band">${band}</div><div class="names">${names}</div><div class="ticks">${ticks}</div>`;
 }
-function stepsTable(el, rows){ el.innerHTML = rows.map(r=>`<tr><td class="sec">${r.label}</td><td class="bars">${r.start}–${r.end-1} · ${r.bars} bars</td><td class="lay">${r.enter.length? (r.layers.length===r.enter.length ? r.layers.join(', ') : `<small>+</small> ${r.enter.join(', ')}`) : (r.layers.length ? r.layers.join(', ') : '<small>FX only</small>')}${r.leave.length?` <small>· out: ${r.leave.length>5 ? r.leave.length+' layers' : r.leave.join(', ')}</small>`:''}</td></tr>`).join(''); }
+function stepsTable(el, rows){ el.innerHTML = rows.map((r,i)=>`<tr style="animation-delay:${600+i*90}ms"><td class="sec">${r.label}</td><td class="bars">${r.start}–${r.end-1} · ${r.bars} bars</td><td class="lay">${r.enter.length? (r.layers.length===r.enter.length ? r.layers.join(', ') : `<small>+</small> ${r.enter.join(', ')}`) : (r.layers.length ? r.layers.join(', ') : '<small>FX only</small>')}${r.leave.length?` <small>· out: ${r.leave.length>5 ? r.leave.length+' layers' : r.leave.join(', ')}</small>`:''}</td></tr>`).join(''); }
 async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed${st.email?' · '+st.email:''}`:(st.state==='trial'?`Trial · ${st.days_left} days left`:'Trial ended');
   S.licensed = st.state!=='expired'; const g=$('gate'); if(!S.licensed){ g.classList.remove('hidden'); requestAnimationFrame(()=>g.classList.add('in')); for(const i of [1,2,3,4]) $('s'+i).classList.add('hidden'); $('gateMeta').textContent=`FLOW ${st.version} · machine ${st.machine}`; } else { g.classList.add('hidden'); } return st; }
 window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; const last = await api().load_session(); if(last){ S.lastOpts=last; const packs=String(last.pack).split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('resumeMeta').textContent = `${last.reference.split(/[\\/]/).pop()} · ${packs.length>1?packs.length+' folders':packs[0].split(/[\\/]/).pop()} · ${last.length?fmt(last.length):'reference length'} · ${last.target==='ableton'?'Ableton Live':'Stems + MIDI'}`; $('resumeCard').classList.remove('hidden'); } show(1); });
