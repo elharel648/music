@@ -224,7 +224,7 @@ class Api:
 def main():
     api = Api()
     window = webview.create_window(f"{PRODUCT}", _ui_path(), js_api=api, width=1180, height=860, min_size=(960, 680),
-                                   background_color="#F4F3EF")
+                                   background_color="#07080B")
     api.window = window
     webview.start(debug=False)
 
