@@ -65,6 +65,19 @@
   .tl .ticks i { position:absolute; top:-1px; width:1px; height:5px; background:#C6C5BF; }
   .tl .ticks span { position:absolute; top:6px; font:500 10px "Geist Mono",ui-monospace,monospace; color:var(--mut); transform:translateX(-50%); }
   table.steps tr { opacity:0; animation:rise .45s var(--ease) forwards; }
+  .tl .curve { display:block; width:100%; height:84px; margin-bottom:10px; }
+  .tl .curve .area { fill:var(--acc); fill-opacity:0; animation:areain .9s ease .9s forwards; }
+  .tl .curve .line { fill:none; stroke:var(--acc); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; stroke-dasharray:2400; stroke-dashoffset:2400; animation:draw 1.6s cubic-bezier(.4,0,.2,1) .35s forwards; }
+  .tl .curve .grid { stroke:var(--line); stroke-width:1; }
+  @keyframes areain { to { fill-opacity:.1; } }
+  .tl .lanes { margin-top:14px; display:flex; flex-direction:column; gap:5px; }
+  .tl .lane { display:grid; grid-template-columns:118px minmax(0,1fr); gap:12px; align-items:center; opacity:0; animation:rise .45s var(--ease) forwards; }
+  .tl .lane:hover .blk { opacity:1; }
+  .tl .lane .ln { font-size:11px; font-weight:500; color:var(--sec); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tl .lane .tr { position:relative; height:9px; }
+  .tl .blk { position:absolute; top:0; height:9px; border-radius:2px; background:var(--acc); opacity:.75; transform-origin:left center; transform:scaleX(0); animation:grow .6s var(--ease) forwards; transition:opacity .2s; }
+  .tl .blk.k { background:var(--ink); opacity:.9; } .tl .blk.q { opacity:.35; } .tl .blk.fx { width:3px !important; background:var(--ink); border-radius:1px; }
+  .tl .blk.sw { background:var(--acc); opacity:.38; }
   .stats > div .v { color:var(--ink); } .stats > div:first-child .v { color:var(--acc-ink); }
   table.steps { width:100%; border-collapse:collapse; font-size:13px; }
   table.steps td { padding:10px 0; border-top:1px solid var(--line2); vertical-align:top; line-height:1.45; }
@@ -302,15 +315,25 @@ function show(step){ S.step=step; for(const i of [1,2,3,4]){ const el=$('s'+i); 
 function alertBox(el, msg, kind){ if(!msg){ el.classList.add('hidden'); return; } el.className = 'alert' + (kind?' '+kind:''); el.textContent = msg; }
 function stats(el, items, animate){ el.innerHTML = items.map(([v,l],i)=>`<div data-rv style="--i:${i}"><div class="v" data-v="${String(v).replace(/"/g,'')}">${animate && /^\d+$/.test(String(v)) ? '0' : v}</div><div class="l">${l}</div></div>`).join('');
   if(animate) el.querySelectorAll('.v').forEach(n=>{ const target=n.dataset.v; if(!/^\d+$/.test(target)) return; const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(+target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }); }
-function timeline(el, sections, total){
+function spansFromBools(arr){ const out=[]; let start=null; arr.forEach((v,i)=>{ if(v && start===null) start=i+1; if(!v && start!==null){ out.push([start,i+1]); start=null; } }); if(start!==null) out.push([start,arr.length+1]); return out; }
+function curveSvg(vals, total){ if(!vals || vals.length<4) return ''; const W=1000, H=84, pad=4; const n=vals.length; const pts = vals.map((v,i)=>[(i/(n-1))*W, H-pad-(v*(H-2*pad))]);
+  let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`; for(let i=1;i<n;i++){ const [x0,y0]=pts[i-1],[x1,y1]=pts[i]; const cx=((x0+x1)/2).toFixed(1); d += ` C${cx} ${y0.toFixed(1)}, ${cx} ${y1.toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`; }
+  const grid = [0.25,0.5,0.75].map(g=>`<line class="grid" x1="0" x2="${W}" y1="${(H-pad-g*(H-2*pad)).toFixed(1)}" y2="${(H-pad-g*(H-2*pad)).toFixed(1)}"/>`).join('');
+  return `<svg class="curve" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${grid}<path class="area" d="${d} L${W} ${H} L0 ${H} Z"/><path class="line" d="${d}"/></svg>`; }
+function timeline(el, sections, total, opts){ opts = opts||{};
   const cls = s => /^Drop|Return/.test(s.label) ? 'hi' : (/Break|Build|Outro/.test(s.label) ? 'lo' : '');
   const w = s => ((s.end-s.start)/total*100).toFixed(2);
   const band = sections.map((s,i)=>`<div class="seg ${cls(s)}" style="flex:0 0 ${w(s)}%;animation-delay:${i*110}ms" title="${s.label} · ${s.start}–${s.end-1}"></div>`).join('') + '<div class="scan"></div>';
   const names = sections.map((s,i)=>`<div class="${cls(s)==='hi'?'hi':''}" style="flex:0 0 ${w(s)}%;animation-delay:${200+i*110}ms">${s.label}<small>${s.start}–${s.end-1}</small></div>`).join('');
   const step = total > 160 ? 32 : (total > 80 ? 16 : 8); let ticks = '';
   for(let b=1; b<=total; b+=step){ const x=((b-1)/total*100).toFixed(2); ticks += `<i style="left:${x}%"></i><span style="left:${x}%">${b}</span>`; }
-  el.innerHTML = `<div class="band">${band}</div><div class="names">${names}</div><div class="ticks">${ticks}</div>`;
+  const lanes = (opts.lanes||[]).map((l,i)=>{ const blocks = (l.spans||[]).map(([a,b],j)=>`<i class="blk ${l.cls||''}" style="left:${((a-1)/total*100).toFixed(2)}%;width:${((b-a)/total*100).toFixed(2)}%;animation-delay:${700+i*60+j*40}ms"></i>`).join('')
+      + (l.hits||[]).map(h=>`<i class="blk fx" style="left:${((h-1)/total*100).toFixed(2)}%;animation-delay:${700+i*60}ms"></i>`).join('')
+      + (l.sweeps||[]).map(b=>`<i class="blk sw" style="left:${((b-1)/total*100).toFixed(2)}%;width:${(8/total*100).toFixed(2)}%;animation-delay:${700+i*60}ms"></i>`).join('');
+    return `<div class="lane" style="animation-delay:${600+i*60}ms"><div class="ln">${l.name}</div><div class="tr">${blocks}</div></div>`; }).join('');
+  el.innerHTML = `${curveSvg(opts.curve, total)}<div class="band">${band}</div><div class="names">${names}</div><div class="ticks">${ticks}</div>${lanes?`<div class="lanes">${lanes}</div>`:''}`;
 }
+const ROLE_CLS = r => (/^(kick|bass)$/.test(r) ? 'k' : (/pad|atmos/.test(r) ? 'q' : ''));
 function stepsTable(el, rows){ el.innerHTML = rows.map((r,i)=>`<tr style="animation-delay:${600+i*90}ms"><td class="sec">${r.label}</td><td class="bars">${r.start}–${r.end-1} · ${r.bars} bars</td><td class="lay">${r.enter.length? (r.layers.length===r.enter.length ? r.layers.join(', ') : `<small>+</small> ${r.enter.join(', ')}`) : (r.layers.length ? r.layers.join(', ') : '<small>FX only</small>')}${r.leave.length?` <small>· out: ${r.leave.length>5 ? r.leave.length+' layers' : r.leave.join(', ')}</small>`:''}</td></tr>`).join(''); }
 async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed${st.email?' · '+st.email:''}`:(st.state==='trial'?`Trial · ${st.days_left} days left`:'Trial ended');
   S.licensed = st.state!=='expired'; const g=$('gate'); if(!S.licensed){ g.classList.remove('hidden'); requestAnimationFrame(()=>g.classList.add('in')); for(const i of [1,2,3,4]) $('s'+i).classList.add('hidden'); $('gateMeta').textContent=`FLOW ${st.version} · machine ${st.machine}`; } else { g.classList.add('hidden'); } return st; }
@@ -333,7 +356,9 @@ async function analyze(){ alertBox($('refMsg'), 'Listening…', 'ok'); const bpm
   S.ref=r.ref; alertBox($('refMsg'), null); const k=r.ref.key;
   $('refResult').classList.remove('hidden');
   stats($('refStats'), [[`${r.ref.bpm.toFixed(0)}`, r.ref.tempo_info.source==='estimated'?'BPM, detected':'BPM'], [`${k.tonic} ${k.mode==='minor'?'min':'maj'}`, k.confidence<0.6?'Key, unsure':'Key'], [fmt(r.ref.duration),'Length'], [`${r.ref.bars}`,'Bars'], [`${r.ref.sections.length}`,'Sections']], true);
-  timeline($('refTimeline'), r.ref.sections, r.ref.bars); $('to2').disabled=false;
+  const en = (r.ref.elements&&r.ref.elements.energy)||[]; const mn=Math.min(...en), mx=Math.max(...en); const curve = en.map(v=> mx>mn ? (v-mn)/(mx-mn) : 0.5);
+  const lanes = r.ref.elements ? [{name:'Kick', cls:'k', spans:spansFromBools(r.ref.elements.kick)}, {name:'Hats and top', spans:spansFromBools(r.ref.elements.hats)}] : [];
+  timeline($('refTimeline'), r.ref.sections, r.ref.bars, {curve, lanes}); $('to2').disabled=false;
   S.len = Math.max(150, Math.min(600, Math.ceil(r.ref.duration/30)*30)); $('lenRange').value = S.len; updateLen(); }
 $('analyzeBtn').onclick = analyze;
 $('to2').onclick=()=>show(2); $('back1').onclick=()=>show(1);
@@ -399,7 +424,9 @@ window.flowError = (msg)=>{ $('buildTitle').textContent='Stopped'; $('buildLead'
 window.flowDone = async (sum)=>{ setStage(5); $('progress').classList.add('done'); $('buildTitle').textContent='Your track is ready'; $('buildLead').textContent = sum.ableton ? 'It is in the Live Set in front of you. Press Cmd+S now: what FLOW wrote lives in memory until you save.' : 'Open the folder: full-length stems, a MIDI file with the markers, and your Blueprint.';
   await sleep(500); $('stages').classList.add('hidden'); $('doneCard').classList.remove('hidden');
   stats($('doneStats'), [[`${sum.bpm.toFixed(0)}`,'BPM'],[`${sum.bars}`,'Bars'],[fmt(sum.bars*240/sum.bpm),'Length'],[`${sum.tracks}`,'Tracks'],[`${sum.sections.length}`,'Sections']], true);
-  timeline($('doneTimeline'), sum.sections, sum.bars); if(sum.rows) stepsTable($('doneSteps'), sum.rows); else $('doneSteps').innerHTML = sum.steps.map(s=>`<tr><td class="lay">${s}</td></tr>`).join('');
+  const lanes = (sum.layers||[]).filter(l=>!/impact|uplifter|downlifter/.test(l.role)).slice(0,14).map(l=>({name:l.name, cls:ROLE_CLS(l.role), spans:l.spans, sweeps:l.sweeps}));
+  const fx = (sum.layers||[]).filter(l=>/impact|uplifter|downlifter/.test(l.role)); if(fx.length) lanes.push({name:'FX', hits: fx.flatMap(l=>l.hits||[]), spans:[]});
+  timeline($('doneTimeline'), sum.sections, sum.bars, {curve: sum.density, lanes}); if(sum.rows) stepsTable($('doneSteps'), sum.rows); else $('doneSteps').innerHTML = sum.steps.map(s=>`<tr><td class="lay">${s}</td></tr>`).join('');
   $('donePlace').textContent = sum.placeholders.length ? `Placeholders to replace by ear: ${sum.placeholders.join(', ')}. Structure and drums follow the reference; bass and synth patterns are starting points.` : '';
   const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length) alertBox($('doneWarn'), warns.join('  ·  '), 'warn');
   $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
