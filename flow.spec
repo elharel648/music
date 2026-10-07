@@ -42,8 +42,8 @@ if sys.platform == "darwin":
         info_plist={
             "CFBundleName": "FLOW",
             "CFBundleDisplayName": "FLOW",
-            "CFBundleShortVersionString": "0.1.1",
-            "CFBundleVersion": "0.1.1",
+            "CFBundleShortVersionString": "0.1.2",
+            "CFBundleVersion": "0.1.2",
             "NSHighResolutionCapable": True,
             "NSHumanReadableCopyright": "© 2026 Harel Eliyahu. All rights reserved.",
             "LSMinimumSystemVersion": "12.0",

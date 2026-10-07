@@ -38,27 +38,28 @@ def _role_from_text(text: str) -> str | None:
 
 
 def scan_pack(folder: str, bpm: float | None = None, max_files: int = 2000) -> dict:
-    """Walk a folder; return {'samples': [...], 'by_role': {...}, 'bpm_hint': ..., 'key_hint': ...}."""
+    """Walk one folder, or several joined by os.pathsep; return samples, roles, hints and warnings."""
+    folders = [f for f in str(folder).split(os.pathsep) if f.strip()]
     samples = []
-    for root, _dirs, files in os.walk(folder):
-        for fn in sorted(files):
-            if fn.startswith(".") or not fn.lower().endswith(audio.AUDIO_EXT):
-                continue
-            path = os.path.join(root, fn)
-            rel = os.path.relpath(path, folder)
-            try:
-                dur = audio.duration(path)
-            except Exception:
-                continue
-            text = rel.replace(os.sep, " ")
-            role = _role_from_text(fn) or _role_from_text(text) or ("loop" if dur > 3.5 else "oneshot")
-            b = bpm_from_name(fn) or bpm_from_name(text)
-            k = key_from_name(fn)
-            is_loop = ("loop" in text.lower()) or (b is not None and dur >= 3.0) or dur >= 6.0
-            samples.append({"path": path, "name": fn, "rel": rel, "role": role, "duration": round(dur, 3),
-                            "bpm": b, "key": {"pc": k[0], "mode": k[1]} if k else None, "is_loop": bool(is_loop)})
-            if len(samples) >= max_files:
-                break
+    icloud = 0
+    for base in folders:
+        for root, _dirs, files in os.walk(base):
+            for fn in sorted(files):
+                if fn.endswith(".icloud"):
+                    icloud += 1
+                    continue
+                if fn.startswith(".") or not fn.lower().endswith(audio.AUDIO_EXT):
+                    continue
+                path = os.path.join(root, fn)
+                if _is_dataless(path):  # iCloud placeholder: opening it would stall on a download
+                    icloud += 1
+                    continue
+                rel = os.path.relpath(path, base)
+                d = _describe(path, fn, rel)
+                if d:
+                    samples.append(d)
+                if len(samples) >= max_files:
+                    break
     by_role: dict[str, list] = {}
     for s in samples:
         by_role.setdefault(s["role"], []).append(s)
@@ -69,15 +70,43 @@ def scan_pack(folder: str, bpm: float | None = None, max_files: int = 2000) -> d
     has_kick = bool(by_role.get("kick"))
     has_drums = any(r in by_role for r in DRUM_ROLES)
     warnings = []
+    if icloud:
+        warnings.append(f"{icloud} files are still in iCloud and not on this Mac. In Finder: right-click the folder › Download Now, then scan again.")
     if not samples:
         warnings.append("No audio files in this folder.")
     elif not has_drums:
-        warnings.append("No drums found in this folder. Choose the pack's TOP folder, the one that contains Drums, Loops and FX.")
+        warnings.append("No drums found. Choose the pack's TOP folder (the one that contains Drums, Loops and FX), or several folders at once.")
     elif not has_kick:
         warnings.append("No kick drum found. FLOW builds the groove around a kick; add one or choose the pack's top folder.")
-    return {"folder": folder, "count": len(samples), "samples": samples, "by_role": {k: len(v) for k, v in by_role.items()},
+    return {"folder": folder, "folders": folders, "count": len(samples), "samples": samples, "by_role": {k: len(v) for k, v in by_role.items()},
             "bpm_hint": bpm_hint, "key_hint": key_hint, "has_kick": has_kick, "has_drums": has_drums, "warnings": warnings,
             "_by_role": by_role}
+
+
+SF_DATALESS = 0x40000000  # macOS: file content lives in iCloud, not on disk
+
+
+def _is_dataless(path: str) -> bool:
+    try:
+        st = os.stat(path)
+    except OSError:
+        return True
+    flags = getattr(st, "st_flags", 0)
+    return bool(flags & SF_DATALESS)
+
+
+def _describe(path: str, fn: str, rel: str) -> dict | None:
+    try:
+        dur = audio.duration(path)
+    except Exception:
+        return None
+    text = rel.replace(os.sep, " ")
+    role = _role_from_text(fn) or _role_from_text(text) or ("loop" if dur > 3.5 else "oneshot")
+    b = bpm_from_name(fn) or bpm_from_name(text)
+    k = key_from_name(fn)
+    is_loop = ("loop" in text.lower()) or (b is not None and dur >= 3.0) or dur >= 6.0
+    return {"path": path, "name": fn, "rel": rel, "role": role, "duration": round(dur, 3),
+            "bpm": b, "key": {"pc": k[0], "mode": k[1]} if k else None, "is_loop": bool(is_loop)}
 
 
 def _features(path: str) -> dict:

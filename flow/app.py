@@ -53,6 +53,11 @@ class Api:
         r = self.window.create_file_dialog(webview.FOLDER_DIALOG)
         return r[0] if r else None
 
+    def pick_folders(self):
+        """Several folders at once (Cmd-click in the dialog). Returned joined with os.pathsep for scan_pack."""
+        r = self.window.create_file_dialog(webview.FOLDER_DIALOG, allow_multiple=True)
+        return os.pathsep.join(r) if r else None
+
     # ---- analysis
     def analyze(self, path: str, bpm: float | None = None):
         try:

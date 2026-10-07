@@ -105,11 +105,11 @@
 
   <!-- STEP 2 -->
   <section class="panel hidden" id="s2">
-    <div><h1>Drop your sounds</h1><p class="lead">A folder of one-shots, loops, stems. A messy folder is fine: FLOW reads every file and works out what it is. Loops are used only when their BPM matches.</p></div>
+    <div><h1>Drop your sounds</h1><p class="lead">Choose the pack's top folder (the one holding Drums, Loops, FX), or Cmd-click several folders. A messy folder is fine: FLOW reads every file and works out what it is. Loops are used only when their BPM matches.</p></div>
     <div class="drop">
       <div style="font-size:18px;font-weight:700" id="packName">No folder yet</div>
       <div class="path" id="packPath"></div>
-      <div class="row"><button class="btn" id="pickPack">CHOOSE A FOLDER</button></div>
+      <div class="row"><button class="btn" id="pickPack">CHOOSE FOLDER(S)</button></div>
       <div id="packMsg" class="tiny"></div>
     </div>
     <div class="card hidden" id="packResult"><h2>YOUR SOUNDS</h2><div class="row" id="packChips"></div></div>
@@ -185,7 +185,7 @@ $('analyzeBtn').onclick = async ()=>{ $('refMsg').textContent='Listening…'; $(
   $('refResult').classList.remove('hidden'); $('to2').disabled=false; $('lenIn').placeholder = fmtLen(r.ref.duration); };
 $('to2').onclick=()=>show(2); $('back1').onclick=()=>show(1);
 
-$('pickPack').onclick = async ()=>{ const p = await api().pick_folder(); if(!p) return; S.packPath=p; $('packName').textContent=p.split(/[\\/]/).pop(); $('packPath').textContent=p; $('packMsg').textContent='Reading every file…';
+$('pickPack').onclick = async ()=>{ const p = await api().pick_folders(); if(!p) return; S.packPath=p; const parts=p.split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('packName').textContent = parts.length>1 ? `${parts.length} folders` : parts[0].split(/[\\/]/).pop(); $('packPath').textContent=parts.join('  +  '); $('packMsg').textContent='Reading every file…';
   const r = await api().scan_pack(p); if(!r.ok){ $('packMsg').innerHTML=`<span class="err">${r.error}</span>`; return; } S.pack=r.pack;
   const warn = (r.pack.warnings||[]); $('packMsg').innerHTML = warn.length ? `<span class="err">${warn.join(' ')}</span>` : `<span class="ok">Kick found · ready to build</span>`;
   const roles = Object.entries(r.pack.by_role).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span class="chip">${k.toUpperCase()} · ${v}</span>`).join('');
