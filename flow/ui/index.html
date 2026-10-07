@@ -13,16 +13,16 @@
   html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:Geist,-apple-system,system-ui,"Segoe UI",sans-serif; font-size:14px; -webkit-font-smoothing:antialiased; font-feature-settings:"ss01","cv11"; }
   button, input, select { font-family:inherit; }
   .mono { font-family:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace; }
-  .top { height:64px; display:flex; align-items:center; gap:16px; padding:0 40px; }
-  .brand { font-weight:700; letter-spacing:.26em; font-size:14px; }
-  .brand small { font-weight:600; letter-spacing:.18em; font-size:10px; color:var(--sec); margin-left:12px; }
+  .rail { display:flex; gap:6px; padding:0 40px; height:2px; margin-top:0; }
+  .rail i { flex:1; background:#E3E2DD; transition:background .35s var(--ease); }
+  .rail i.on { background:var(--ink); }
+  .top { height:60px; display:flex; align-items:center; gap:16px; padding:0 40px; }
+  .brand { font-weight:700; letter-spacing:.2em; font-size:13px; }
   .spacer { flex:1; }
-  .steps { display:flex; gap:22px; font-size:10.5px; font-weight:600; letter-spacing:.14em; color:#B9B9C1; }
-  .steps span { display:inline-flex; align-items:center; gap:7px; transition:color .3s; }
-  .steps i { width:5px; height:5px; border-radius:50%; background:currentColor; display:inline-block; }
-  .steps .done { color:var(--ink);} .steps .cur { color:var(--acc-ink);}
-  .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:var(--tint); color:var(--acc-ink); font-size:12px; font-weight:500; }
-  .pill i { width:7px; height:7px; border-radius:50%; background:var(--acc); display:inline-block; }
+  .steps { display:flex; gap:26px; font-size:12.5px; font-weight:500; color:#B0B0B7; }
+  .steps span { transition:color .3s; }
+  .steps .done { color:#6B6B74; } .steps .cur { color:var(--ink); font-weight:600; }
+  .pill { font-size:12px; color:var(--mut); }
   .wrap { max-width:960px; margin:0 auto; padding:36px 32px 72px; }
   .view { display:flex; flex-direction:column; gap:24px; opacity:0; transform:translateY(10px); transition:opacity .28s ease, transform .36s var(--ease); }
   .view.in { opacity:1; transform:none; }
@@ -139,11 +139,11 @@
 </style>
 </head>
 <body>
+<div class="rail" id="rail"><i></i><i></i><i></i><i></i></div>
 <div class="top">
-  <div class="brand">FLOW<small>AI PRODUCER</small></div>
+  <div class="brand">FLOW</div>
   <div class="spacer"></div>
-  <div class="steps" id="stepper"><span data-s="1"><i></i>REFERENCE</span><span data-s="2"><i></i>SOUNDS</span><span data-s="3"><i></i>DIRECTION</span><span data-s="4"><i></i>BUILD</span></div>
-  <div class="pill" id="status"><i></i><span id="statusText">Starting</span></div>
+  <div class="steps" id="stepper"><span data-s="1">Reference</span><span data-s="2">Sounds</span><span data-s="3">Direction</span><span data-s="4">Build</span></div>
 </div>
 
 <div class="wrap">
@@ -270,7 +270,7 @@
   </section>
 
 </div>
-<footer>© 2026 Harel Eliyahu · FLOW</footer>
+<footer>© 2026 Harel Eliyahu · FLOW <span class="pill" id="status"> · <span id="statusText">Starting</span></span></footer>
 
 <script>
 const S = { step:1, ref:null, refPath:null, pack:null, packPath:null, style:'house', target:'ableton', out:null, len:270, licensed:false, lastOpts:null };
@@ -280,7 +280,8 @@ const fmt = sec => `${Math.floor(sec/60)}:${String(Math.round(sec%60)).padStart(
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
 function show(step){ S.step=step; for(const i of [1,2,3,4]){ const el=$('s'+i); if(i!==step){ el.classList.remove('in'); el.classList.add('hidden'); } }
   const el=$('s'+step); el.classList.remove('hidden'); requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('in')));
-  document.querySelectorAll('#stepper span').forEach(sp=>{ const n=+sp.dataset.s; sp.className = n<step?'done':(n===step?'cur':''); }); window.scrollTo(0,0); }
+  document.querySelectorAll('#stepper span').forEach(sp=>{ const n=+sp.dataset.s; sp.className = n<step?'done':(n===step?'cur':''); });
+  document.querySelectorAll('#rail i').forEach((seg,i)=>seg.classList.toggle('on', i<step)); window.scrollTo(0,0); }
 function alertBox(el, msg, kind){ if(!msg){ el.classList.add('hidden'); return; } el.className = 'alert' + (kind?' '+kind:''); el.textContent = msg; }
 function tiles(el, items, animate){ el.innerHTML = items.map(([v,l],i)=>`<div class="tile" data-rv style="--i:${i}"><div class="v" data-v="${String(v).replace(/"/g,'')}">${animate && /^\d+$/.test(String(v)) ? '0' : v}</div><div class="l">${l}</div></div>`).join('');
   if(animate) el.querySelectorAll('.v').forEach(n=>{ const target=n.dataset.v; if(!/^\d+$/.test(target)) return; const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(+target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }); }

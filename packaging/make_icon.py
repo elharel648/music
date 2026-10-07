@@ -25,28 +25,29 @@ def png(rgba: np.ndarray) -> bytes:
 
 
 def render(size: int) -> np.ndarray:
+    """Flat, sharp mark: five black bars on a white rounded square. No gradient, no glow."""
     img = np.zeros((size, size, 4), dtype=np.uint8)
     yy, xx = np.mgrid[0:size, 0:size]
-    r = size * 0.22
+    r = size * 0.225
     cx = cy = size / 2
-    half = size / 2 - size * 0.04
+    half = size / 2 - size * 0.05
     dx = np.maximum(np.abs(xx - cx) - (half - r), 0)
     dy = np.maximum(np.abs(yy - cy) - (half - r), 0)
     inside = (dx ** 2 + dy ** 2) <= r ** 2
-    # vertical gradient lavender
-    t = (yy / size)[..., None]
-    top, bot = np.array([0x73, 0x72, 0xE8]), np.array([0x5C, 0x5B, 0xE0])
-    col = (top * (1 - t) + bot * t).astype(np.uint8)
-    img[inside, :3] = col[inside]
+    img[inside, :3] = 255
     img[inside, 3] = 255
-    # three bars, heights like a structure strip
-    bars = [(0.24, 0.36), (0.42, 0.58), (0.60, 0.80)]
-    base = size * 0.78
-    for (x0, x1), hgt in zip(bars, (0.28, 0.42, 0.56)):
-        y0 = base - size * hgt
-        m = (xx >= size * x0) & (xx <= size * x1) & (yy >= y0) & (yy <= base)
-        img[m, :3] = 255
+    # five bars, bottom-aligned, heights like a structure strip
+    heights = (0.20, 0.32, 0.44, 0.26, 0.52)
+    w, gap = size * 0.085, size * 0.045
+    total = 5 * w + 4 * gap
+    x = cx - total / 2
+    base = size * 0.76
+    for h in heights:
+        y0 = base - size * h
+        m = (xx >= x) & (xx < x + w) & (yy >= y0) & (yy <= base) & inside
+        img[m, :3] = 0x12
         img[m, 3] = 255
+        x += w + gap
     return img
 
 
