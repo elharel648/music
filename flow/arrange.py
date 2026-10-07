@@ -186,6 +186,20 @@ def seconds(bars: float, bpm: float) -> float:
     return bars * 240.0 / bpm
 
 
+def plan_view(plan: dict) -> dict:
+    """Everything the UI needs to draw the arrangement: sections and one record per track, in plan order.
+    `layers[i]` is plan['tracks'][i], so a '@track:i' progress event maps straight onto it."""
+    layers = []
+    for i, t in enumerate(plan.get("tracks", [])):
+        layers.append({"i": i, "name": t["name"].split(" · ")[0], "role": t["role"],
+                       "spans": [[int(a), int(b)] for a, b in t.get("spans", [])],
+                       "hits": [float(h) for h in t.get("hits", [])],
+                       "sweeps": [int(b) for b, _p in t.get("sweeps", [])], "sweep_bars": int(t.get("sweep_bars") or 8)})
+    return {"bars": int(plan.get("bars") or 0), "bpm": float(plan.get("bpm") or 120),
+            "sections": [{"label": s["label"], "start": s["start"], "end": s["end"], "bars": s["bars"]} for s in plan.get("sections", [])],
+            "layers": layers, "rows": describe_rows(plan), "steps": describe(plan), "placeholders": plan.get("placeholders", [])}
+
+
 def describe_rows(plan: dict) -> list[dict]:
     """Structured build steps: one row per section with the layers present at its first bar."""
     rows = []

@@ -127,3 +127,15 @@ def test_finish_options_shape():
     from flow import finish
     keys = {k for k, _, _ in finish.OPTIONS}
     assert finish.DEFAULT_ON <= keys and "transitions" in keys
+
+
+def test_plan_view_shape():
+    ref = _fake_ref()
+    kit = {"kick": {"path": "x", "name": "Kick.wav", "duration": 0.4, "is_loop": False}}
+    loops = {"kick": {"path": "k.wav", "bars": 4, "source": "Kick.wav"}}
+    plan = arrange.build_plan(ref, kit, loops)
+    v = arrange.plan_view(plan)
+    assert v["bars"] == 72 and v["layers"][0]["i"] == 0 and v["layers"][0]["role"] == "kick"
+    assert all(isinstance(a, int) and isinstance(b, int) for a, b in v["layers"][0]["spans"])
+    import json
+    json.dumps(v)  # must be serializable for the UI

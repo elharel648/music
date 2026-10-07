@@ -211,6 +211,7 @@ class Live:
                 n += 1
                 tick(f"{t['name']}: hit at bar {hb}")
             report["tracks"].append({"index": ti, "name": t["name"], "clips": n})
+            prog(f"@track:{i}", min(0.98, done / max(total_steps, 1)))
         # sidechain / effects
         sc = plan.get("sidechain")
         if sc:

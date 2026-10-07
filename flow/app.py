@@ -12,23 +12,6 @@ import webview
 from . import __version__, PRODUCT, analysis, pack as packmod, plugins, license as lic, cli as flowcli
 
 
-def _density(plan: dict) -> list[float]:
-    """How many layers play in each bar, 0..1, for the energy curve on the result screen."""
-    bars = int(plan.get("bars") or 0)
-    if not bars:
-        return []
-    counts = [0.0] * bars
-    for t in plan.get("tracks", []):
-        for s, e in t.get("spans", []):
-            for b in range(max(1, int(s)), min(bars, int(e) - 1) + 1):
-                counts[b - 1] += 1.0
-        for b, _p in t.get("sweeps", []):
-            for k in range(int(b), min(bars, int(b) + (t.get("sweep_bars") or 8) - 1) + 1):
-                counts[k - 1] += 0.6
-    top = max(counts) or 1.0
-    return [round(c / top, 3) for c in counts]
-
-
 def _ui_path() -> str:
     base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
     for cand in (os.path.join(base, "flow", "ui", "index.html"), os.path.join(base, "ui", "index.html")):
@@ -46,6 +29,10 @@ class Api:
     def _emit(self, msg: str, pct: float):
         if self.window:
             self.window.evaluate_js(f"window.flowProgress({json.dumps(msg)}, {float(pct)})")
+
+    def _emit_plan(self, view: dict):
+        if self.window:
+            self.window.evaluate_js(f"window.flowPlan({json.dumps(view, default=str)})")
 
     # ---- license
     def status(self):
@@ -205,17 +192,12 @@ class Api:
                     opts["reference"], opts["pack"], flowcli.parse_length(opts.get("length") or None) if isinstance(opts.get("length"), str) else opts.get("length"),
                     opts.get("target", "stems"), opts.get("out") or None, opts.get("style", "house"), opts.get("bpm") or None,
                     opts.get("synth") or None, opts.get("sidechain") or None, bool(opts.get("force")), progress=self._emit,
-                    work_dir=opts.get("work_dir") or None, finish_opts=set(fin) if isinstance(fin, list) else None)
+                    work_dir=opts.get("work_dir") or None, finish_opts=set(fin) if isinstance(fin, list) else None,
+                    on_plan=self._emit_plan)
                 res.pop("reference", None)
                 plan = res.get("plan", {})
                 from . import arrange
-                summary = {"bars": plan.get("bars"), "bpm": plan.get("bpm"), "tracks": len(plan.get("tracks", [])),
-                           "sections": [{"label": s["label"], "start": s["start"], "end": s["end"]} for s in plan.get("sections", [])],
-                           "steps": arrange.describe(plan), "rows": arrange.describe_rows(plan), "placeholders": plan.get("placeholders", []),
-                           "layers": [{"name": t["name"].split(" · ")[0], "role": t["role"], "spans": t.get("spans", []),
-                                       "hits": t.get("hits", []), "sweeps": [b for b, _p in t.get("sweeps", [])]} for t in plan.get("tracks", [])],
-                           "density": _density(plan),
-                           "export": res.get("export"), "ableton": res.get("ableton"), "kit": res.get("kit")}
+                summary = {**arrange.plan_view(plan), "export": res.get("export"), "ableton": res.get("ableton"), "kit": res.get("kit")}
                 self.window.evaluate_js(f"window.flowDone({json.dumps(summary, default=str)})")
             except BaseException as e:  # SystemExit from license too
                 tb = traceback.format_exc(limit=2)

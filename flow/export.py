@@ -59,6 +59,7 @@ def render_stems(plan: dict, out_dir: str, sr: int = 48000, progress=None, tail_
         written.append(path)
         if progress:
             progress(f"Stem {i + 1}/{len(tracks)}: {t['name']}", (i + 1) / len(tracks))
+            progress(f"@track:{i}", (i + 1) / len(tracks))
     return written
 
 

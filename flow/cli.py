@@ -25,10 +25,10 @@ def parse_length(s) -> float | None:
 
 def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, out: str | None, style: str = "house",
               bpm: float | None = None, midi_synth: str | None = None, sidechain: str | None = None, force: bool = False,
-              progress=None, work_dir: str | None = None, finish_opts: set[str] | None = None) -> dict:
+              progress=None, work_dir: str | None = None, finish_opts: set[str] | None = None, on_plan=None) -> dict:
     from . import finish as finishmod, transitions
     finish_opts = set(finish_opts) if finish_opts is not None else set(finishmod.DEFAULT_ON)
-    prog = progress or (lambda m, p: print(f"[{p * 100:5.1f}%] {m}"))
+    prog = progress or (lambda m, p: None if m.startswith("@") else print(f"[{p * 100:5.1f}%] {m}"))
     ok, st = lic.can_build()
     if not ok:
         raise SystemExit(f"License: {st.get('reason')}")
@@ -64,6 +64,8 @@ def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, o
         prog(f"Transition sweeps rendered: {n_sw}", 0.39)
     plan["finish"] = sorted(finish_opts)
     prog(f"Plan: {plan['bars']} bars, {len(plan['tracks'])} tracks", 0.4)
+    if on_plan:
+        on_plan(arrange.plan_view(plan))
     result = {"reference": {k: v for k, v in ref.items() if k != "bar_features"}, "plan": plan, "kit": {k: v["name"] for k, v in kit.items()}}
     if target == "ableton":
         from .ableton_bridge import Live
