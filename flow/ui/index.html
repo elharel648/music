@@ -37,11 +37,14 @@
   .well .name { font-size:15px; font-weight:600; }
   .well .meta { font-size:12px; color:var(--sec); word-break:break-all; margin-top:2px; }
   .well .body { flex:1; min-width:0; }
-  .empty { padding:22px 22px; display:flex; align-items:center; gap:16px; }
-  .empty .ic { display:none; }
-  .empty .body { flex:1; min-width:0; }
-  .empty .t { font-size:15px; font-weight:600; }
-  .empty .s { font-size:12.5px; color:var(--sec); margin-top:3px; }
+  .empty { padding:56px 32px 52px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:0; }
+  .empty .mark { height:30px; display:flex; align-items:flex-end; gap:5px; margin-bottom:22px; }
+  .empty .mark i { display:block; width:6px; background:var(--ink); border-radius:1px; }
+  .empty .grid { display:grid; grid-template-columns:repeat(3,7px); gap:5px; margin-bottom:22px; }
+  .empty .grid i { display:block; width:7px; height:7px; background:var(--ink); border-radius:1.5px; }
+  .empty .grid i.o { background:#D9D8D3; }
+  .empty .t { font-size:19px; font-weight:600; letter-spacing:-.015em; }
+  .empty .s { font-size:13px; color:var(--sec); margin-top:6px; margin-bottom:22px; }
   .tiles { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
   .tile { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
   .tile .v { font-size:22px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
@@ -166,8 +169,9 @@
     </div>
     <div class="card" id="refCard" data-rv style="--i:2">
       <div class="empty" id="refEmpty">
-        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
-        <div class="body"><div class="t">No reference track yet</div><div class="s">WAV, AIFF, MP3 or FLAC. One track is enough.</div></div>
+        <div class="mark" aria-hidden="true"><i style="height:9px"></i><i style="height:15px"></i><i style="height:22px"></i><i style="height:12px"></i><i style="height:30px"></i></div>
+        <div class="t">Choose a reference track</div>
+        <div class="s">WAV, AIFF, MP3 or FLAC. One track is enough.</div>
         <button class="btn" id="pickRef">Choose a track</button>
       </div>
       <div class="well hidden" id="refWell">
@@ -194,8 +198,9 @@
     <div data-rv style="--i:0"><div class="eyebrow">STEP 2 OF 4</div><h1>Your sounds</h1><p class="lead">Choose the pack's top folder, or Cmd-click several folders. A messy folder is fine: FLOW reads every file and works out what it is.</p></div>
     <div class="card" id="packCard" data-rv style="--i:1">
       <div class="empty" id="packEmpty">
-        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
-        <div class="body"><div class="t">No sounds yet</div><div class="s">Drums, loops, bass and synth shots, FX. Loops are used only when their BPM matches.</div></div>
+        <div class="grid" aria-hidden="true"><i></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i class="o"></i><i></i><i></i></div>
+        <div class="t">Choose your sounds</div>
+        <div class="s">Drums, loops, bass and synth shots, FX. The pack's top folder, or several folders at once.</div>
         <button class="btn" id="pickPack">Choose folders</button>
       </div>
       <div class="well hidden" id="packWell">
