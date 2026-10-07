@@ -12,3 +12,4 @@ keys/
 FLOW loops/
 FLOW export/
 build_*.log
+.claude/

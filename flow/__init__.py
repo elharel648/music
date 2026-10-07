@@ -2,6 +2,6 @@
 
 Copyright (c) 2026 Harel Eliyahu. All rights reserved. Proprietary software; see LICENSE.
 """
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 PRODUCT = "FLOW"
 COPYRIGHT = "© 2026 Harel Eliyahu. All rights reserved."

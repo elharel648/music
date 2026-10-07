@@ -41,6 +41,14 @@ def test_scale_caps_tension_sections():
 def test_target_bars():
     assert arrange.target_bars(None, 120, 72) == 72
     assert arrange.target_bars(6 * 60 + 30, 128, 72) == 208  # 390 s at 128 BPM ≈ 208 bars
+    assert arrange.target_bars(30, 120, 72) == 64             # never under two minutes
+    assert arrange.target_bars(None, 120, 20) == 64
+
+
+def test_parse_length():
+    from flow.cli import parse_length
+    assert parse_length("6:30") == 390 and parse_length("3") == 180 and parse_length("3.5") == 210
+    assert parse_length("390") == 390 and parse_length(270) == 270 and parse_length("") is None
 
 
 def test_build_plan_kick_drops_before_break(tmp_path):

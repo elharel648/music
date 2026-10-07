@@ -1,6 +1,6 @@
 [project]
 name = "flow-producer"
-version = "0.1.2"
+version = "0.2.0"
 description = "FLOW — AI Producer Layer: reference in, your sounds in, an editable arrangement out."
 readme = "README.md"
 requires-python = ">=3.11"

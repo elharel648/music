@@ -36,11 +36,15 @@ ONESHOT_ROLES = {"kick", "clap", "ohat", "chat", "tom", "tom_b", "tom_c", "perc"
 MELODIC = {"bass", "synth"}
 
 
+MIN_SECONDS = 120.0  # a FLOW track is never shorter than two minutes
+
+
 def target_bars(length_seconds: float | None, bpm: float, ref_bars: int) -> int:
+    floor = int(round(MIN_SECONDS * bpm / 240.0 / 8.0)) * 8
     if not length_seconds:
-        return ref_bars
+        return max(ref_bars, floor)
     bars = length_seconds * bpm / 240.0
-    return max(16, int(round(bars / 8.0)) * 8)
+    return max(floor, int(round(bars / 8.0)) * 8)
 
 
 CAPS = {"Build": 16, "Breakdown": 32}  # tension sections do not grow with the track; drops, intros and outros do

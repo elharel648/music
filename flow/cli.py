@@ -9,13 +9,18 @@ import tempfile
 from . import __version__, analysis, pack as packmod, patterns, arrange, export, plugins, license as lic
 
 
-def parse_length(s: str | None) -> float | None:
-    if not s:
+def parse_length(s) -> float | None:
+    """'6:30' -> 390 s · '6' or '6.5' -> minutes (small numbers are minutes) · '390' -> seconds · numbers pass through."""
+    if s is None or s == "":
         return None
+    if isinstance(s, (int, float)):
+        return float(s)
+    s = str(s).strip().replace(",", ".")
     if ":" in s:
         m, sec = s.split(":", 1)
-        return int(m) * 60 + float(sec)
-    return float(s)
+        return int(m) * 60 + float(sec or 0)
+    v = float(s)
+    return v * 60 if v <= 20 else v
 
 
 def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, out: str | None, style: str = "house",
