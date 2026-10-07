@@ -37,14 +37,15 @@
   .well .name { font-size:15px; font-weight:600; }
   .well .meta { font-size:12px; color:var(--sec); word-break:break-all; margin-top:2px; }
   .well .body { flex:1; min-width:0; }
-  .empty { padding:48px 24px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:14px; }
-  .empty .ic { width:52px; height:52px; border-radius:16px; }
-  .empty .t { font-size:17px; font-weight:600; }
-  .empty .s { font-size:13px; color:var(--sec); max-width:420px; }
+  .empty { padding:22px 22px; display:flex; align-items:center; gap:16px; }
+  .empty .ic { display:none; }
+  .empty .body { flex:1; min-width:0; }
+  .empty .t { font-size:15px; font-weight:600; }
+  .empty .s { font-size:12.5px; color:var(--sec); margin-top:3px; }
   .tiles { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
   .tile { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
   .tile .v { font-size:22px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
-  .tile .l { font-size:10.5px; font-weight:600; letter-spacing:.14em; color:var(--sec); margin-top:4px; }
+  .tile .l { font-size:11px; font-weight:500; letter-spacing:.06em; color:var(--sec); margin-top:4px; }
   .section { display:flex; flex-direction:column; gap:12px; }
   .section h2 { margin:0; font-size:11px; font-weight:600; letter-spacing:.14em; color:var(--sec); }
   .strip { display:flex; gap:6px; align-items:flex-end; height:100px; }
@@ -70,20 +71,20 @@
   .readout { font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; min-width:150px; text-align:right; }
   .readout small { color:var(--sec); font-weight:500; margin-left:6px; }
   .presets { display:inline-flex; gap:6px; }
-  .presets button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:500; cursor:pointer; color:var(--ink); transition:all .18s var(--ease); }
+  .presets button { border:1px solid var(--line); background:#fff; border-radius:7px; padding:6px 10px; font-size:12px; font-weight:500; cursor:pointer; color:var(--ink); transition:all .18s var(--ease); }
   .presets button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
   select, input[type=text] { font-size:13.5px; font-weight:500; padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--ink); min-width:220px; }
-  .btn { display:inline-flex; align-items:center; gap:10px; height:44px; padding:0 20px; border-radius:999px; border:0; background:var(--ink); color:#fff; font-size:13px; font-weight:600; letter-spacing:.04em; cursor:pointer; transition:transform .18s var(--ease), box-shadow .18s var(--ease), opacity .18s; }
-  .btn:hover { transform:translateY(-1px); box-shadow:0 8px 20px rgba(20,20,30,.14); }
-  .btn:active { transform:translateY(0) scale(.98); box-shadow:none; }
-  .btn.acc { height:52px; padding:0 30px; background:linear-gradient(180deg,#6A69E6,#5C5BE0); box-shadow:0 12px 30px rgba(92,91,224,.26); font-size:14px; }
-  .btn.acc:hover { box-shadow:0 16px 36px rgba(92,91,224,.34); }
+  .btn { display:inline-flex; align-items:center; gap:10px; height:40px; padding:0 18px; border-radius:9px; border:0; background:var(--ink); color:#fff; font-size:13.5px; font-weight:600; letter-spacing:0; cursor:pointer; transition:transform .18s var(--ease), box-shadow .18s var(--ease), opacity .18s, background .18s; }
+  .btn:hover { background:#000; box-shadow:0 6px 16px rgba(20,20,30,.12); }
+  .btn:active { transform:scale(.985); box-shadow:none; }
+  .btn.acc { height:46px; padding:0 26px; background:var(--acc); box-shadow:0 10px 26px rgba(92,91,224,.24); font-size:14px; }
+  .btn.acc:hover { background:var(--acc-ink); box-shadow:0 14px 32px rgba(92,91,224,.3); }
   .btn.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
-  .btn.ghost:hover { box-shadow:0 6px 16px rgba(20,20,30,.08); }
-  .btn.sm { height:36px; padding:0 14px; font-size:12px; }
+  .btn.ghost:hover { background:#fff; border-color:rgba(20,20,30,.2); box-shadow:none; }
+  .btn.sm { height:34px; padding:0 13px; font-size:12.5px; }
   .btn:disabled { opacity:.4; cursor:default; box-shadow:none; transform:none; }
   .chips { display:flex; gap:8px; flex-wrap:wrap; }
-  .chip { padding:6px 11px; border-radius:999px; background:#fff; border:1px solid var(--line); font-size:12px; font-weight:500; color:var(--ink); }
+  .chip { padding:6px 10px; border-radius:7px; background:#fff; border:1px solid var(--line); font-size:12px; font-weight:500; color:var(--ink); }
   .chip.dark { background:var(--ink); color:#fff; border-color:var(--ink); }
   .alert { display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-radius:12px; background:#FDF3F1; border:1px solid #F1CFC8; color:var(--err); font-size:13px; font-weight:500; line-height:1.5; }
   .alert.ok { background:#EEF8F2; border-color:#CBE7D6; color:var(--ok); }
@@ -150,7 +151,7 @@
 
   <section class="view hidden" id="gate" style="max-width:560px">
     <div><div class="eyebrow">LICENSE</div><h1>Your trial has ended.</h1><p class="lead">Enter the license key you received after purchase. Keys are verified on this computer; nothing is sent anywhere.</p></div>
-    <div class="card" style="padding:18px 20px;display:flex;gap:10px;align-items:center"><input type="text" id="keyInput" placeholder="FLOW-…" style="flex:1;min-width:0"><button class="btn" id="activateBtn">ACTIVATE</button></div>
+    <div class="card" style="padding:18px 20px;display:flex;gap:10px;align-items:center"><input type="text" id="keyInput" placeholder="FLOW-…" style="flex:1;min-width:0"><button class="btn" id="activateBtn">Activate</button></div>
     <div id="gateMsg" class="alert hidden"></div>
     <div class="tiny" id="gateMeta"></div>
   </section>
@@ -161,19 +162,18 @@
     <div class="card resume hidden" id="resumeCard" data-rv style="--i:1">
       <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9"/><path d="M3 3v6h6"/></svg></div>
       <div class="body"><div class="t">Pick up where you left off</div><div class="m" id="resumeMeta"></div></div>
-      <button class="btn ghost sm" id="resumeNo">START FRESH</button><button class="btn sm" id="resumeYes">RESUME</button>
+      <button class="btn ghost sm" id="resumeNo">Start fresh</button><button class="btn sm" id="resumeYes">Resume</button>
     </div>
     <div class="card" id="refCard" data-rv style="--i:2">
       <div class="empty" id="refEmpty">
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
-        <div class="t">Choose a reference track</div>
-        <div class="s">WAV, AIFF, MP3 or FLAC. One track is enough.</div>
-        <button class="btn" id="pickRef">CHOOSE A TRACK</button>
+        <div class="body"><div class="t">No reference track yet</div><div class="s">WAV, AIFF, MP3 or FLAC. One track is enough.</div></div>
+        <button class="btn" id="pickRef">Choose a track</button>
       </div>
       <div class="well hidden" id="refWell">
         <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
         <div class="body"><div class="name" id="refName"></div><div class="meta" id="refPath"></div></div>
-        <button class="btn ghost sm" id="pickRef2">CHANGE</button>
+        <button class="btn ghost sm" id="pickRef2">Change</button>
       </div>
     </div>
     <div id="refMsg" class="alert hidden"></div>
@@ -183,10 +183,10 @@
       <div class="card" style="padding:20px 22px 16px"><div class="strip" id="refStrip"></div><div class="labels" id="refLabels" style="margin-top:10px"></div></div>
       <div class="rows card">
         <div class="row"><div><div class="k">Tempo</div><div class="h">Detected from the audio. Override only if the grid looks wrong.</div></div>
-          <div class="c"><input type="text" id="bpmIn" placeholder="auto" style="min-width:110px;width:110px;text-align:right"><button class="btn ghost sm" id="analyzeBtn">RE-ANALYZE</button></div></div>
+          <div class="c"><input type="text" id="bpmIn" placeholder="auto" style="min-width:110px;width:110px;text-align:right"><button class="btn ghost sm" id="analyzeBtn">Re-analyze</button></div></div>
       </div>
     </div>
-    <div class="foot"><div class="spacer"></div><button class="btn" id="to2" disabled>CONTINUE</button></div>
+    <div class="foot"><div class="spacer"></div><button class="btn" id="to2" disabled>Continue</button></div>
   </section>
 
   <!-- STEP 2 -->
@@ -195,19 +195,18 @@
     <div class="card" id="packCard" data-rv style="--i:1">
       <div class="empty" id="packEmpty">
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
-        <div class="t">Choose your sample folder</div>
-        <div class="s">Drums, loops, bass and synth shots, FX. Loops are used only when their BPM matches.</div>
-        <button class="btn" id="pickPack">CHOOSE FOLDER(S)</button>
+        <div class="body"><div class="t">No sounds yet</div><div class="s">Drums, loops, bass and synth shots, FX. Loops are used only when their BPM matches.</div></div>
+        <button class="btn" id="pickPack">Choose folders</button>
       </div>
       <div class="well hidden" id="packWell">
         <div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C5BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
         <div class="body"><div class="name" id="packName"></div><div class="meta" id="packPath"></div></div>
-        <button class="btn ghost sm" id="pickPack2">CHANGE</button>
+        <button class="btn ghost sm" id="pickPack2">Change</button>
       </div>
     </div>
     <div id="packMsg" class="alert hidden"></div>
     <div class="section hidden" id="packResult"><h2>FOUND</h2><div class="chips" id="packChips"></div></div>
-    <div class="foot"><button class="btn ghost" id="back1">BACK</button><div class="spacer"></div><button class="btn" id="to3" disabled>CONTINUE</button></div>
+    <div class="foot"><button class="btn ghost" id="back1">Back</button><div class="spacer"></div><button class="btn" id="to3" disabled>Continue</button></div>
   </section>
 
   <!-- STEP 3 -->
@@ -219,9 +218,9 @@
       <div class="row"><div><div class="k">Length</div><div class="h">Never shorter than 2:00. Sections scale with the track; builds and breakdowns stay tight.</div></div>
         <div class="c"><div class="presets" id="lenPresets"><button data-v="180">3:00</button><button data-v="270">4:30</button><button data-v="360">6:00</button><button data-v="450">7:30</button></div><input type="range" id="lenRange" min="120" max="600" step="15" value="270"><div class="readout" id="lenOut">4:30</div></div></div>
       <div class="row"><div><div class="k">Build in</div><div class="h" id="targetHint"></div></div>
-        <div class="c"><button class="btn ghost sm hidden" id="installBridge">INSTALL FLOW BRIDGE</button><div class="seg" id="targetSeg"><button data-v="ableton" class="on">Ableton Live</button><button data-v="stems">Stems + MIDI</button></div></div></div>
+        <div class="c"><button class="btn ghost sm hidden" id="installBridge">Install FLOW Bridge</button><div class="seg" id="targetSeg"><button data-v="ableton" class="on">Ableton Live</button><button data-v="stems">Stems + MIDI</button></div></div></div>
       <div class="row hidden" id="outRow"><div><div class="k">Output folder</div><div class="h">Stems, a MIDI file with markers, and the Blueprint report.</div></div>
-        <div class="c"><span class="tiny" id="outPath">Next to the reference</span><button class="btn ghost sm" id="pickOut">CHOOSE</button></div></div>
+        <div class="c"><span class="tiny" id="outPath">Next to the reference</span><button class="btn ghost sm" id="pickOut">Choose</button></div></div>
     </div>
     <div class="section" data-rv style="--i:2">
       <h2>YOUR PLUG-INS · ABLETON ONLY</h2>
@@ -229,7 +228,7 @@
         <div class="row"><div><div class="k">Bass and lead</div><div class="h">Drive your own synth as MIDI. Pick a preset in Live afterwards.</div></div>
           <div class="c"><select id="synthSel"><option value="">Sample shots (default)</option></select></div></div>
         <div class="row"><div><div class="k">Sidechain</div><div class="h">Loaded on every track except the kick.</div></div>
-          <div class="c"><select id="scSel"><option value="">None</option></select><button class="btn ghost sm" id="scanPlug">SCAN</button></div></div>
+          <div class="c"><select id="scSel"><option value="">None</option></select><button class="btn ghost sm" id="scanPlug">Scan</button></div></div>
       </div>
       <div class="tiny" id="plugMsg"></div>
     </div>
@@ -238,7 +237,7 @@
       <div class="rows card" id="finishCard"></div>
       <div class="tiny">Done with Ableton's own devices, on every track FLOW builds. Turn off anything you would rather do by hand. For Stems + MIDI only the transition sweeps apply.</div>
     </div>
-    <div class="foot"><button class="btn ghost" id="back2">BACK</button><div class="spacer"></div><button class="btn acc" id="buildBtn">BUILD MY TRACK</button></div>
+    <div class="foot"><button class="btn ghost" id="back2">Back</button><div class="spacer"></div><button class="btn acc" id="buildBtn">Build my track</button></div>
   </section>
 
   <!-- STEP 4 -->
@@ -257,7 +256,7 @@
     <div class="card stopbox hidden" id="stopCard">
       <div class="t" id="stopTitle">The build stopped</div>
       <div class="m" id="stopMsg"></div>
-      <div class="foot" style="padding-top:4px"><button class="btn" id="retryBtn">CHECK AGAIN AND RETRY</button><button class="btn ghost" id="again2">BUILD ANOTHER</button></div>
+      <div class="foot" style="padding-top:4px"><button class="btn" id="retryBtn">Check again and retry</button><button class="btn ghost" id="again2">Build another</button></div>
     </div>
     <div id="doneWarn" class="alert warn hidden"></div>
     <div class="section hidden" id="doneCard">
@@ -266,7 +265,7 @@
       <div class="card" style="padding:20px 22px"><h2 style="margin:0 0 12px;font-size:11px;letter-spacing:.14em;color:var(--sec);font-weight:600">BUILD STEPS</h2><ol class="list" id="doneSteps"></ol></div>
       <div class="tiny" id="donePlace"></div>
     </div>
-    <div class="foot"><button class="btn ghost hidden" id="again">BUILD ANOTHER</button><button class="btn ghost hidden" id="openOut">OPEN FOLDER</button><div class="spacer"></div><span class="tiny" id="saveNote"></span></div>
+    <div class="foot"><button class="btn ghost hidden" id="again">Build another</button><button class="btn ghost hidden" id="openOut">Open folder</button><div class="spacer"></div><span class="tiny" id="saveNote"></span></div>
   </section>
 
 </div>
