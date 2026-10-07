@@ -194,7 +194,7 @@ class Api:
                 from . import arrange
                 summary = {"bars": plan.get("bars"), "bpm": plan.get("bpm"), "tracks": len(plan.get("tracks", [])),
                            "sections": [{"label": s["label"], "start": s["start"], "end": s["end"]} for s in plan.get("sections", [])],
-                           "steps": arrange.describe(plan), "placeholders": plan.get("placeholders", []),
+                           "steps": arrange.describe(plan), "rows": arrange.describe_rows(plan), "placeholders": plan.get("placeholders", []),
                            "export": res.get("export"), "ableton": res.get("ableton"), "kit": res.get("kit")}
                 self.window.evaluate_js(f"window.flowDone({json.dumps(summary, default=str)})")
             except BaseException as e:  # SystemExit from license too

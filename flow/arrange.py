@@ -186,6 +186,19 @@ def seconds(bars: float, bpm: float) -> float:
     return bars * 240.0 / bpm
 
 
+def describe_rows(plan: dict) -> list[dict]:
+    """Structured build steps: one row per section with the layers present at its first bar."""
+    rows = []
+    prev: set[str] = set()
+    for s in plan["sections"]:
+        here = [t["name"].split(" · ")[0] for t in plan["tracks"] if any(a <= s["start"] < b for a, b in t.get("spans", []))]
+        cur = set(here)
+        rows.append({"label": s["label"], "start": s["start"], "end": s["end"], "bars": s["bars"], "layers": here,
+                     "enter": [h for h in here if h not in prev], "leave": sorted(prev - cur)})
+        prev = cur
+    return rows
+
+
 def describe(plan: dict) -> list[str]:
     """Human-readable build steps (what enters where), for the report and the UI."""
     lines = []
