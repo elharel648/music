@@ -26,7 +26,7 @@
   @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
 
   /* ---------- the device ---------- */
-  .dev { position:absolute; inset:10px; border-radius:16px; background:var(--dev); box-shadow:var(--shadow); border:1px solid var(--line); display:grid; grid-template-rows:50px minmax(190px,1fr) minmax(330px,46%) 28px; overflow:hidden; transition:background .35s, border-color .35s; }
+  .dev { position:absolute; inset:10px; margin:auto; max-width:1480px; max-height:940px; border-radius:16px; background:var(--dev); box-shadow:var(--shadow); border:1px solid var(--line); display:grid; grid-template-rows:50px minmax(190px,1fr) clamp(312px,41%,372px) 28px; overflow:hidden; transition:background .35s, border-color .35s; }
   .bar { display:flex; align-items:center; gap:14px; padding:0 16px 0 18px; }
   .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.24em; font-size:12px; }
   .brand svg rect { fill:var(--ink); transform-origin:bottom; animation:bars var(--beat) ease-in-out infinite; animation-delay:calc(var(--k) * var(--beat) / -5); }
@@ -166,9 +166,21 @@
   .led.work { background:var(--mc); box-shadow:0 0 8px var(--mc); animation:beat calc(var(--beat) / 2) ease-in-out infinite; }
   .led.err { background:var(--err); box-shadow:0 0 8px var(--err); animation:none; }
   @keyframes beat { 0%,100% { opacity:.55; box-shadow:0 0 3px var(--mc); } 18% { opacity:1; box-shadow:0 0 12px var(--mc); } }
+  .num { font:500 10px var(--mono); color:rgba(255,255,255,.32); letter-spacing:.06em; }
   .mn { font-size:10.5px; font-weight:700; letter-spacing:.2em; color:var(--mc); text-shadow:0 0 12px color-mix(in srgb, var(--mc) 60%, transparent); }
+  .frow2 { display:flex; align-items:center; gap:10px; min-height:34px; }
+  .fname { flex:1; min-width:0; }
+  .fname b { display:block; font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fname small { display:block; font:500 9.5px var(--mono); color:var(--mut); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.02em; }
+  .fname.empty b { color:var(--sec); font-weight:500; }
+  .sb.pri { background:var(--btn); color:var(--btn-ink); border-color:transparent; padding:0 13px; }
+  .sb.pri:hover { border-color:transparent; filter:brightness(1.12); }
+  .next { animation:nextring var(--beat) ease-out infinite; }
+  @keyframes nextring { 0% { box-shadow:0 0 0 0 color-mix(in srgb, var(--mc) 55%, transparent); } 100% { box-shadow:0 0 0 9px color-mix(in srgb, var(--mc) 0%, transparent); } }
+  .big button.next { animation:nextring var(--beat) ease-out infinite, none; }
+  .ro.big .v.dim, .ro.sm .v.dim { color:var(--mut); }
   .ms { margin-left:auto; font:500 10px var(--mono); color:rgba(255,255,255,.45); letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
-  .mb { flex:1; min-height:0; padding:12px 12px 12px; display:flex; flex-direction:column; gap:8px; }
+  .mb { flex:1; min-height:0; padding:10px 12px 12px; display:flex; flex-direction:column; gap:8px; }
   .pad { flex:1; min-height:0; border:1px solid var(--line); border-radius:10px; background:var(--mod2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; text-align:center; padding:12px; transition:border-color .2s, transform .25s var(--spring), background .2s; }
   .pad:hover { border-color:var(--mc); transform:translateY(-2px); }
   .pad:active { transform:scale(.985); }
@@ -176,7 +188,7 @@
   .pad .t { font-size:13px; font-weight:600; letter-spacing:-.01em; } .pad .s { font-size:10.5px; color:var(--sec); line-height:1.45; max-width:200px; }
   .ros { display:grid; grid-template-columns:1fr 1fr; gap:10px 8px; }
   .ro .v { font:500 30px var(--mono); letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
-  .ro.big .v { font-size:40px; }
+  .ro.big .v { font-size:36px; }
   .ro .l { font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.14em; text-transform:uppercase; margin-top:5px; }
   .ro.sm .v { font-size:17px; }
   .file { font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -190,47 +202,47 @@
   .in:focus { border-color:var(--mc); }
   .in::placeholder { color:var(--mut); }
   .leds { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px 8px; }
-  .rl { display:flex; align-items:center; gap:7px; font-size:10.5px; color:var(--mut); }
+  .rl { display:flex; align-items:center; gap:7px; font-size:10.5px; color:var(--mut); transition:color .3s; }
   .rl i { width:6px; height:6px; border-radius:50%; background:var(--led-off); flex:0 0 6px; opacity:.5; }
   .rl.on { color:var(--ink); } .rl.on i { background:var(--mc); box-shadow:0 0 7px var(--mc); opacity:1; }
   .msg { font:500 10.5px var(--mono); color:var(--sec); line-height:1.45; min-height:14px; }
   .msg.ok { color:var(--ok); } .msg.warn { color:var(--warn); } .msg.err { color:var(--err); }
-  .vrow { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:9px; border:1px solid var(--line); background:var(--mod2); }
+  .vrow { display:flex; align-items:center; gap:9px; padding:6px 8px 6px 10px; border-radius:9px; border:1px solid var(--line); background:var(--mod2); margin-top:auto; }
   .vrow svg { stroke:var(--sec); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:0 0 14px; }
   .vrow.has svg { stroke:var(--mc); }
   .vrow .body { flex:1; min-width:0; font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .vrow .body small { display:block; font:500 10px var(--mono); color:var(--mut); font-weight:500; margin-top:1px; white-space:normal; }
+  .vrow .body small { display:block; font:500 9.5px var(--mono); color:var(--mut); font-weight:500; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .vrow .x { background:none; border:0; padding:2px; color:var(--mut); display:flex; } .vrow .x:hover { color:var(--err); }
-  .sel { border-radius:10px; background:var(--ctrl); border:1px solid var(--line); padding:8px 6px 8px; }
+  .sel { border-radius:10px; background:var(--ctrl); border:1px solid var(--line); padding:6px 6px 7px; }
   .sel .row { display:flex; align-items:center; gap:4px; }
-  .sel .arr { width:26px; height:28px; border:0; background:transparent; color:var(--sec); display:flex; align-items:center; justify-content:center; border-radius:6px; transition:background .15s, color .15s; }
+  .sel .arr { width:26px; height:26px; border:0; background:transparent; color:var(--sec); display:flex; align-items:center; justify-content:center; border-radius:6px; transition:background .15s, color .15s; }
   .sel .arr:hover { background:var(--mod); color:var(--ink); }
   .sel .arr svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
   .sel .mid { flex:1; text-align:center; min-width:0; }
   .sel .mid .n { font-size:13px; font-weight:600; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sel .mid .g { font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.12em; text-transform:uppercase; margin-top:2px; }
   .sel .mid .g.off { color:var(--warn); }
-  .sel .dots { display:flex; justify-content:center; gap:5px; margin-top:8px; }
+  .sel .dots { display:flex; justify-content:center; gap:5px; margin-top:6px; }
   .sel .dots i { width:4px; height:4px; border-radius:50%; background:var(--tick); transition:background .2s, box-shadow .2s, transform .2s; }
   .sel .dots i.on { background:var(--mc); box-shadow:0 0 6px var(--mc); transform:scale(1.3); }
-  .knobwrap { display:flex; flex-direction:column; align-items:center; gap:4px; margin:0; }
-  .knob { position:relative; width:108px; height:108px; touch-action:none; cursor:ns-resize; outline:none; -webkit-user-select:none; user-select:none; }
+  .knobwrap { display:flex; flex-direction:column; align-items:center; gap:3px; margin:0; }
+  .knob { position:relative; width:100px; height:100px; touch-action:none; cursor:ns-resize; outline:none; -webkit-user-select:none; user-select:none; }
   .knob svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
   .knob .tk { stroke:var(--tick); stroke-width:1.6; stroke-linecap:round; transition:stroke .2s; } .knob .tk.lit { stroke:var(--mc); }
   .knob .arc { fill:none; stroke:var(--mc); stroke-width:2.4; stroke-linecap:round; filter:drop-shadow(0 0 5px color-mix(in srgb, var(--mc) 65%, transparent)); }
-  .knob .body { position:absolute; inset:18px; border-radius:50%; background:radial-gradient(circle at 32% 24%, var(--knob-a) 0%, var(--knob-b) 42%, var(--knob-c) 100%); box-shadow:0 12px 22px rgba(0,0,0,.22), 0 1px 0 rgba(255,255,255,.7) inset, 0 -5px 8px rgba(0,0,0,.08) inset, 0 0 0 1px rgba(0,0,0,.14); transition:transform .45s var(--ease); display:flex; align-items:center; justify-content:center; }
+  .knob .body { position:absolute; inset:17px; border-radius:50%; background:radial-gradient(circle at 32% 24%, var(--knob-a) 0%, var(--knob-b) 42%, var(--knob-c) 100%); box-shadow:0 12px 22px rgba(0,0,0,.22), 0 1px 0 rgba(255,255,255,.7) inset, 0 -5px 8px rgba(0,0,0,.08) inset, 0 0 0 1px rgba(0,0,0,.14); transition:transform .45s var(--ease); display:flex; align-items:center; justify-content:center; }
   :root[data-theme=dark] .knob .body { box-shadow:0 12px 22px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.14) inset, 0 -5px 8px rgba(0,0,0,.5) inset, 0 0 0 1px rgba(0,0,0,.7); }
   .knob.drag .body { transition:none; }
   .knob .ind { position:absolute; left:50%; top:5px; width:3px; height:12px; margin-left:-1.5px; border-radius:2px; background:var(--mc); box-shadow:0 0 8px var(--mc); }
-  .knob .kv { font:500 17px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .knob .kv { font:500 16px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
   .knob .kv b { display:block; font-size:9px; font-weight:500; letter-spacing:.14em; color:var(--mut); text-align:center; margin-top:2px; }
   .knobl { font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.14em; text-transform:uppercase; }
   .tg { display:flex; background:var(--ctrl); border:1px solid var(--line); border-radius:9px; padding:3px; }
-  .tg button { flex:1; border:0; background:transparent; height:26px; border-radius:6px; font-size:11px; font-weight:600; color:var(--sec); transition:all .2s var(--ease); }
+  .tg button { flex:1; border:0; background:transparent; height:24px; border-radius:6px; font-size:11px; font-weight:600; color:var(--sec); transition:all .2s var(--ease); }
   .tg button.on { background:var(--mod); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.14); }
   .hint { font:500 10px var(--mono); color:var(--mut); line-height:1.4; min-height:13px; }
   .hint.ok { color:var(--ok); } .hint.warn { color:var(--warn); } .hint.err { color:var(--err); }
-  .fbtn { height:30px; border-radius:8px; border:1px solid var(--line); background:var(--mod); font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:space-between; padding:0 10px; transition:border-color .2s; }
+  .fbtn { height:28px; border-radius:8px; border:1px solid var(--line); background:var(--mod); font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:space-between; padding:0 10px; transition:border-color .2s; }
   .fbtn:hover { border-color:var(--ink); } .fbtn.on { border-color:var(--mc); }
   .fbtn svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; }
   .bigwrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
@@ -292,35 +304,28 @@
 
   <section class="deck" id="deck">
     <div class="mod" data-m="ref" style="--mc:var(--c-ref)">
-      <div class="mh"><i class="led" id="ledRef"></i><span class="mn">REFERENCE</span><span class="ms" id="msRef">Empty</span></div>
+      <div class="mh"><i class="led" id="ledRef"></i><span class="num">01</span><span class="mn">REFERENCE</span><span class="ms" id="msRef">Empty</span></div>
       <div class="mb">
-        <button class="pad" id="pickRef"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M3 12h2l2-6 3 12 3-9 2 5 2-2h4"/></svg><div class="t">Choose a track</div><div class="s">The track whose world your song should belong in. WAV, AIFF, MP3 or FLAC.</div></button>
-        <div class="hidden" id="refLoaded" style="display:flex;flex-direction:column;gap:10px;flex:1;min-height:0">
-          <div class="file" id="refName"></div>
-          <div class="ro big"><div class="v" id="roBpm">—</div><div class="l" id="roBpmL">BPM</div></div>
-          <div class="ros"><div class="ro sm"><div class="v" id="roKey">—</div><div class="l">Key</div></div><div class="ro sm"><div class="v" id="roBars">—</div><div class="l">Bars</div></div><div class="ro sm"><div class="v" id="roLen">—</div><div class="l">Length</div></div><div class="ro sm"><div class="v" id="roSec">—</div><div class="l">Sections</div></div></div>
-          <div class="msg" id="refMsg"></div>
-          <div class="mrow"><input class="in" type="text" id="bpmIn" placeholder="auto" title="Tempo override"><button class="sb" id="analyzeBtn">Re-analyze</button><span style="flex:1"></span><button class="lk" id="pickRef2">Change</button></div>
-        </div>
+        <div class="frow2"><div class="fname empty" id="refName"><b>No track yet</b><small>WAV · AIFF · MP3 · FLAC</small></div><button class="sb pri" id="pickRef">Choose</button></div>
+        <div class="ro big"><div class="v dim" id="roBpm">—</div><div class="l" id="roBpmL">BPM</div></div>
+        <div class="ros"><div class="ro sm"><div class="v dim" id="roKey">—</div><div class="l">Key</div></div><div class="ro sm"><div class="v dim" id="roBars">—</div><div class="l">Bars</div></div><div class="ro sm"><div class="v dim" id="roLen">—</div><div class="l">Length</div></div><div class="ro sm"><div class="v dim" id="roSec">—</div><div class="l">Sections</div></div></div>
+        <div class="msg" id="refMsg">The track whose world your song should belong in.</div>
+        <div class="mrow hidden" id="refTools"><input class="in" type="text" id="bpmIn" placeholder="auto" title="Tempo override"><button class="sb" id="analyzeBtn">Re-analyze</button></div>
       </div>
     </div>
     <div class="mod" data-m="snd" style="--mc:var(--c-snd)">
-      <div class="mh"><i class="led" id="ledSnd"></i><span class="mn">SOUNDS</span><span class="ms" id="msSnd">Empty</span></div>
+      <div class="mh"><i class="led" id="ledSnd"></i><span class="num">02</span><span class="mn">SOUNDS</span><span class="ms" id="msSnd">Empty</span></div>
       <div class="mb">
-        <button class="pad" id="pickPack"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><div class="t">Choose folders</div><div class="s">Your sample pack. The top folder, or Cmd-click several. A messy folder is fine.</div></button>
-        <div class="hidden" id="packLoaded" style="display:flex;flex-direction:column;gap:10px;flex:1;min-height:0">
-          <div class="file" id="packName"></div>
-          <div class="ro big"><div class="v" id="roCount">—</div><div class="l">Sounds</div></div>
-          <div class="leds" id="roleLeds"></div>
-          <div class="msg" id="packMsg"></div>
-          <div class="mrow"><span style="flex:1"></span><button class="lk" id="pickPack2">Change</button></div>
-        </div>
-        <div class="vrow" id="vocalRow"><svg width="14" height="14" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal <small id="vocalMeta">Optional. An acapella or a chant, cut into phrases and placed where the style wants a voice.</small></div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="sb" id="pickVocal">Add</button></div>
+        <div class="frow2"><div class="fname empty" id="packName"><b>No sounds yet</b><small>The pack's top folder, or several at once</small></div><button class="sb pri" id="pickPack">Choose</button></div>
+        <div class="ro big"><div class="v dim" id="roCount">—</div><div class="l">Sounds</div></div>
+        <div class="leds" id="roleLeds"></div>
+        <div class="msg" id="packMsg">A messy folder is fine. FLOW reads every file.</div>
+        <div class="vrow" id="vocalRow"><svg width="14" height="14" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal · optional<small id="vocalMeta">An acapella or a chant, placed where the style wants a voice</small></div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="sb" id="pickVocal">Add</button></div>
       </div>
     </div>
     <div class="mod" data-m="dir" style="--mc:var(--c-dir)">
-      <div class="mh"><i class="led" id="ledDir"></i><span class="mn">DIRECTION</span><span class="ms" id="msDir">House · 4:30</span></div>
-      <div class="mb">
+      <div class="mh"><i class="led" id="ledDir"></i><span class="num">03</span><span class="mn">DIRECTION</span><span class="ms" id="msDir">House · 4:30</span></div>
+      <div class="mb" style="gap:6px">
         <div class="sel" id="styleSel"><div class="row"><button class="arr" id="stPrev"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="mid"><div class="n" id="stName">House</div><div class="g" id="stGroup">House · 120–128 BPM</div></div><button class="arr" id="stNext"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div><div class="dots" id="stDots"></div></div>
         <div class="knobwrap">
           <div class="knob" id="knob" tabindex="0" role="slider" aria-label="Length" aria-valuemin="120" aria-valuemax="600" aria-valuenow="270">
@@ -336,7 +341,7 @@
       </div>
     </div>
     <div class="mod" data-m="bld" style="--mc:var(--c-bld)">
-      <div class="mh"><i class="led" id="ledBld"></i><span class="mn">BUILD</span><span class="ms" id="msBld">Waiting</span></div>
+      <div class="mh"><i class="led" id="ledBld"></i><span class="num">04</span><span class="mn">BUILD</span><span class="ms" id="msBld">Waiting</span></div>
       <div class="mb">
         <div class="bigwrap">
           <div class="big" id="bigWrap"><svg viewBox="0 0 118 118"><circle class="ring" cx="59" cy="59" r="55"/><circle class="prog" id="prog" cx="59" cy="59" r="55"/></svg><button id="buildBtn" disabled>BUILD</button></div>
@@ -481,13 +486,13 @@ $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classL
 
 /* ---------- reference ---------- */
 let REFTL = null;
-function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('refName').innerHTML = `${n}<small>${S.refPath}</small>`; $('pickRef').classList.add('hidden'); $('refLoaded').classList.remove('hidden'); $('sess').innerHTML = `<b>${n}</b>`; }
+function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('refName').className='fname'; $('refName').innerHTML = `<b>${n}</b><small>${S.refPath}</small>`; $('pickRef').textContent='Change'; $('pickRef').classList.remove('pri'); $('refTools').classList.remove('hidden'); $('sess').innerHTML = `<b>${n}</b>`; }
 async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; setRefFile(); setActive('ref'); analyze(); }
-$('pickRef').onclick = pickRef; $('pickRef2').onclick = pickRef;
+$('pickRef').onclick = pickRef;
 async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=parseFloat($('bpmIn').value)||null;
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ setMod('ref','Error','err'); $('refMsg').className='msg err'; $('refMsg').textContent=r.error; return; }
   S.ref=r.ref; const k=r.ref.key; setBeat(r.ref.bpm); setMod('ref','Measured','on'); $('refMsg').textContent = r.ref.tempo_info.source==='estimated' ? 'Tempo detected from the audio' : 'Tempo from the file name';
-  tickNum($('roBpm'), Math.round(r.ref.bpm)); $('roBpmL').textContent = r.ref.tempo_info.source==='estimated' ? 'BPM · detected' : 'BPM'; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
+  ['roBpm','roKey','roBars','roLen','roSec'].forEach(id=>$(id).classList.remove('dim')); tickNum($('roBpm'), Math.round(r.ref.bpm)); $('roBpmL').textContent = r.ref.tempo_info.source==='estimated' ? 'BPM · detected' : 'BPM'; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
   $('sess').innerHTML = `<b>${r.ref.file || S.refPath.split(/[\\/]/).pop()}</b> · ${Math.round(r.ref.bpm)} BPM · ${k.tonic} ${k.mode==='minor'?'min':'maj'} · ${r.ref.bars} bars`;
   const el = r.ref.elements||{}; const en = el.energy||[]; const mn=Math.min(...en), mx=Math.max(...en); const curve = en.map(v=> mx>mn ? (v-mn)/(mx-mn) : 0.5);
   const lanes = el.kick ? [{name:'Kick', cls:'k', blocks:spansFromBools(el.kick).map(([a,b])=>({a,b,k:'span'}))}, {name:'Hats and top', cls:'', blocks:spansFromBools(el.hats).map(([a,b])=>({a,b,k:'span'}))}] : [];
@@ -498,9 +503,9 @@ $('analyzeBtn').onclick = analyze;
 function tickNum(n, target){ if(reduced){ n.textContent=target; return; } const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
 
 /* ---------- sounds ---------- */
-function setPackFile(){ const parts=S.packPath.split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('packName').innerHTML = (parts.length>1 ? `${parts.length} folders` : parts[0].split(/[\\/]/).pop()) + `<small>${parts.join('  +  ')}</small>`; $('pickPack').classList.add('hidden'); $('packLoaded').classList.remove('hidden'); }
+function setPackFile(){ const parts=S.packPath.split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('packName').className='fname'; $('packName').innerHTML = `<b>${parts.length>1 ? parts.length+' folders' : parts[0].split(/[\\/]/).pop()}</b><small>${parts.join('  +  ')}</small>`; $('pickPack').textContent='Change'; $('pickPack').classList.remove('pri'); }
 function msg(el, text, kind){ el.className = 'msg' + (kind?' '+kind:''); el.textContent = text||''; }
-async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Reading','work'); msg($('packMsg'),'Reading every file…'); $('roCount').textContent='—'; $('roleLeds').innerHTML='';
+async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Reading','work'); msg($('packMsg'),'Reading every file…'); $('roCount').textContent='—'; $('roCount').classList.add('dim'); renderLeds({});
   const r = await api().scan_pack(p); if(!r.ok){ setMod('snd','Error','err'); msg($('packMsg'), r.error, 'err'); return; } S.pack=r.pack;
   const warn = (r.pack.warnings||[]);
   if(warn.some(w=>/iCloud/.test(w))){ const n = (warn.find(w=>/iCloud/.test(w)).match(/^(\d+)/)||[0,'some'])[1];
@@ -511,19 +516,19 @@ async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Read
   if(warn.length){ msg($('packMsg'), warn.join(' '), 'err'); setMod('snd','Check','err'); } else { msg($('packMsg'), 'Kick found · ready to build', 'ok'); setMod('snd','Ready','on'); }
   renderPack(r.pack); }
 const ROLE_LEDS = [['kick','Kick'],['clap','Clap'],['chat','Hats'],['perc','Perc'],['bass','Bass'],['synth','Synth'],['pad','Pad'],['atmos','Atmos'],['fx','FX']];
-function renderPack(pack){ tickNum($('roCount'), pack.count); const br=pack.by_role||{}; const has = k => k==='chat' ? (br.chat||br.ohat||br.shaker) : (k==='fx' ? (br.fx||br.impact||br.uplifter||br.downlifter) : br[k]);
-  $('roleLeds').innerHTML = ROLE_LEDS.map(([k,n])=>`<div class="rl ${has(k)?'on':''}"><i></i>${n}</div>`).join('');
+function renderLeds(br){ const has = k => k==='chat' ? (br.chat||br.ohat||br.shaker) : (k==='fx' ? (br.fx||br.impact||br.uplifter||br.downlifter) : br[k]); $('roleLeds').innerHTML = ROLE_LEDS.map(([k,n])=>`<div class="rl ${has(k)?'on':''}"><i></i>${n}</div>`).join(''); }
+function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCount'), pack.count); const br=pack.by_role||{}; renderLeds(br);
   const rows = Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); const mx = rows.length ? rows[0][1] : 1;
   $('kitView').innerHTML = `<div class="dvhead"><div class="t">${pack.count} sounds<small>${pack.bpm_hint?pack.bpm_hint+' BPM loops':''}</small></div><div class="r">${rows.length} kinds</div></div><div class="kit">${rows.map(([k,v],i)=>`<div class="kr"><span>${k.replace('_',' ')}</span><div class="kb"><i style="width:${(v/mx*100).toFixed(1)}%;--d:${i*60}ms"></i></div><b>${v}</b></div>`).join('')}</div>`;
   $('kitView').classList.remove('hidden'); $('sndCap').textContent = ''; syncIdle(); gateBuild(); }
 async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; setActive('snd'); await scanPack(); }
-$('pickPack').onclick = pickPack; $('pickPack2').onclick = pickPack;
+$('pickPack').onclick = pickPack; renderLeds({});
 async function describeVocal(){ const p=S.vocalPath; const n=p.split(/[\\/]/).pop(); $('vocalRow').classList.add('has'); $('vocalName').innerHTML = `${n}<small id="vocalMeta">Listening…</small>`; $('vocalClear').classList.remove('hidden'); $('pickVocal').textContent='Change';
   const r = await api().analyze_vocal(p); if(!r.ok){ $('vocalMeta').textContent = r.error; return; } const v=r.vocal; S.vocal=v;
   const key = v.key ? `${NOTES[v.key.pc]} ${v.key.mode==='minor'?'min':'maj'}` : 'key unknown'; const bpm = v.bpm ? `${v.bpm} BPM` : 'tempo taken as the project’s';
   $('vocalMeta').textContent = `${v.count} phrase${v.count===1?'':'s'} · ${fmt(v.duration)} · ${bpm} · ${key}`; if(S.view==='dir') drawDir(); }
 $('pickVocal').onclick = async ()=>{ const p = await api().pick_vocal(); if(!p) return; S.vocalPath=p; await describeVocal(); };
-$('vocalClear').onclick = ()=>{ S.vocalPath=null; S.vocal=null; $('vocalRow').classList.remove('has'); $('vocalName').innerHTML='Vocal <small id="vocalMeta">Optional. An acapella or a chant, cut into phrases and placed where the style wants a voice.</small>'; $('vocalClear').classList.add('hidden'); $('pickVocal').textContent='Add'; if(S.view==='dir') drawDir(); };
+$('vocalClear').onclick = ()=>{ S.vocalPath=null; S.vocal=null; $('vocalRow').classList.remove('has'); $('vocalName').innerHTML='Vocal · optional<small id="vocalMeta">An acapella or a chant, placed where the style wants a voice</small>'; $('vocalClear').classList.add('hidden'); $('pickVocal').textContent='Add'; if(S.view==='dir') drawDir(); };
 
 /* ---------- direction ---------- */
 const STYLE_ALIAS = {afro:'afro_house', techno:'peak_techno'};
@@ -578,13 +583,14 @@ $('scanPlug').onclick = scanPlugins;
 /* ---------- build ---------- */
 let TL = null;
 (function meters(){ $('meter').innerHTML = Array.from({length:18},(_,i)=>`<i style="--m:${(.35+Math.abs(Math.sin(i*1.7))*.65).toFixed(2)};animation-delay:${(i*.07).toFixed(2)}s;animation-duration:${(.7+Math.abs(Math.cos(i))*.7).toFixed(2)}s"></i>`).join(''); })();
-function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; if(!S.building && !S.built){ $('bst').textContent = ok ? 'Ready' : (S.ref ? 'Needs your sounds' : (S.pack ? 'Needs a reference' : 'Needs a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); } }
+function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'buildBtn'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
+function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; if(!S.building && !S.built){ $('bst').textContent = ok ? 'Ready · writes into the Live Set in front' : (S.ref ? 'Waiting for 02 · Sounds' : (S.pack ? 'Waiting for 01 · Reference' : 'Waiting for 01 and 02')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
 function setProg(p){ $('prog').style.strokeDashoffset = (345*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
 function resetBuild(){ if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); $('bigWrap').classList.add('working');
   $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent='BUILDING'; $('buildBtn').disabled=true; $('bst').textContent='Measuring, choosing, rendering, placing.'; setMod('bld','Working','work'); }
 function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
-async function startBuild(){ S.building=true; resetBuild(); setActive('bld');
+async function startBuild(){ S.building=true; resetBuild(); markNext(); setActive('bld');
   if(S.target==='ableton'){ const st = await liveStatus(); if(!st.ok || !st.fresh){ await sleep(350); window.flowError(st.ok ? `The Live Set in front has ${st.tracks} tracks. In Ableton: File › New Live Set, then press Retry.` : st.reason); return; } }
   S.lastOpts = currentOpts(); const r = await api().build(S.lastOpts); if(!r.ok){ window.flowError(r.error); } }
 $('buildBtn').onclick = startBuild;
@@ -593,10 +599,10 @@ window.flowPlan = v=>{ S.plan=v; if(TL) TL.destroy(); TL = mountTimeline($('tlCa
 window.flowProgress = (msg,pct)=>{ if(msg.startsWith('@track:')){ if(TL) TL.reveal(+msg.slice(7)); return; }
   setProg(pct); $('log').textContent += msg+'\n'; $('log').scrollTop=1e9; $('statusLine').textContent = msg; $('bst').textContent = msg;
   setPhase(pct<0.15?0 : pct<0.3?1 : pct<0.4?2 : (S.target==='ableton' && pct>=0.85 ? 4 : 3)); };
-window.flowError = msg=>{ S.building=false; $('buildTL').classList.remove('building'); $('bigWrap').classList.remove('working'); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
+window.flowError = msg=>{ S.building=false; markNext(); $('buildTL').classList.remove('building'); $('bigWrap').classList.remove('working'); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
   if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Fix the cause, then retry'; liveStatus(); };
-window.flowDone = async sum=>{ S.building=false; S.built=true; $('buildTL').classList.remove('building'); $('bigWrap').classList.remove('working'); setProg(1); setPhase(5); setMod('bld','Done','on');
+window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); $('bigWrap').classList.remove('working'); setProg(1); setPhase(5); setMod('bld','Done','on');
   $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; $('bst').textContent = sum.ableton ? 'Your track is in the Live Set in front of you. Press Cmd+S now.' : 'Open the folder: stems, a MIDI file with markers, and your Blueprint.';
   if(!TL) window.flowPlan(sum); TL.revealAll();
   const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bst').textContent += ` · ${warns.length} note${warns.length===1?'':'s'} in Details`; }
