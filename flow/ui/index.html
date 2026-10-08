@@ -484,6 +484,21 @@
   .subj .fname.go-l { animation:slideL .36s var(--spring) both; } .subj .fname.go-r { animation:slideR .36s var(--spring) both; }
   @keyframes slideL { 0% { opacity:0; transform:translateX(14px); } 100% { opacity:1; transform:none; } }
   @keyframes slideR { 0% { opacity:0; transform:translateX(-14px); } 100% { opacity:1; transform:none; } }
+  /* the build button: a matte, machined disc that floats, with the ring as a hairline groove */
+  .big .ring { stroke:rgba(20,20,30,.09); stroke-width:1.25; }
+  :root[data-theme=dark] .big .ring { stroke:rgba(255,255,255,.1); }
+  .big .prog { stroke-width:2; filter:drop-shadow(0 0 5px rgba(var(--acc-rgb),.55)); }
+  .big button { inset:12px; background:radial-gradient(circle at 50% 28%, #2E2F37 0%, #191A20 50%, #0E0F13 100%); color:rgba(255,255,255,.94); font-size:11px; font-weight:700; letter-spacing:.26em; text-indent:.26em;
+    box-shadow:0 18px 36px rgba(20,20,30,.24), 0 4px 10px rgba(20,20,30,.12), inset 0 1px 0 rgba(255,255,255,.16), inset 0 -10px 16px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.04); transition:transform .22s var(--spring), box-shadow .22s, color .3s; }
+  .big button::before { content:""; position:absolute; inset:5px; border-radius:50%; border:1px solid rgba(255,255,255,.07); pointer-events:none; }
+  .big button::after { content:""; position:absolute; left:22%; right:22%; top:9%; height:30%; border-radius:50%; background:linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,0)); pointer-events:none; }
+  .big button:hover { transform:translateY(-1px); box-shadow:0 22px 40px rgba(20,20,30,.26), 0 4px 10px rgba(20,20,30,.12), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -10px 16px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.04); }
+  .big button:active { transform:scale(.975) translateY(1px); box-shadow:0 8px 18px rgba(20,20,30,.2), inset 0 3px 10px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.03); }
+  .big button:disabled { transform:none; }
+  .big.wait button { color:rgba(255,255,255,.32); box-shadow:0 10px 22px rgba(20,20,30,.12), inset 0 1px 0 rgba(255,255,255,.1), inset 0 -8px 14px rgba(0,0,0,.3); }
+  :root[data-theme=dark] .big button { background:radial-gradient(circle at 50% 28%, #FFFFFF 0%, #ECECF0 50%, #D4D4DB 100%); color:rgba(16,16,20,.92); box-shadow:0 18px 36px rgba(0,0,0,.55), 0 4px 10px rgba(0,0,0,.35), inset 0 1px 0 #fff, inset 0 -10px 16px rgba(0,0,0,.14); }
+  :root[data-theme=dark] .big button::before { border-color:rgba(0,0,0,.06); } :root[data-theme=dark] .big button::after { background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+  :root[data-theme=dark] .big.wait button { color:rgba(16,16,20,.35); }
   .kval { text-align:center; line-height:1; margin-top:2px; }
   .kval b { display:block; font:500 24px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
   .kval small { display:block; margin-top:5px; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
