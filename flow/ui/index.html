@@ -765,6 +765,34 @@
   .cands .cr .du { font:500 10px var(--mono); color:var(--d-mut); }
   .cands .cr.any { margin-bottom:4px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,.08); color:var(--d-sec); }
   .cands .cr.any:hover { color:var(--d-ink); }
+
+  /* Switches in the hardware's idiom: two labels and a small pill with a black knob that sits on the chosen side. */
+  .tg.sm, .tg.sm::before { all:unset; }
+  .tg.sm { position:relative; display:inline-flex; align-items:center; gap:8px; height:22px; }
+  .tg.sm::before { content:none; }
+  .tg.sm button { all:unset; cursor:pointer; font:500 11px "Satoshi",sans-serif; color:var(--mut); letter-spacing:0; transition:color .2s; white-space:nowrap; }
+  .tg.sm button.on { color:var(--ink); font-weight:600; }
+  .tg.sm button:disabled { opacity:.35; cursor:default; }
+  .tg.sm .pill { position:relative; width:34px; height:18px; border-radius:9px; background:#E6E6EA; box-shadow:inset 0 1px 3px rgba(20,20,30,.16), inset 0 0 0 1px rgba(20,20,30,.05); cursor:pointer; flex:0 0 34px; }
+  .tg.sm .pill i { position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #3A3B44 0%, #111113 70%); box-shadow:0 2px 4px rgba(20,20,30,.35), inset 0 1px 0 rgba(255,255,255,.18); transition:transform .22s var(--ease); }
+  .tg.sm.r .pill i { transform:translateX(16px); }
+  :root[data-theme=dark] .tg.sm .pill { background:#111218; box-shadow:inset 0 1px 3px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.05); }
+  :root[data-theme=dark] .tg.sm .pill i { background:radial-gradient(circle at 35% 30%, #FFFFFF 0%, #DCDCE2 70%); box-shadow:0 2px 4px rgba(0,0,0,.5); }
+  :root[data-theme=dark] .tg.sm button.on { color:#F4F1EA; }
+
+  /* A value field: recessed, the number in ink, two tiny steppers, the unit beside it. */
+  .vf { display:inline-flex; align-items:center; gap:6px; }
+  .vf .in { height:22px; width:38px; padding:0 6px; border-radius:6px; border:0; background:#ECECEF; box-shadow:inset 0 1px 3px rgba(20,20,30,.12), inset 0 0 0 1px rgba(20,20,30,.04); font:500 11.5px var(--mono); color:var(--ink); text-align:center; letter-spacing:.02em; }
+  .vf .in::placeholder { color:var(--sec); } .vf .in:focus { outline:none; box-shadow:inset 0 1px 3px rgba(20,20,30,.12), inset 0 0 0 1px var(--acc); }
+  .vf .steps { display:flex; flex-direction:column; gap:1px; }
+  .vf .steps button { all:unset; cursor:pointer; width:14px; height:10px; display:grid; place-items:center; color:var(--mut); border-radius:3px; }
+  .vf .steps button:hover { color:var(--ink); background:rgba(20,20,30,.06); } .vf .steps button:active { color:var(--acc); }
+  .vf .steps svg { width:8px; height:5px; fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  .vf .dl { font:500 9px var(--mono); color:var(--mut); letter-spacing:.12em; text-transform:uppercase; }
+  :root[data-theme=dark] .vf .in { background:#111218; color:#F4F1EA; box-shadow:inset 0 1px 3px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.05); }
+  .well.dir .drow { justify-content:space-between; }
+  .well.dir .bpmbox .in { width:38px; } .well.dir .bpmbox .dl { display:inline; }
+  .well.bld .pfoot.pre .ta { font-size:11.5px; }
 </style>
 </head>
 <body>
@@ -843,8 +871,8 @@
           <div class="cap" id="knobBody"><i class="pip"></i></div>
           <span class="kend l">2:00</span><span class="kend r">10:00</span>
         </div>
-        <div class="kval"><b id="lcdBig">4:30</b><small><span id="lcdSub">136 bars</span> · <span class="bpmbox" title="Tempo. Empty follows the reference; type to override."><input class="in" type="text" id="bpmIn" placeholder="—" inputmode="numeric" maxlength="3"><span class="dl">BPM</span></span></small></div>
-        <div class="drow"><div class="tg sm" id="structSeg" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
+        <div class="kval"><b id="lcdBig">4:30</b><small><span id="lcdSub">136 bars</span></small></div>
+        <div class="drow"><div class="vf bpmbox" title="Tempo. Follows the reference until you change it."><input class="in" type="text" id="bpmIn" placeholder="—" inputmode="numeric" maxlength="3"><span class="steps"><button type="button" id="bpmUp" aria-label="Faster"><svg viewBox="0 0 10 6"><path d="M1 5l4-4 4 4"/></svg></button><button type="button" id="bpmDn" aria-label="Slower"><svg viewBox="0 0 10 6"><path d="M1 1l4 4 4-4"/></svg></button></span><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><span class="pill"><i></i></span><button data-v="typical">Typical</button></div></div>
       </div>
       <div class="hint hidden" id="targetHint"></div>
     </div>
@@ -852,7 +880,7 @@
       <div class="well bld">
         <div class="mh"><i class="led" id="ledBld"></i><span class="mn">Build</span><span class="ms" id="msBld">Waiting</span></div>
         <div class="bigbox"><div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div></div>
-        <div class="pfoot pre"><div class="tg sm" id="targetSeg"><button data-v="ableton" class="on">Live</button><button data-v="stems">Stems + MIDI</button></div><span class="sp"></span><button class="ta" id="finBtn" style="white-space:nowrap">Finish<span class="xw"> &amp; plug-ins</span></button></div>
+        <div class="pfoot pre"><div class="tg sm" id="targetSeg"><button data-v="ableton" class="on">Live</button><span class="pill"><i></i></span><button data-v="stems">Stems + MIDI</button></div><span class="sp"></span><button class="ta" id="finBtn" style="white-space:nowrap">Finish<span class="xw"> &amp; plug-ins</span> ›</button></div>
         <div class="pfoot post"><button class="ta hidden" id="listenBtn">Listen first</button><button class="ta hidden" id="openOut">Open folder</button><button class="ta hidden" id="again">Build another</button><button class="ta hidden" id="toggleLog">Details</button></div>
       </div>
       <div class="frow2 hidden"><div class="fname wrap"><b id="bst">Waiting for a reference and your sounds</b></div></div>
@@ -1184,7 +1212,11 @@ function setLen(v){ v=Math.max(K.min,Math.min(K.max,Math.round(v/K.step)*K.step)
 setLen(270);
 document.querySelectorAll('#targetSeg button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#targetSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.target=b.dataset.v; checkTarget(); gateBuild(); });
 function refUsable(){ return !!(S.ref && S.ref.bars >= 48 && S.ref.sections.length >= 3); }
-function syncSwitches(){ document.querySelectorAll('.tg.sm').forEach(sw=>{ const on=sw.querySelector('button.on'); if(!on){ sw.style.setProperty('--w','0px'); return; } sw.style.setProperty('--w', on.offsetWidth+'px'); sw.style.setProperty('--x', on.offsetLeft+'px'); }); }
+function syncSwitches(){ document.querySelectorAll('.tg.sm').forEach(sw=>{ const bs=sw.querySelectorAll('button'); sw.classList.toggle('r', !!(bs[1] && bs[1].classList.contains('on'))); }); }
+document.querySelectorAll('.tg.sm .pill').forEach(pl=>pl.onclick=()=>{ const sw=pl.closest('.tg.sm'); const bs=sw.querySelectorAll('button'); const other = bs[0].classList.contains('on') ? bs[1] : bs[0]; if(!other.disabled) other.click(); });
+function bpmNow(){ const i=$('bpmIn'); return parseFloat(i.value) || parseFloat(i.placeholder) || (S.ref && S.ref.bpm) || 124; }
+function nudgeBpm(d){ const i=$('bpmIn'); i.value=String(Math.max(60, Math.min(200, Math.round(bpmNow()+d)))); i.dispatchEvent(new Event('change')); }
+$('bpmUp').onclick=()=>nudgeBpm(1); $('bpmDn').onclick=()=>nudgeBpm(-1);
 window.addEventListener('resize', syncSwitches); document.addEventListener('click', e=>{ if(e.target.closest('.tg.sm')) requestAnimationFrame(syncSwitches); });
 function renderStruct(){ requestAnimationFrame(syncSwitches); const ok=refUsable(); if(!ok && S.structure==='reference') S.structure='typical'; const rb=document.querySelector('#structSeg button[data-v="reference"]'); rb.disabled=!ok; rb.title = ok ? '' : 'The reference is too short to carry a structure'; document.querySelectorAll('#structSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===S.structure)); if(S.view==='dir') drawDir(); }
 document.querySelectorAll('#structSeg button').forEach(b=>b.onclick=()=>{ if(b.disabled) return; S.structure=b.dataset.v; renderStruct(); markStale(); });
