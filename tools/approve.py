@@ -101,7 +101,7 @@ def cmd_release(args):
     for out in (os.path.join(ROOT, "site", "latest.json"), os.path.join(ROOT, "packaging", "latest.json")):
         with open(out, "w") as f:
             json.dump(man, f, indent=1)
-    print("update manifest written to site/latest.json — commit and push so Netlify serves it; running apps show 'Update' on next launch")
+    print("update manifest written to site/latest.json — run `firebase deploy --only hosting` in site/ so it is served; running apps show 'Update' on next launch")
     if not endpoints.SITE_URL:
         print("WARNING: flow/endpoints.py SITE_URL is empty; the manifest points nowhere useful yet")
 
