@@ -164,7 +164,16 @@ def analyze_reference(path: str, bpm_hint: float | None = None, prefer_range=(10
     sections = detect_sections(bars)
     label_sections(sections, bars)
     elements = element_map(bars)
+    # waveform overview of the measured bars for the display: 720 peak values, 0..1
+    i0, i1 = int(origin * sr), int((origin + n_bars * bar_len) * sr)
+    seg = np.abs(mono[i0:max(i0 + 1, i1)])
+    bins = 720
+    edges = np.linspace(0, len(seg), bins + 1).astype(int)
+    overview = [float(seg[a:b].max()) if b > a else 0.0 for a, b in zip(edges[:-1], edges[1:])]
+    pk = max(overview) or 1.0
+    overview = [round(v / pk, 3) for v in overview]
     return {
+        "overview": overview,
         "file": os.path.basename(path), "path": path, "duration": round(dur, 2),
         "bpm": round(bpm, 2), "tempo_info": tempo_info, "grid_origin": round(origin, 3),
         "bars": n_bars, "key": {"tonic": PC_NAMES[pc], "pc": pc, "mode": mode, "confidence": conf},

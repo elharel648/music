@@ -16,7 +16,7 @@ const rows=secs.map(s=>({label:s.label,start:s.start,end:s.end,bars:s.bars,layer
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 window.pywebview={api:{status:async()=>({state:'trial',days_left:14,version:'0.6',machine:'demo'}),load_session:async()=>null, styles:async()=>STYLES,
  pick_reference:async()=>'/Users/harel/Desktop/הפקה/tps/TPS - Oasis.wav',
- analyze:async()=>{await wait(900);return {ok:true,ref:{bpm:124,key:{tonic:'A',mode:'minor',confidence:.8},duration:290,bars:144,sections:secs,tempo_info:{source:'estimated'},elements:{energy:en,kick:en.map(v=>v>.4),hats:en.map(v=>v>.5)}}}},
+ analyze:async()=>{await wait(900);return {ok:true,ref:{bpm:124,key:{tonic:'A',mode:'minor',confidence:.8},duration:290,bars:144,sections:secs,tempo_info:{source:'estimated'},overview:Array.from({length:720},(_,i)=>{const b=Math.floor(i/5);const e=en[Math.min(143,b)]||.3;return Math.min(1,e*(.55+.45*Math.abs(Math.sin(i*.7)))*(.8+.2*Math.random()));}),elements:{energy:en,kick:en.map(v=>v>.4),hats:en.map(v=>v>.5)}}}},
  pick_folders:async()=>'/Users/harel/Desktop/הפקה/tps/TPS - Oasis - Sample Pack',
  scan_pack:async()=>{await wait(900);return {ok:true,pack:{count:255,by_role:{kick:12,clap:8,chat:20,synth:30,bass:15,atmos:9,perc:22,fx:14},warnings:[],bpm_hint:124}}},
  pick_vocal:async()=>'/Users/harel/Music/Vocals/Chant - Yalla 122 BPM Amin.wav',

@@ -168,4 +168,5 @@ def get(key: str | None) -> Style:
 
 
 def listing() -> list[dict]:
-    return [{"key": s.key, "name": s.name, "group": s.group, "bpm": list(s.bpm), "blurb": s.blurb} for s in STYLES.values()]
+    return [{"key": s.key, "name": s.name, "group": s.group, "bpm": list(s.bpm), "blurb": s.blurb, "template": s.template,
+             "vocal_sections": list(s.vocal_sections)} for s in STYLES.values()]
