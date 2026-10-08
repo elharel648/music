@@ -237,10 +237,27 @@
   .ro.sm .v { font-size:17px; }
   .file { font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .file small { display:block; font:500 10px var(--mono); color:var(--mut); margin-top:2px; font-weight:500; overflow:hidden; text-overflow:ellipsis; }
-  .mrow { display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:auto; }
+  .mrow { display:flex; align-items:center; justify-content:flex-end; gap:14px; margin-top:auto; min-height:22px; }
+  .ta { background:none; border:0; padding:0; font-size:11.5px; font-weight:600; color:var(--ink); cursor:pointer; transition:opacity .15s; }
+  .ta:hover { opacity:.6; } .ta:disabled { color:var(--mut); opacity:1; cursor:default; } .ta.on { color:var(--acc); }
+  .subj { justify-content:space-between; gap:4px; }
+  .subj .fname { text-align:center; }
+  .arr2 { width:24px; height:24px; flex:0 0 24px; border:0; background:transparent; color:var(--mut); border-radius:6px; display:flex; align-items:center; justify-content:center; padding:0; transition:color .15s, background .15s; }
+  .arr2:hover { color:var(--ink); background:var(--ctrl); }
+  .arr2 svg { width:11px; height:11px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .fname small.off { color:var(--warn); }
+  .fname.wrap b, .fname.wrap small { white-space:normal; line-height:1.4; }
+  .well { position:relative; }
+  .well.dir { justify-content:space-between; }
+  .well.dir .knob { align-self:center; }
+  .well.bld { align-items:center; justify-content:center; padding:8px; min-height:132px; }
+  .well.bld .big { transform:scale(.86); margin:-8px 0; }
+  .fname.wrap small.clamp { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mini.hit { cursor:pointer; }
+  .tip { position:absolute; left:0; top:0; pointer-events:none; background:var(--ink); color:var(--mod); font-size:10.5px; font-weight:500; padding:3px 7px; border-radius:6px; white-space:nowrap; transform:translate(-50%,-135%); opacity:0; transition:opacity .12s; z-index:3; }
   .lk { background:none; border:0; padding:0; font-size:11px; font-weight:600; color:var(--sec); text-decoration:underline; text-underline-offset:3px; }
   .lk:hover { color:var(--ink); }
-  .sb { height:26px; padding:0 10px; border-radius:6px; border:1px solid var(--line); background:var(--mod); font-size:11px; font-weight:600; transition:border-color .2s, transform .2s var(--ease); white-space:nowrap; }
+  .sb { height:26px; padding:0 10px; border-radius:7px; border:1px solid var(--line); background:var(--mod); font-size:11px; font-weight:600; transition:border-color .2s, transform .2s var(--ease); white-space:nowrap; }
   .sb:hover { border-color:var(--ink); } .sb:active { transform:scale(.97); }
   .in { height:26px; width:60px; font:500 12px var(--mono); padding:0 8px; border-radius:7px; border:1px solid var(--line); background:var(--ctrl); color:var(--ink); outline:none; text-align:right; }
   .in:focus { border-color:var(--acc); }
@@ -272,14 +289,14 @@
   .sel .dots i { width:4px; height:4px; border-radius:50%; background:var(--tick); transition:background .2s, box-shadow .2s, transform .2s; }
   .sel .dots i.on { background:var(--acc); box-shadow:0 0 6px var(--acc); transform:scale(1.3); }
   .knobwrap { display:flex; flex-direction:column; align-items:center; gap:2px; margin:0; }
-  .knob { position:relative; width:118px; height:100px; touch-action:none; cursor:ns-resize; outline:none; -webkit-user-select:none; user-select:none; }
-  .knob svg { position:absolute; left:7px; top:0; width:104px; height:104px; overflow:visible; }
+  .knob { position:relative; width:100px; height:100px; touch-action:none; cursor:ns-resize; outline:none; -webkit-user-select:none; user-select:none; }
+  .knob svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
   .knob .dt { fill:var(--tick); transition:fill .25s; } .knob .dt.lit { fill:var(--acc); }
-  .knob .cap { position:absolute; left:22px; top:15px; width:74px; height:74px; border-radius:50%; background:radial-gradient(circle at 38% 28%, #FFFFFF 0%, #F6F6F4 38%, #E6E6E2 78%, #D4D4CF 100%); box-shadow:0 12px 24px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); transition:transform .45s var(--ease), box-shadow .3s; }
+  .knob .cap { position:absolute; left:15px; top:15px; width:70px; height:70px; border-radius:50%; background:radial-gradient(circle at 38% 28%, #FFFFFF 0%, #F6F6F4 38%, #E6E6E2 78%, #D4D4CF 100%); box-shadow:0 12px 24px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); transition:transform .45s var(--ease), box-shadow .3s; }
   :root[data-theme=dark] .knob .cap { background:radial-gradient(circle at 38% 28%, #4E4F59 0%, #34353E 40%, #22232A 80%, #17181E 100%); box-shadow:0 12px 24px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14), inset 0 -4px 8px rgba(0,0,0,.35); }
   .knob:hover .cap { box-shadow:0 14px 28px rgba(20,20,30,.2), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); }
   .knob.drag .cap { transition:box-shadow .3s; }
-  .knob .pip { position:absolute; left:50%; top:9px; width:6px; height:6px; margin-left:-3px; border-radius:50%; background:var(--acc); box-shadow:0 0 7px var(--acc); }
+  .knob .pip { position:absolute; left:50%; top:8px; width:6px; height:6px; margin-left:-3px; border-radius:50%; background:var(--acc); box-shadow:0 0 7px var(--acc); }
   .knob .kend { position:absolute; bottom:-2px; font:500 9px var(--mono); color:var(--mut); letter-spacing:.04em; } .knob .kend.l { left:2px; } .knob .kend.r { right:0; }
   .knob:focus-visible .cap { outline:2px solid var(--acc); outline-offset:3px; }
   .knobl { font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; } .knobl b { color:var(--ink); font-weight:600; font-size:11.5px; letter-spacing:0; }
@@ -288,7 +305,7 @@
   .dl { font:500 9.5px var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--mut); }
   .tg.sm { padding:2px; border-radius:7px; } .tg.sm button { height:20px; font-size:10.5px; padding:0 8px; flex:0 0 auto; }
   .tg button:disabled { opacity:.35; }
-  .tg { display:flex; background:var(--ctrl); border:1px solid var(--line); border-radius:9px; padding:3px; }
+  .tg { display:flex; background:var(--ctrl); border:1px solid var(--line); border-radius:8px; padding:3px; }
   .tg button { flex:1; border:0; background:transparent; height:24px; border-radius:6px; font-size:11px; font-weight:600; color:var(--sec); transition:all .2s var(--ease); }
   .tg button.on { background:var(--mod); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.14); }
   .hint { font:500 10px var(--mono); color:var(--mut); line-height:1.4; min-height:13px; }
@@ -374,7 +391,7 @@
 
   <section class="deck" id="deck">
     <div class="mod" data-m="ref" style="--mc:var(--c-ref)">
-      <div class="mh"><i class="led" id="ledRef"></i><span class="num">01</span><span class="mn">Reference</span><span class="ms" id="msRef">Empty</span></div>
+      <div class="mh"><i class="led" id="ledRef"></i><span class="mn">Reference</span><span class="ms" id="msRef">Empty</span></div>
       <div class="mb">
         <div class="frow2"><div class="fname empty" id="refName"><b>No track</b></div><button class="sb pri" id="pickRef">Choose</button></div>
         <div class="well">
@@ -383,48 +400,45 @@
           <div class="grid4"><div><div class="v dim" id="roKey">—</div><div class="l">Key</div></div><div><div class="v dim" id="roBars">—</div><div class="l">Bars</div></div><div><div class="v dim" id="roLen">—</div><div class="l">Length</div></div><div><div class="v dim" id="roSec">—</div><div class="l">Sections</div></div></div>
         </div>
         <div class="msg" id="refMsg"></div>
-        <div class="mrow hidden" id="refTools"><button class="sb" id="analyzeBtn">Re-analyze</button></div>
+        <div class="mrow hidden" id="refTools"><button class="ta hidden" id="refStop">Stop</button><button class="ta" id="analyzeBtn">Re-analyze</button></div>
       </div>
     </div>
     <div class="mod" data-m="snd" style="--mc:var(--c-snd)">
-      <div class="mh"><i class="led" id="ledSnd"></i><span class="num">02</span><span class="mn">Sounds</span><span class="ms" id="msSnd">Empty</span></div>
+      <div class="mh"><i class="led" id="ledSnd"></i><span class="mn">Sounds</span><span class="ms" id="msSnd">Empty</span></div>
       <div class="mb">
         <div class="frow2"><div class="fname empty" id="packName"><b>No sounds</b></div><button class="sb pri" id="pickPack">Choose</button></div>
         <div class="well">
           <div class="hero"><span class="v dim" id="roCount">—</span><span class="u">Sounds</span><span class="u" id="roUsed" style="margin-left:auto"></span></div>
-          <canvas class="mini" id="sndMini" aria-hidden="true"></canvas>
+          <canvas class="mini" id="sndMini" aria-hidden="true"></canvas><div class="tip" id="sndTip"></div>
           <div class="leds" id="roleLeds"></div>
         </div>
         <div class="msg" id="packMsg"></div>
-        <div class="vrow" id="vocalRow"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal, optional</div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="sb" id="pickVocal">Add</button></div>
+        <div class="vrow" id="vocalRow"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal, optional</div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="ta" id="pickVocal">Add</button></div>
       </div>
     </div>
     <div class="mod" data-m="dir" style="--mc:var(--c-dir)">
-      <div class="mh"><i class="led" id="ledDir"></i><span class="num">03</span><span class="mn">Direction</span><span class="ms" id="msDir">House · 4:30</span></div>
-      <div class="mb" style="gap:5px;padding-top:9px">
-        <div class="sel" id="styleSel"><div class="row"><button class="arr" id="stPrev"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="mid"><div class="n" id="stName">House</div><div class="g" id="stGroup">House · 120–128 BPM</div></div><button class="arr" id="stNext"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div><div class="dots" id="stDots"></div></div>
-        <div class="knobwrap">
+      <div class="mh"><i class="led" id="ledDir"></i><span class="mn">Direction</span><span class="ms" id="msDir">House · 4:30</span></div>
+      <div class="mb" style="gap:6px;padding-top:9px">
+        <div class="frow2 subj" id="styleSel"><button class="arr2" id="stPrev" aria-label="Previous style"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="fname"><b id="stName">House</b><small id="stGroup">House · 120–128 BPM</small></div><button class="arr2" id="stNext" aria-label="Next style"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
+        <div class="well dir">
+          <div class="hero"><span class="v" id="lcdBig">4:30</span><span class="u">Length · <span id="lcdSub">136 bars</span></span></div>
           <div class="knob" id="knob" tabindex="0" role="slider" aria-label="Length" aria-valuemin="120" aria-valuemax="600" aria-valuenow="270">
             <svg viewBox="0 0 200 200" aria-hidden="true"><g id="knobDots"></g></svg>
             <div class="cap" id="knobBody"><i class="pip"></i></div>
-            <span class="kend l">2:00</span><span class="kend r">10:00</span>
           </div>
-          <div class="knobl">Length · <b id="lcdBig">4:30</b> · <span id="lcdSub">136 bars</span></div>
+          <div class="drow"><div class="bpmbox" title="Your tempo. Empty follows the reference."><input class="in" type="text" id="bpmIn" placeholder="—"><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" style="margin-left:auto" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
         </div>
-        <div class="drow"><div class="bpmbox" title="Your tempo. Empty follows the reference."><input class="in" type="text" id="bpmIn" placeholder="—"><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" style="margin-left:auto" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
-        <div class="tg" id="targetSeg"><button data-v="ableton" class="on">Ableton Live</button><button data-v="stems">Stems + MIDI</button></div>
+        <div class="mrow" style="justify-content:space-between;margin-top:0"><div class="tg sm" id="targetSeg"><button data-v="ableton" class="on">Live</button><button data-v="stems">Stems + MIDI</button></div><button class="ta" id="finBtn" style="white-space:nowrap">Finish &amp; plug-ins</button></div>
         <div class="hint hidden" id="targetHint"></div>
-        <button class="fbtn" id="finBtn"><span>Finish &amp; plug-ins</span><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
     </div>
     <div class="mod" data-m="bld" style="--mc:var(--c-bld)">
-      <div class="mh"><i class="led" id="ledBld"></i><span class="num">04</span><span class="mn">Build</span><span class="ms" id="msBld">Waiting</span></div>
+      <div class="mh"><i class="led" id="ledBld"></i><span class="mn">Build</span><span class="ms" id="msBld">Waiting</span></div>
       <div class="mb">
-        <div class="bigwrap">
-          <div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div>
-          <div class="bst" id="bst">Waiting for a reference and your sounds</div><div class="bsub" id="bsub">Builds this arrangement from your sounds and your direction. Nothing is decided for you.</div>
-          <div class="acts" id="acts"><button class="sb hidden" id="listenBtn">Listen first</button><button class="sb hidden" id="openOut">Open folder</button><button class="sb hidden" id="again">Build another</button><button class="lk hidden" id="toggleLog">Details</button></div>
-        </div>
+        <div class="frow2"><div class="fname wrap"><b id="bst">Waiting for a reference and your sounds</b></div></div>
+        <div class="well bld"><div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div></div>
+        <div class="fname wrap"><small class="clamp" id="bsub">Builds this arrangement from your sounds and your direction. Nothing is decided for you.</small></div>
+        <div class="mrow" style="justify-content:flex-start;margin-top:0"><button class="ta hidden" id="listenBtn">Listen first</button><button class="ta hidden" id="openOut">Open folder</button><button class="ta hidden" id="again">Build another</button><button class="ta hidden" id="toggleLog">Details</button></div>
       </div>
     </div>
   </section>
@@ -477,17 +491,39 @@ function startSeq(el){ const pats=[['Kick',[0,4,8,12]],['Clap',[4,12]],['Hat',[2
 /* the plates in 01 and 02 are alive: a scanning overview of the reference, a field of sounds that twinkles to the beat */
 function fitCanvas(cv){ const dpr=Math.min(2,window.devicePixelRatio||1); const r=cv.getBoundingClientRect(); if(r.width<2||r.height<2) return null; if(cv.width!==Math.round(r.width*dpr)||cv.height!==Math.round(r.height*dpr)){ cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); } return dpr; }
 function beatPhase(){ const b=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--beat'))||2.6; return (performance.now()/1000 % b)/b; }
+const refAud = {url:null, active:false};
+async function playRef(x){ const a=$('aud'); if(!S.refPath) return; if(!refAud.url){ const r=await api().audition_url(S.refPath); if(!r.ok) return; refAud.url=r.url; } document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on'));
+  if(!a.src || a.src!==refAud.url){ a.src=refAud.url; await new Promise(res=>{ a.onloadedmetadata=res; a.onerror=res; a.load(); }); } refAud.active=true; a.currentTime = x*(a.duration||S.ref.duration||0); a.play().catch(()=>{}); }
 (function miniRef(){ const cv=$('refMini'); const ctx=cv.getContext('2d'); let t=0;
   const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const src=S.ref&&S.ref.overview; const n=64; const gap=W/n, mid=H/2; const head=(t*.07)%1.3-.15; const pulse=1+.05*Math.pow(1-beatPhase(),6);
       for(let i=0;i<n;i++){ let v; if(src){ const a=Math.floor(i/n*src.length), b=Math.max(a+1,Math.floor((i+1)/n*src.length)); v=Math.max(...src.slice(a,b)); } else v=.18+.1*Math.abs(Math.sin(i*.7)); const lit=src?Math.max(0,1-Math.abs(i/n-head)*5):0; const al=src?(.22+.78*lit):.22;
         ctx.fillStyle=src?`rgba(${ACC()},${al})`:(document.documentElement.dataset.theme==='dark'?'rgba(255,255,255,.12)':'rgba(20,20,30,.1)'); ctx.shadowBlur=src?10*dpr*lit:0; ctx.shadowColor=`rgba(${ACC()},.8)`;
-        const bh=Math.max(1.5*dpr, v*H*.9*pulse); const bw=Math.max(1,gap*.45); ctx.fillRect(i*gap+gap*.28, mid-bh/2, bw, bh); } }
-    t+=.016; if(!reduced) requestAnimationFrame(frame); }; frame(); })();
-(function miniSnd(){ const cv=$('sndMini'); const ctx=cv.getContext('2d'); let t=0; const seeds=Array.from({length:260},(_,i)=>({p:Math.random()*6.28, s:.6+Math.random()*1.2}));
-  const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const n=S.pack?Math.min(240,S.pack.count):120; const cols=Math.ceil(Math.sqrt(n*W/H)), rows=Math.ceil(n/cols); const cw=W/cols, ch=H/rows; const r=Math.max(1,Math.min(cw,ch)*.18); const kick=Math.pow(1-beatPhase(),8);
-      for(let i=0;i<n;i++){ const x=(i%cols+.5)*cw, y=(Math.floor(i/cols)+.5)*ch; const sd=seeds[i%seeds.length]; const tw=S.pack?Math.pow(Math.max(0,Math.sin(sd.p+t*sd.s)),10):0; const al=S.pack?(.2+.8*Math.max(tw, kick*(i%17===0?1:0))):.14;
-        ctx.fillStyle=S.pack?`rgba(${ACC()},${al})`:(document.documentElement.dataset.theme==='dark'?'rgba(255,255,255,.12)':'rgba(20,20,30,.1)'); ctx.shadowBlur=S.pack?8*dpr*tw:0; ctx.shadowColor=`rgba(${ACC()},.9)`; ctx.beginPath(); ctx.arc(x,y,r*(1+.6*tw),0,6.28); ctx.fill(); } }
-    t+=.016; if(!reduced) requestAnimationFrame(frame); }; frame(); })();
+        const bh=Math.max(1.5*dpr, v*H*.9*pulse); const bw=Math.max(1,gap*.45); ctx.fillRect(i*gap+gap*.28, mid-bh/2, bw, bh); }
+      const a=$('aud'); if(src && refAud.active && !a.paused && a.duration){ ctx.shadowBlur=0; ctx.fillStyle = document.documentElement.dataset.theme==='dark' ? '#fff' : '#141418'; ctx.fillRect(a.currentTime/a.duration*W - dpr*.5, 0, dpr, H); } }
+    t+=.016; if(!reduced) requestAnimationFrame(frame); }; frame();
+  cv.addEventListener('click', e=>{ if(!S.ref) return; const r=cv.getBoundingClientRect(); playRef((e.clientX-r.left)/r.width); });
+  cv.addEventListener('pointerenter', ()=>cv.classList.toggle('hit', !!S.ref)); })();
+$('refStop').onclick = ()=>{ const a=$('aud'); a.pause(); refAud.active=false; };
+$('aud').addEventListener('play', ()=>$('refStop').classList.toggle('hidden', !refAud.active));
+$('aud').addEventListener('pause', ()=>$('refStop').classList.add('hidden'));
+$('aud').addEventListener('ended', ()=>{ refAud.active=false; $('refStop').classList.add('hidden'); });
+function KIT_PATHS(){ return new Set(S.kit.filter(r=>r.chosen).map(r=>r.chosen.path)); }
+function kitRoleOf(path){ const r=S.kit.find(x=>x.chosen&&x.chosen.path===path); return r?r.label:null; }
+(function miniSnd(){ const cv=$('sndMini'); const ctx=cv.getContext('2d'); let t=0, hover=-1, L=null; const seeds=Array.from({length:260},(_,i)=>({p:Math.random()*6.28, s:.5+Math.random()*1.1}));
+  const samples=()=>S.pack?(S.pack.samples||[]):[];
+  const layout=(W,H)=>{ const n=S.pack?Math.min(240, samples().length||S.pack.count):120; const cols=Math.ceil(Math.sqrt(n*W/H)), rows=Math.ceil(n/cols); return L={n,cols,rows,cw:W/cols,ch:H/rows}; };
+  const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const {n,cols,cw,ch}=layout(W,H); const r=Math.max(1,Math.min(cw,ch)*.17); const kick=Math.pow(1-beatPhase(),8); const kit=KIT_PATHS(); const sm=samples(); const dark=document.documentElement.dataset.theme==='dark';
+      for(let i=0;i<n;i++){ const x=(i%cols+.5)*cw, y=(Math.floor(i/cols)+.5)*ch; const sd=seeds[i%seeds.length]; const inKit = !!(sm[i] && kit.has(sm[i].path)); const tw = S.pack ? Math.pow(Math.max(0,Math.sin(sd.p+t*sd.s)),12)*.45 : 0; const hv = i===hover;
+        const al = !S.pack ? .14 : (hv ? 1 : (inKit ? .95 : .16+tw)); const rr = r*(inKit?1.5:1)*(hv?1.7:1)*(inKit?1+.25*kick:1);
+        ctx.fillStyle = S.pack ? `rgba(${ACC()},${al})` : (dark?'rgba(255,255,255,.12)':'rgba(20,20,30,.1)'); ctx.shadowBlur = inKit ? 9*dpr*kick : 0; ctx.shadowColor=`rgba(${ACC()},.9)`; ctx.beginPath(); ctx.arc(x,y,rr,0,6.28); ctx.fill(); } }
+    t+=.016; if(!reduced) requestAnimationFrame(frame); };
+  const tip=$('sndTip');
+  cv.addEventListener('pointermove', e=>{ if(!S.pack||!L) return; const r=cv.getBoundingClientRect(); const x=(e.clientX-r.left)*(cv.width/r.width), y=(e.clientY-r.top)*(cv.height/r.height); const i=Math.floor(y/L.ch)*L.cols+Math.floor(x/L.cw); const smp=samples()[i];
+    if(i>=0 && i<L.n && smp){ hover=i; const role=kitRoleOf(smp.path); tip.textContent = smp.name.replace(/\.[^.]+$/,'') + (role?` · ${role}`:''); const w=cv.parentElement.getBoundingClientRect(); const half=tip.offsetWidth/2+6; tip.style.left=Math.min(w.width-half, Math.max(half, e.clientX-w.left))+'px'; tip.style.top=Math.max(26, e.clientY-w.top)+'px'; tip.style.opacity=1; cv.classList.add('hit'); }
+    else { hover=-1; tip.style.opacity=0; cv.classList.remove('hit'); } });
+  cv.addEventListener('pointerleave', ()=>{ hover=-1; tip.style.opacity=0; cv.classList.remove('hit'); });
+  cv.addEventListener('click', ()=>{ if(hover<0||!S.pack) return; const smp=samples()[hover]; if(smp) audition(smp.path, null); });
+  frame(); })();
 let stopWave=null, stopSeq=null;
 function syncIdle(){ const waveOn = S.view==='ref' && !S.ref, seqOn = S.view==='snd' && !S.pack;
   if(waveOn && !stopWave) stopWave=startWave($('waveCv')); if(!waveOn && stopWave){ stopWave(); stopWave=null; }
@@ -586,7 +622,7 @@ $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classL
 /* ---------- reference ---------- */
 let REFTL = null;
 function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('refName').className='fname'; $('refName').title=S.refPath; $('refName').innerHTML = `<b>${esc(n)}</b>`; $('pickRef').textContent='Change'; $('pickRef').classList.remove('pri'); $('refTools').classList.remove('hidden'); $('sess').innerHTML = `<b>${esc(n)}</b>`; }
-async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; setRefFile(); setActive('ref'); analyze(); }
+async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; refAud.url=null; refAud.active=false; setRefFile(); setActive('ref'); analyze(); }
 $('pickRef').onclick = pickRef;
 async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=parseFloat($('bpmIn').value)||null;
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ setMod('ref','Error','err'); $('refMsg').className='msg err'; $('refMsg').textContent=r.error; return; }
@@ -630,7 +666,7 @@ function renderKit(){ const rows = S.kit; if(!rows.length) return; const sel = r
       return `<div class="krow ${S.kitOverrides[r.role]!==undefined?'ov':''}" data-role="${esc(r.role)}"><span class="kl">${esc(r.label)}</span><span class="kn" title="${esc(r.chosen?r.chosen.rel||r.chosen.path:'')}">${r.chosen?stem(r.chosen.name):'—'}</span><span class="kc">${idx+1}/${n}</span><button class="kb" data-d="-1" ${n<2?'disabled':''}>${KIT_ICON.prev}</button><button class="kb" data-d="1" ${n<2?'disabled':''}>${KIT_ICON.next}</button><button class="kb pl" ${r.chosen?'':'disabled'}>${KIT_ICON.play}</button></div>`; }).join('')}</div>`;
   $('kitView').querySelectorAll('.krow').forEach(row=>{ const role=row.dataset.role; row.querySelectorAll('.kb[data-d]').forEach(b=>b.onclick=()=>cycleKit(role, +b.dataset.d)); const pl=row.querySelector('.pl'); if(pl) pl.onclick=()=>{ const r=S.kit.find(x=>x.role===role); if(r&&r.chosen) audition(r.chosen.path, pl); }; }); }
 function cycleKit(role, d){ const r=S.kit.find(x=>x.role===role); if(!r || r.candidates.length<2) return; const idx=r.chosen ? r.candidates.findIndex(c=>c.path===r.chosen.path) : -1; const next=r.candidates[(idx+d+r.candidates.length)%r.candidates.length]; r.chosen=next; S.kitOverrides[role]=next.path; markStale(); renderKit(); const pl=$('kitView').querySelector(`.krow[data-role="${role}"] .pl`); audition(next.path, pl); }
-async function audition(path, btn){ const a=$('aud'); if(btn && btn.classList.contains('on')){ a.pause(); return; } const r = await api().audition_url(path); if(!r.ok) return; document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on')); a.src=r.url; a.currentTime=0; a.play().catch(()=>{}); if(btn){ btn.classList.add('on'); a.onended=()=>btn.classList.remove('on'); a.onpause=()=>btn.classList.remove('on'); } }
+async function audition(path, btn){ const a=$('aud'); refAud.active=false; if(btn && btn.classList.contains('on')){ a.pause(); return; } const r = await api().audition_url(path); if(!r.ok) return; document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on')); a.src=r.url; a.currentTime=0; a.play().catch(()=>{}); if(btn){ btn.classList.add('on'); a.onended=()=>btn.classList.remove('on'); a.onpause=()=>btn.classList.remove('on'); } }
 function markStale(){ if(S.preview){ S.previewStale=true; stopPlayer(); $('tp').classList.add('hidden'); } listenLabel(); }
 async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; setActive('snd'); await scanPack(); }
 $('pickPack').onclick = pickPack; renderLeds({});
@@ -645,8 +681,8 @@ $('vocalClear').onclick = ()=>{ markStale(); S.vocalPath=null; S.vocal=null; $('
 const STYLE_ALIAS = {afro:'afro_house', techno:'peak_techno'};
 function curStyle(){ if(!S.styles.some(s=>s.key===S.style)) S.style = STYLE_ALIAS[S.style] || 'house'; return S.styles.find(s=>s.key===S.style); }
 function renderStyle(){ const st=curStyle(); if(!st) return; const bpm=S.ref?S.ref.bpm:null; const off = bpm && (bpm < st.bpm[0]-4 || bpm > st.bpm[1]+4);
-  $('stName').textContent=st.name; $('stGroup').textContent=`${st.group} · ${st.bpm[0]}–${st.bpm[1]} BPM`; $('stGroup').className='g'+(off?' off':''); $('stGroup').title = off ? `The reference runs at ${Math.round(bpm)} BPM` : '';
-  $('stDots').innerHTML = S.styles.map(s=>`<i class="${s.key===S.style?'on':''}"></i>`).join(''); setMod('dir', `${st.name} · ${fmt(S.len)}`); if(S.view==='dir') drawDir(); }
+  $('stName').textContent=st.name; $('stGroup').textContent=`${st.group} · ${st.bpm[0]}–${st.bpm[1]} BPM`; $('stGroup').classList.toggle('off', !!off); $('stGroup').title = off ? `The reference runs at ${Math.round(bpm)} BPM` : '';
+  setMod('dir', `${st.name} · ${fmt(S.len)}`); if(S.view==='dir') drawDir(); }
 function stepStyle(d){ if(!S.styles.length) return; const i=S.styles.findIndex(s=>s.key===S.style); S.style = S.styles[(i+d+S.styles.length)%S.styles.length].key; renderStyle(); markStale(); }
 $('stPrev').onclick=()=>stepStyle(-1); $('stNext').onclick=()=>stepStyle(1);
 $('styleSel').addEventListener('wheel', e=>{ e.preventDefault(); stepStyle(e.deltaY>0?1:-1); }, {passive:false});
@@ -738,7 +774,7 @@ window.flowError = msg=>{ S.building=false; $('listenBtn').disabled=false; markN
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
   if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Stopped. Fix the cause, then retry.'; liveStatus(); };
 window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); bigState('done'); setProg(1); setPhase(5); setMod('bld','Done','on');
-  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; const nUsed = sum.kit ? Object.keys(sum.kit).length : null; const from = `Built from your sounds${nUsed?` (${nUsed} used)`:''}, your direction (${sum.style_name||curStyle().name} · ${fmt(S.len)}) and ${sum.structure==='typical'?'a typical structure':'the reference\u2019s structure'}.`; $('bst').textContent = sum.ableton ? 'Your track is in Live. Press Cmd+S.' : 'Your track is in the folder.'; $('bsub').textContent = from;
+  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; const nUsed = sum.kit ? Object.keys(sum.kit).length : null; const from = `From your sounds${nUsed?` (${nUsed} used)`:''}, ${sum.style_name||curStyle().name} · ${fmt(S.len)}, ${sum.structure==='typical'?'typical structure':'reference structure'}.`; $('bst').textContent = sum.ableton ? 'Your track is in Live. Press Cmd+S.' : 'Your track is in the folder.'; $('bsub').textContent = from;
   if(!TL) window.flowPlan(sum); TL.revealAll();
   if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bsub').textContent += ` ${warns.length} note${warns.length===1?'':'s'} in Details.`; }
   if(sum.kit){ S.usedCount=Object.keys(sum.kit).length; renderKit(); } $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }

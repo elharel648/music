@@ -200,6 +200,7 @@ class Api:
         try:
             r = analysis.analyze_reference(path, bpm_hint=bpm or None)
             r.pop("bar_features", None)
+            self._ref_path = os.path.realpath(path)
             return {"ok": True, "ref": r}
         except Exception as e:
             return {"ok": False, "error": f"{e}"}
@@ -237,7 +238,8 @@ class Api:
             roots = [os.path.realpath(f) for f in self._pack_folders]
             if self._ctx:
                 roots.append(os.path.realpath(self._ctx["work"]))
-            if not any(real == r or real.startswith(r + os.sep) for r in roots) or not os.path.isfile(real):
+            ok_ref = getattr(self, "_ref_path", None) == real
+            if not (ok_ref or any(real == r or real.startswith(r + os.sep) for r in roots)) or not os.path.isfile(real):
                 return {"ok": False, "error": "Not one of your sounds"}
             return {"ok": True, "url": self.media.register(real)}
         except Exception as e:
