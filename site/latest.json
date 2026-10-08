@@ -1,6 +1,6 @@
 {
- "version": "0.8.3",
+ "version": "0.8.4",
  "url": "https://alma-e5db0.web.app/#access",
- "notes": "License key can be entered from the trial chip",
- "sig": "TW_Qzc_tjCN-2v68Itcv-syupcXPiJ2Nk8-nTqfBPhnnpu9mtl12NXJP19E5UEkIGFrJBQTdCekKNDGCatQeCg"
+ "notes": "A clearer license view; enter your key from the trial chip",
+ "sig": "R0Obe_z5Dl3EopfkhFLV9atl75_0Z36DMv_r1X9Sq6AgiUTObrtrBT3-8q3n2bsrmAXBIFsGC4Pb-zrkXZboCQ"
 }
