@@ -909,6 +909,9 @@
   .well.dir .drow .hs, .hs { width:100%; }
   .hs .v { width:30px; text-align:left; } .hs .lbl { width:30px; text-align:right; }
   .well.dir .drow #structSeg { justify-self:stretch; width:100%; display:flex; justify-content:space-between; gap:0; }
+
+  /* No status words in the plate headers (Measured, Ready, Melodic Techno · 5:00). Only a failure speaks there. */
+  .well > .mh .ms { display:none; } .well > .mh .ms.err { display:inline; color:var(--err); }
 </style>
 </head>
 <body>
