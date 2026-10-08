@@ -473,8 +473,9 @@
   .kinds { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:2px; margin-top:6px; overflow:hidden; }
   .kr { display:grid; grid-template-columns:44px 1fr 24px; align-items:center; gap:10px; height:14px; }
   .kr .kl { font-size:10px; font-weight:500; color:var(--sec); font-family:"IBM Plex Sans",sans-serif; letter-spacing:0; text-transform:none; }
-  .kr .bar { height:3px; border-radius:2px; background:var(--ctrl); overflow:hidden; }
-  .kr .bar i { display:block; height:100%; border-radius:2px; background:var(--acc); transform-origin:left; transform:scaleX(var(--w,0)); transition:transform .7s var(--ease); }
+  .kr canvas { width:100%; height:14px; display:block; clip-path:inset(0 100% 0 0); transition:clip-path .55s var(--ease); transition-delay:var(--d,0ms); opacity:.85; }
+  .kr canvas.in { clip-path:inset(0 0 0 0); }
+  .kr.has { cursor:pointer; } .kr.has:hover canvas { opacity:1; } .kr.has:hover .kl { color:var(--ink); }
   .kr b { font:500 10px var(--mono); color:var(--ink); text-align:right; font-variant-numeric:tabular-nums; }
   .kr.off .kl, .kr.off b { color:var(--mut); }
   .kval { text-align:center; line-height:1; margin-top:2px; }
@@ -805,10 +806,15 @@ async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Read
   if(warn.length){ msg($('packMsg'), warn.join(' '), 'err'); setMod('snd','Check','err'); } else { msg($('packMsg'), ''); setMod('snd','Ready','on'); }
   renderPack(r.pack); }
 const ROLE_LEDS = [['kick','Kick'],['clap','Clap'],['chat','Hats'],['perc','Perc'],['bass','Bass'],['synth','Synth'],['pad','Pad'],['atmos','Atmos'],['fx','FX']];
+const KIND_ROLES = {kick:['kick'], clap:['clap'], chat:['chat','ohat','hat_loop'], perc:['perc','perc_loop','shaker_loop','perc_loop2'], bass:['bass'], synth:['synth'], pad:['pad'], atmos:['atmos'], fx:['impact','uplifter','downlifter']};
 function renderLeds(br){ const n = k => k==='chat' ? ((br.chat||0)+(br.ohat||0)+(br.shaker||0)) : k==='perc' ? ((br.perc||0)+(br.top||0)) : k==='fx' ? ((br.fx||0)+(br.impact||0)+(br.uplifter||0)+(br.downlifter||0)) : (br[k]||0);
-  const counts = ROLE_LEDS.map(([k,l])=>[l, n(k)]); const mx = Math.max(1, ...counts.map(c=>c[1]));
-  $('roleLeds').innerHTML = counts.map(([l,c])=>`<div class="kr ${c?'':'off'}"><span class="kl">${l}</span><div class="bar"><i style="--w:${(c/mx).toFixed(3)}"></i></div><b>${S.pack ? (c||'—') : '—'}</b></div>`).join('');
-  requestAnimationFrame(()=>$('roleLeds').querySelectorAll('.bar i').forEach(i=>{ i.style.transform=`scaleX(${i.style.getPropertyValue('--w')||0})`; })); }
+  $('roleLeds').innerHTML = ROLE_LEDS.map(([k,l],i)=>`<div class="kr ${n(k)?'':'off'}" data-kind="${k}"><span class="kl">${l}</span><canvas style="--d:${i*45}ms"></canvas><b>${S.pack ? (n(k)||'—') : '—'}</b></div>`).join('');
+  drawKindWaves(); }
+function kindSound(k){ for(const role of KIND_ROLES[k]||[]){ const r=S.kit.find(x=>x.role===role && x.chosen); if(r) return r.chosen; } return null; }
+function drawKindWaves(){ const dark=document.documentElement.dataset.theme==='dark'; const empty = dark?'rgba(255,255,255,.1)':'rgba(20,20,30,.1)';
+  $('roleLeds').querySelectorAll('.kr').forEach(row=>{ const k=row.dataset.kind, cv=row.querySelector('canvas'), snd=kindSound(k); row.classList.toggle('has', !!snd);
+    if(snd){ drawPeaks(cv, PEAKS.get(snd.path)||null, empty); peaksFor(snd.path).then(pk=>{ if(row.isConnected) drawPeaks(cv, pk, empty); }); row.onclick=()=>audition(snd.path, null); row.title=snd.name; } else { drawPeaks(cv, null, empty); row.onclick=null; }
+    requestAnimationFrame(()=>requestAnimationFrame(()=>cv.classList.add('in'))); }); }
 function kitRows(br){ return Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); }
 function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCount'), pack.count); const br=pack.by_role||{}; renderLeds(br); loadKit();
   const rows = Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); const mx = rows.length ? rows[0][1] : 1;
@@ -818,9 +824,9 @@ const KIT_ICON = {prev:'<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg
 async function loadKit(){ if(!S.packPath) return; const r = await api().kit_options(S.packPath, S.ref ? userBpm() : null, S.kitOverrides); if(!r.ok){ msg($('packMsg'), r.error, 'err'); return; } S.kit = r.kit; renderKit(); }
 const PEAKS = new Map();
 async function peaksFor(path){ if(PEAKS.has(path)) return PEAKS.get(path); const r = await api().sample_peaks(path); const pk = (r && r.ok) ? r.peaks : null; PEAKS.set(path, pk); return pk; }
-function drawPeaks(cv, pk){ const dpr=fitCanvas(cv); if(!dpr) return; const ctx=cv.getContext('2d'); const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); if(!pk){ ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(0,H/2-dpr*.5,W,dpr); return; }
+function drawPeaks(cv, pk, empty){ const dpr=fitCanvas(cv); if(!dpr) return; const ctx=cv.getContext('2d'); const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); if(!pk){ ctx.fillStyle=empty||'rgba(255,255,255,.08)'; ctx.fillRect(0,H/2-dpr*.5,W,dpr); return; }
   const n=pk.length, gap=W/n; ctx.fillStyle=`rgba(${ACC()},.9)`; for(let i=0;i<n;i++){ const h=Math.max(dpr, pk[i]*H*.95); ctx.fillRect(i*gap+gap*.2, (H-h)/2, Math.max(dpr, gap*.6), h); } }
-function renderKit(){ const rows = S.kit; if(!rows.length) return; const sel = rows.filter(r=>r.chosen).length; $('roUsed').textContent = S.usedCount ? `${sel} selected · ${S.usedCount} used` : `${sel} selected`;
+function renderKit(){ const rows = S.kit; if(!rows.length) return; drawKindWaves(); const sel = rows.filter(r=>r.chosen).length; $('roUsed').textContent = S.usedCount ? `${sel} selected · ${S.usedCount} used` : `${sel} selected`;
   const stem = n => esc(String(n).replace(/^TPS - Oasis - /,'').replace(/\.[^.]+$/,''));
   $('kitView').innerHTML = `<div class="dvhead"><div class="t">Your sounds<small>${rows.length} roles · ${S.pack?S.pack.count:0} sounds</small></div><div class="r">${Object.keys(S.kitOverrides).length ? `<b>${Object.keys(S.kitOverrides).length}</b> changed by you` : 'FLOW\u2019s first pick · swap any'}</div></div>
     <div class="tiles">${rows.map(r=>{ const n=r.candidates.length; const idx=r.chosen ? Math.max(0, r.candidates.findIndex(c=>c.path===r.chosen.path)) : -1;
