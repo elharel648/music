@@ -6,7 +6,7 @@ They are deliberately simple: the structure comes from the reference, the patter
 from __future__ import annotations
 import os
 import numpy as np
-from . import audio
+from . import audio, styles as stylelib
 
 # (beats within a bar, every_n_bars, bar_offset)
 PATTERNS = {
@@ -25,12 +25,22 @@ PATTERNS = {
 MIDI_ROOT = {"bass": 36, "synth": 60}  # C1 for bass, C3 for synth (Live's C3 = 60)
 
 
-def midi_notes(role: str, tonic_pc: int, bars: int = 4) -> list[dict]:
+def pattern_for(role: str, style: str | None = None) -> dict:
+    """The pattern for `role` in `style`: the default, with the style's overrides on top."""
+    base = PATTERNS.get(role, PATTERNS["perc"])
+    over = stylelib.get(style).patterns.get(role) if style else None
+    return {**base, **over} if over else base
+
+
+def midi_notes(role: str, tonic_pc: int, bars: int = 4, style: str | None = None) -> list[dict]:
     """Notes in beats for a MIDI clip of `bars` bars, following the same pattern as the audio render."""
-    p = PATTERNS[role]
+    p = pattern_for(role, style)
     root = MIDI_ROOT[role] + tonic_pc
     notes, k = [], 0
+    every = p.get("every", 1)
     for b in range(bars):
+        if every > 1 and (b % every) != every - 1:
+            continue
         for beat in p["beats"]:
             st = p.get("pitch_cycle", [0])
             pitch = root + st[k % len(st)]
@@ -39,14 +49,14 @@ def midi_notes(role: str, tonic_pc: int, bars: int = 4) -> list[dict]:
     return notes
 
 
-def render_loop(role: str, sample_path: str, bpm: float, bars: int = 4, sr: int = 48000, transpose: float = 0.0) -> np.ndarray:
+def render_loop(role: str, sample_path: str, bpm: float, bars: int = 4, sr: int = 48000, transpose: float = 0.0, style: str | None = None) -> np.ndarray:
     """Render a `bars`-bar loop at `bpm` from a one-shot. Returns (2, n) float32."""
     y, _ = audio.load(sample_path, sr=sr)
     if y.shape[0] == 1:
         y = np.vstack([y, y])
     if transpose:
         y = audio.pitch_shift_resample(y, transpose)
-    p = PATTERNS[role]
+    p = pattern_for(role, style)
     bar_len = 240.0 / bpm
     n = int(bar_len * bars * sr)
     buf = np.zeros((2, n), dtype=np.float32)
@@ -92,7 +102,7 @@ def _norm(buf):
     return buf
 
 
-def render_kit_loops(kit: dict, bpm: float, out_dir: str, transpose: dict | None = None, sr: int = 48000) -> dict:
+def render_kit_loops(kit: dict, bpm: float, out_dir: str, transpose: dict | None = None, sr: int = 48000, style: str | None = None) -> dict:
     """Render loops for every one-shot role in the kit. Returns role -> {path, bars}."""
     os.makedirs(out_dir, exist_ok=True)
     out = {}
@@ -102,14 +112,14 @@ def render_kit_loops(kit: dict, bpm: float, out_dir: str, transpose: dict | None
         if not s or s.get("is_loop"):
             continue
         tr = (transpose or {}).get(role, 0.0)
-        y = render_loop(pat, s["path"], bpm, 4, sr, tr)
-        name = f"{os.path.splitext(s['name'])[0]} - {pat} 4bar.wav".replace("/", "-")
+        y = render_loop(pat, s["path"], bpm, 4, sr, tr, style)
+        name = f"{os.path.splitext(s['name'])[0]} - {pat} {style or 'house'} 4bar.wav".replace("/", "-")
         path = os.path.join(out_dir, name)
         audio.write(path, y, sr)
         out[role] = {"path": path, "bars": 4, "source": s["name"]}
     if kit.get("tom") and not kit["tom"].get("is_loop"):
         for extra in ("tom_b", "tom_c"):
-            y = render_loop(extra, kit["tom"]["path"], bpm, 4, sr)
+            y = render_loop(extra, kit["tom"]["path"], bpm, 4, sr, 0.0, style)
             path = os.path.join(out_dir, f"{os.path.splitext(kit['tom']['name'])[0]} - {extra} 4bar.wav")
             audio.write(path, y, sr)
             out[extra] = {"path": path, "bars": 4, "source": kit["tom"]["name"]}

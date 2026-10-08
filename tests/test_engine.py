@@ -149,3 +149,57 @@ def test_finish_parameter_mappings():
     assert finish.eq8_freq(10) == 0.0 and finish.eq8_freq(22000) == 1.0
     assert finish.utility_gain(0) == 0.0 and finish.utility_gain(-35) == -1.0 and abs(finish.utility_gain(-3) + 0.0857) < 0.001
     assert finish.reverb_decay(200) == 0.0 and abs(finish.reverb_decay(4000) - 0.525) < 0.002
+
+
+def test_styles_library_consistent():
+    from flow import styles, patterns
+    assert len(styles.STYLES) >= 8
+    for st in styles.STYLES.values():
+        assert set(st.template) == set(styles.SECTIONS), st.key
+        for roles in st.template.values():
+            assert set(roles) <= styles.ROLES, (st.key, roles)
+        for role, pat in st.patterns.items():
+            assert role in patterns.PATTERNS, (st.key, role)
+            assert set(pat) <= {"beats", "gain", "accent", "every", "pitch_cycle"}, (st.key, role)
+        assert st.bpm[0] < st.bpm[1] and 0 < st.duck <= 1 and set(st.vocal_sections) <= set(styles.SECTIONS)
+    assert styles.get("afro").key == "afro_house" and styles.get("nope").key == "house" and styles.get(None).key == "house"
+    assert [s["key"] for s in styles.listing()] == list(styles.STYLES)
+
+
+def test_pattern_for_overrides_and_midi():
+    from flow import patterns
+    assert patterns.pattern_for("chat", "tech_house")["beats"] != patterns.PATTERNS["chat"]["beats"]
+    assert patterns.pattern_for("kick", "tech_house") == patterns.PATTERNS["kick"]
+    assert patterns.pattern_for("bass", None) == patterns.PATTERNS["bass"]
+    assert len(patterns.midi_notes("synth", 0, 4, style="minimal")) == 2   # every 2nd bar, one hit
+    assert len(patterns.midi_notes("bass", 0, 4, style="peak_techno")) == 48
+
+
+def test_vocal_phrases_and_time_stretch():
+    import numpy as np
+    from flow import vocal, audio
+    sr = 22050
+    t = np.arange(sr * 6) / sr
+    y = np.zeros_like(t)
+    for a, b in ((0.5, 1.6), (3.0, 4.3)):
+        m = (t >= a) & (t < b)
+        y[m] = 0.5 * np.sin(2 * np.pi * 220 * t[m])
+    ph = vocal.split_phrases(y.astype(np.float32), sr)
+    assert len(ph) == 2 and abs(ph[0][0] - 0.5) < 0.1 and abs(ph[1][1] - 4.3) < 0.2
+    st = audio.time_stretch(np.vstack([y, y]).astype(np.float32), 1.1)
+    assert st.shape[0] == 2 and abs(st.shape[1] / len(y) - 1.1) < 0.03
+
+
+def test_place_vocal_respects_sections_and_style():
+    from flow import arrange
+    sections = [{"label": "Intro", "start": 1, "end": 17, "bars": 16}, {"label": "Drop", "start": 17, "end": 49, "bars": 32},
+                {"label": "Breakdown", "start": 49, "end": 65, "bars": 16}]
+    voc = {"name": "v.wav", "phrases": [{"path": "a.wav", "bars": 2, "seconds": 3.8}, {"path": "b.wav", "bars": 4, "seconds": 7.6}]}
+    pl = arrange.place_vocal(sections, voc, "house")
+    assert pl
+    for p in pl:
+        assert any(s["start"] <= p["bar"] and p["bar"] + p["bars"] <= s["end"] and s["label"] in ("Drop", "Breakdown") for s in sections)
+    assert not any(17 <= p["bar"] < 25 for p in pl)                       # the drop lands first
+    assert sum(p["bars"] for p in pl if 17 <= p["bar"] < 49) <= 32 * 0.6  # drops are not wall-to-wall vocal
+    peak = arrange.place_vocal(sections, voc, "peak_techno")
+    assert peak and all(p["bar"] >= 49 for p in peak)                     # peak techno: breakdown only

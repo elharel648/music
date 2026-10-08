@@ -4,32 +4,9 @@ A plan is DAW-agnostic: tracks with spans in bars, one-shot hits in bars, MIDI n
 """
 from __future__ import annotations
 import math
-from . import patterns
+from . import patterns, styles as stylelib
 
-STYLE_TEMPLATES = {
-    # which layers live in which section label. Measured kick/hats presence from the reference overrides kick/hats.
-    "house": {
-        "Intro":     ["atmos", "pad", "kick", "tom", "tom_b", "shaker_loop", "perc"],
-        "Groove":    ["atmos", "pad", "kick", "tom", "tom_b", "tom_c", "shaker_loop", "perc", "bass", "synth", "perc_loop", "chat"],
-        "Drop":      ["atmos", "pad", "kick", "tom", "tom_b", "tom_c", "shaker_loop", "perc", "bass", "synth", "perc_loop", "chat", "clap", "hat_loop"],
-        "Breakdown": ["atmos", "pad", "synth"],
-        "Build":     ["atmos", "pad", "synth", "tom", "tom_b", "snare_roll"],
-        "Return":    ["atmos", "pad", "kick", "tom", "tom_b", "shaker_loop", "perc", "bass", "synth", "perc_loop"],
-        "Drop 2":    ["atmos", "pad", "kick", "tom", "tom_b", "tom_c", "shaker_loop", "perc", "bass", "synth", "perc_loop", "chat", "clap", "hat_loop", "ohat", "perc_loop2"],
-        "Outro":     ["atmos", "kick", "shaker_loop", "bass", "perc"],
-    },
-}
-STYLE_TEMPLATES["techno"] = {
-    "Intro":     ["atmos", "kick", "chat", "shaker_loop"],
-    "Groove":    ["atmos", "kick", "chat", "shaker_loop", "bass", "perc_loop", "perc"],
-    "Drop":      ["atmos", "kick", "chat", "ohat", "shaker_loop", "bass", "perc_loop", "perc", "clap", "synth"],
-    "Breakdown": ["atmos", "pad", "synth", "chat"],
-    "Build":     ["atmos", "pad", "synth", "chat", "snare_roll"],
-    "Return":    ["atmos", "kick", "chat", "shaker_loop", "bass", "perc_loop"],
-    "Drop 2":    ["atmos", "kick", "chat", "ohat", "shaker_loop", "bass", "perc_loop", "perc_loop2", "perc", "clap", "synth", "hat_loop"],
-    "Outro":     ["atmos", "kick", "chat", "bass"],
-}
-STYLE_TEMPLATES["afro"] = STYLE_TEMPLATES["house"]
+STYLE_TEMPLATES = {k: st.template for k, st in stylelib.STYLES.items()}  # kept for the CLI and older callers
 
 LOOP_ROLES = {"shaker_loop", "hat_loop", "perc_loop", "perc_loop2", "pad", "atmos"}
 ONESHOT_ROLES = {"kick", "clap", "ohat", "chat", "tom", "tom_b", "tom_c", "perc", "bass", "synth", "snare_roll"}
@@ -85,11 +62,14 @@ def scale_sections(sections: list[dict], total: int) -> list[dict]:
 
 
 def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, length_seconds: float | None = None,
-               style: str = "house", midi_roles: dict | None = None, sidechain: str | None = None) -> dict:
-    """Return the plan. midi_roles: {'bass': {'name': 'Serum', 'uri': ...}, ...} makes those roles MIDI tracks."""
+               style: str = "house", midi_roles: dict | None = None, sidechain: str | None = None, vocal: dict | None = None) -> dict:
+    """Return the plan. midi_roles: {'bass': {'name': 'Serum', 'uri': ...}, ...} makes those roles MIDI tracks.
+    vocal: the output of flow.vocal.prepare (phrases already at the project tempo and key), placed where the style wants it."""
     bpm = bpm or ref["bpm"]
     midi_roles = midi_roles or {}
-    tmpl = STYLE_TEMPLATES.get(style, STYLE_TEMPLATES["house"])
+    st = stylelib.get(style)
+    style = st.key
+    tmpl = st.template
     total = target_bars(length_seconds, bpm, ref["bars"])
     sections = scale_sections(ref["sections"], total)
     tonic = ref["key"]["pc"]
@@ -140,12 +120,19 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
         if role in midi_roles:
             t["kind"] = "midi"
             t["plugin"] = midi_roles[role]
-            t["notes"] = patterns.midi_notes(role, tonic, 4)
+            t["notes"] = patterns.midi_notes(role, tonic, 4, style=style)
             t["clip_bars"] = 4
         else:
             t["kind"] = "audio"
             t["clip_bars"] = src["bars"] or 4
         tracks.append(t)
+
+    if vocal and vocal.get("phrases"):
+        placements = place_vocal(sections, vocal, style)
+        if placements:
+            ph0 = vocal["phrases"][0]
+            tracks.append({"name": f"Vocal · {vocal['name'].rsplit('.', 1)[0]}", "role": "vocal", "kind": "audio", "spans": [], "placements": placements,
+                           "source": {"path": ph0["path"], "bars": None, "kind": "oneshot", "name": vocal["name"]}, "clip_bars": 4})
 
     # FX one-shots at section edges
     fx_tracks = []
@@ -174,10 +161,38 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
     }
 
 
+def place_vocal(sections: list[dict], vocal: dict, style: str) -> list[dict]:
+    """Phrases, in order, cycling, in the sections the style wants a vocal in. Drops get it after their first
+    8 bars and at most 60% of their length; breakdowns from bar one. Phrases sit on a 2-bar grid and never cross a section edge."""
+    st = stylelib.get(style)
+    phrases = vocal.get("phrases") or []
+    if not phrases:
+        return []
+    out, k = [], 0
+    for s in sections:
+        label = s["label"] if s["label"] in stylelib.SECTIONS else ("Drop 2" if s["label"].startswith("Drop") else "Groove")
+        if label not in st.vocal_sections:
+            continue
+        is_drop = label.startswith("Drop") or label == "Return"
+        lead = min(8, max(0, s["bars"] - 8)) if is_drop else 0
+        budget = s["bars"] if label == "Breakdown" else max(2, int(s["bars"] * 0.6))
+        bar, used = s["start"] + lead, 0
+        while bar < s["end"]:
+            ph = phrases[k % len(phrases)]
+            if bar + ph["bars"] > s["end"] or used + ph["bars"] > budget:
+                break
+            out.append({"bar": int(bar), "path": ph["path"], "bars": int(ph["bars"]), "phrase": k % len(phrases)})
+            k += 1
+            used += ph["bars"]
+            bar += ph["bars"] + (2 if k % 2 == 0 else 0)
+            bar += (bar - s["start"]) % 2
+    return out
+
+
 def _track_name(role: str, src_name: str) -> str:
     pretty = {"kick": "Kick", "clap": "Clap", "ohat": "Open Hat", "chat": "Closed Hat", "tom": "Tom", "tom_b": "Tom B", "tom_c": "Tom C",
               "perc": "Perc", "shaker_loop": "Shaker Loop", "hat_loop": "Hat Loop", "perc_loop": "Perc Loop", "perc_loop2": "Perc Loop 2",
-              "bass": "Bass", "synth": "Synth", "pad": "Pad", "atmos": "Atmosphere", "snare_roll": "Build Roll"}
+              "bass": "Bass", "synth": "Synth", "pad": "Pad", "atmos": "Atmosphere", "snare_roll": "Build Roll", "vocal": "Vocal"}
     base = src_name.rsplit(".", 1)[0]
     return f"{pretty.get(role, role.title())} · {base}"
 
@@ -191,8 +206,8 @@ def plan_view(plan: dict) -> dict:
     `layers[i]` is plan['tracks'][i], so a '@track:i' progress event maps straight onto it."""
     layers = []
     for i, t in enumerate(plan.get("tracks", [])):
-        layers.append({"i": i, "name": t["name"].split(" · ")[0], "role": t["role"],
-                       "spans": [[int(a), int(b)] for a, b in t.get("spans", [])],
+        spans = [[int(a), int(b)] for a, b in t.get("spans", [])] + [[int(p["bar"]), int(p["bar"] + p["bars"])] for p in t.get("placements", [])]
+        layers.append({"i": i, "name": t["name"].split(" · ")[0], "role": t["role"], "spans": spans,
                        "hits": [float(h) for h in t.get("hits", [])],
                        "sweeps": [int(b) for b, _p in t.get("sweeps", [])], "sweep_bars": int(t.get("sweep_bars") or 8)})
     return {"bars": int(plan.get("bars") or 0), "bpm": float(plan.get("bpm") or 120),

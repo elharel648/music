@@ -158,7 +158,7 @@ class Live:
         base = self.session()["track_count"]
         tracks = plan["tracks"]
         report = {"tracks": [], "warnings": []}
-        total_steps = sum(len(t.get("spans", [])) * 4 + len(t.get("hits", [])) for t in tracks) + len(tracks) + 2
+        total_steps = sum(len(t.get("spans", [])) * 4 + len(t.get("hits", [])) + len(t.get("placements", [])) for t in tracks) + len(tracks) + 2
         done = 0
 
         def tick(msg):
@@ -190,7 +190,7 @@ class Live:
                         report["warnings"].append(f"{t['name']}: could not load {t['plugin'].get('name')} ({e})")
                 else:
                     report["warnings"].append(f"{t['name']}: plug-in {t.get('plugin', {}).get('name')} not found in Live's browser")
-            else:
+            elif t.get("spans") or t.get("hits"):
                 self.call("create_audio_clip", track_index=ti, clip_index=0, path=t["source"]["path"])
             n = 0
             for s, e in t.get("spans", []):
@@ -206,6 +206,14 @@ class Live:
                     self.call("duplicate_session_clip_to_arrangement", track_index=ti, clip_index=1, destination_time=(sb - 1) * 4.0)
                     n += 1
                 tick(f"{t['name']}: sweep into the drop")
+            slots: dict[str, int] = {}
+            for pl in t.get("placements", []):
+                if pl["path"] not in slots:
+                    slots[pl["path"]] = 2 + len(slots)
+                    self.call("create_audio_clip", track_index=ti, clip_index=slots[pl["path"]], path=pl["path"])
+                self.call("duplicate_session_clip_to_arrangement", track_index=ti, clip_index=slots[pl["path"]], destination_time=(pl["bar"] - 1) * 4.0)
+                n += 1
+                tick(f"{t['name']}: phrase at bar {pl['bar']}")
             for hb in t.get("hits", []):
                 self.call("duplicate_session_clip_to_arrangement", track_index=ti, clip_index=0, destination_time=(hb - 1) * 4.0)
                 n += 1

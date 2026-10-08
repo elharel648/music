@@ -9,7 +9,7 @@ import traceback
 
 import webview
 
-from . import __version__, PRODUCT, analysis, pack as packmod, plugins, license as lic, cli as flowcli
+from . import __version__, PRODUCT, analysis, pack as packmod, plugins, license as lic, cli as flowcli, styles as stylelib
 
 
 def _ui_path() -> str:
@@ -53,7 +53,7 @@ class Api:
 
     def save_session(self, opts: dict):
         try:
-            keep = {k: opts.get(k) for k in ("reference", "pack", "length", "target", "out", "style", "bpm", "synth", "sidechain", "finish")}
+            keep = {k: opts.get(k) for k in ("reference", "pack", "length", "target", "out", "style", "bpm", "synth", "sidechain", "finish", "vocal")}
             with open(self._session_path(), "w") as f:
                 json.dump(keep, f)
             return {"ok": True}
@@ -81,6 +81,21 @@ class Api:
         r = self.window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False,
                                            file_types=("Audio (*.wav;*.aif;*.aiff;*.mp3;*.flac)", "All files (*.*)"))
         return r[0] if r else None
+
+    def pick_vocal(self):
+        r = self.window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False,
+                                           file_types=("Audio (*.wav;*.aif;*.aiff;*.mp3;*.flac)", "All files (*.*)"))
+        return r[0] if r else None
+
+    def analyze_vocal(self, path: str):
+        try:
+            from . import vocal
+            return {"ok": True, "vocal": vocal.analyze(path)}
+        except Exception as e:
+            return {"ok": False, "error": f"{e}"}
+
+    def styles(self):
+        return stylelib.listing()
 
     def pick_folder(self):
         r = self.window.create_file_dialog(webview.FOLDER_DIALOG)
@@ -193,7 +208,7 @@ class Api:
                     opts.get("target", "stems"), opts.get("out") or None, opts.get("style", "house"), opts.get("bpm") or None,
                     opts.get("synth") or None, opts.get("sidechain") or None, bool(opts.get("force")), progress=self._emit,
                     work_dir=opts.get("work_dir") or None, finish_opts=set(fin) if isinstance(fin, list) else None,
-                    on_plan=self._emit_plan)
+                    on_plan=self._emit_plan, vocal=opts.get("vocal") or None)
                 res.pop("reference", None)
                 plan = res.get("plan", {})
                 from . import arrange

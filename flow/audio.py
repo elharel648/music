@@ -57,3 +57,32 @@ def onset_envelope(S: np.ndarray) -> np.ndarray:
 
 def db(x: float) -> float:
     return float(10 * np.log10(max(x, 1e-12)))
+
+
+def time_stretch(y: np.ndarray, factor: float, n_fft: int = 2048, hop: int = 512) -> np.ndarray:
+    """Phase-vocoder time stretch without changing pitch. factor = output length / input length. (ch, n) in and out."""
+    if abs(factor - 1.0) < 1e-3:
+        return y.astype(np.float32)
+    from scipy.signal import stft, istft
+    outs = []
+    for ch in y:
+        _f, _t, Z = stft(ch, nperseg=n_fft, noverlap=n_fft - hop, padded=True)
+        n_frames = Z.shape[1]
+        steps = np.arange(0.0, max(1.0, n_frames - 1), 1.0 / factor)
+        omega = 2 * np.pi * hop * np.arange(Z.shape[0]) / n_fft
+        phase = np.angle(Z[:, 0]).astype(np.float64)
+        out = np.zeros((Z.shape[0], len(steps)), dtype=np.complex128)
+        for i, st in enumerate(steps):
+            j = int(st)
+            frac = st - j
+            z0 = Z[:, j]
+            z1 = Z[:, min(j + 1, n_frames - 1)]
+            mag = (1 - frac) * np.abs(z0) + frac * np.abs(z1)
+            out[:, i] = mag * np.exp(1j * phase)
+            dphi = np.angle(z1) - np.angle(z0) - omega
+            dphi -= 2 * np.pi * np.round(dphi / (2 * np.pi))
+            phase += omega + dphi
+        _t2, x = istft(out, nperseg=n_fft, noverlap=n_fft - hop)
+        outs.append(x)
+    n = min(len(o) for o in outs)
+    return np.vstack([o[:n] for o in outs]).astype(np.float32)

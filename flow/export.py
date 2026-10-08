@@ -8,7 +8,7 @@ import json
 import os
 import struct
 import numpy as np
-from . import audio, arrange
+from . import audio, arrange, patterns as patmod
 
 GM = {"kick": 36, "clap": 39, "snare_roll": 38, "chat": 42, "ohat": 46, "tom": 45, "tom_b": 47, "tom_c": 43, "perc": 63, "shaker_loop": 70}
 
@@ -50,6 +50,14 @@ def render_stems(plan: dict, out_dir: str, sr: int = 48000, progress=None, tail_
             i0 = int((sb - 1) * bar_len * sr)
             i1 = min(n, i0 + sw.shape[1])
             buf[:, i0:i1] += sw[:, : i1 - i0]
+        for pl in t.get("placements", []):
+            if pl["path"] not in cache:
+                yp, _ = audio.load(pl["path"], sr=sr)
+                cache[pl["path"]] = np.vstack([yp, yp]) if yp.shape[0] == 1 else yp
+            yp = cache[pl["path"]]
+            i0 = int((pl["bar"] - 1) * bar_len * sr)
+            i1 = min(n, i0 + yp.shape[1])
+            buf[:, i0:i1] += yp[:, : i1 - i0]
         peak = float(np.abs(buf).max())
         if peak > 0.98:
             buf *= 0.98 / peak
@@ -122,8 +130,7 @@ def write_midi(plan: dict, path: str, tpq: int = 480) -> str:
             tracks.append(_track(ev))
             ch = (ch + 1) % 9
         elif role in GM:
-            from .patterns import PATTERNS
-            p = PATTERNS.get(role if role in PATTERNS else "perc", {"beats": [0]})
+            p = patmod.pattern_for(role, plan.get("style"))
             beats = p.get("beats", [0])
             every = p.get("every", 1)
             for s, e in t.get("spans", []):

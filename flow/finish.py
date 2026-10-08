@@ -5,6 +5,7 @@ parameter degrades to a warning instead of a crash. No DSP is written here: Able
 """
 from __future__ import annotations
 from typing import Callable
+from . import styles as stylelib
 
 OPTIONS = [
     ("gain", "Gain staging", "Every track at a sensible level relative to the kick, with Utility."),
@@ -19,11 +20,11 @@ DEFAULT_ON = {"gain", "lowcut", "duck", "space", "glue", "transitions"}
 # starting balance in dB relative to the kick (0). A starting point, not a mix.
 GAIN_DB = {"kick": 0, "bass": -3, "clap": -6, "snare_roll": -8, "chat": -12, "ohat": -12, "hat_loop": -11, "shaker_loop": -12,
            "perc": -9, "perc_loop": -9, "perc_loop2": -10, "tom": -8, "tom_b": -9, "tom_c": -9, "synth": -8, "pad": -14, "atmos": -14,
-           "impact": -6, "uplifter": -8, "downlifter": -8}
+           "impact": -6, "uplifter": -8, "downlifter": -8, "vocal": -5}
 LOWCUT_HZ = {"clap": 180, "snare_roll": 150, "chat": 300, "ohat": 300, "hat_loop": 250, "shaker_loop": 250, "perc": 150, "perc_loop": 140,
              "perc_loop2": 140, "tom": 90, "tom_b": 90, "tom_c": 90, "synth": 160, "pad": 200, "atmos": 200, "impact": 60,
-             "uplifter": 200, "downlifter": 120}
-SPACE = {"pad": ("reverb", 0.28, 4.0), "atmos": ("reverb", 0.30, 5.0), "clap": ("reverb", 0.18, 1.6), "synth": ("delay", 0.16, None), "tom": ("reverb", 0.12, 1.2)}
+             "uplifter": 200, "downlifter": 120, "vocal": 150}
+SPACE = {"vocal": ("reverb", 0.22, 1.8), "pad": ("reverb", 0.28, 4.0), "atmos": ("reverb", 0.30, 5.0), "clap": ("reverb", 0.18, 1.6), "synth": ("delay", 0.16, None), "tom": ("reverb", 0.12, 1.2)}
 GLUE_ROLES = {"clap", "perc", "perc_loop", "perc_loop2", "tom", "tom_b", "tom_c", "shaker_loop", "hat_loop"}
 NO_DUCK = {"kick", "impact", "uplifter", "downlifter", "snare_roll"}
 
@@ -61,6 +62,7 @@ def apply(live, plan: dict, base_index: int, options: set[str], sidechain: str |
     warnings: list[str] = []
     tracks = plan["tracks"]
     n = max(1, len(tracks))
+    st = stylelib.get(plan.get("style"))
     sc_uri = live.find_plugin(sidechain) if (sidechain and "duck" in options) else None
     if "duck" in options and sidechain and not sc_uri:
         warnings.append(f"Sidechain plug-in {sidechain} not found in Live's browser; using Auto Pan instead.")
@@ -85,16 +87,16 @@ def apply(live, plan: dict, base_index: int, options: set[str], sidechain: str |
                     d = live.add_device(ti, URIS["autopan"])
                     live.set_param(ti, d, "Waveform", 2.0)        # saw down: dip on the beat, recover before the next
                     live.set_param(ti, d, "Phase", 180.0)         # both channels together: volume, not panning
-                    live.set_param(ti, d, "Amount", 0.55)
+                    live.set_param(ti, d, "Amount", float(st.duck))
                     live.set_param(ti, d, "LFO Type", 1.0)        # sync to the beat
                     live.set_param(ti, d, "Sync Rate", AUTOPAN_QUARTER)
                     live.set_param(ti, d, "Shape", 0.5)
             if "space" in options and role in SPACE:
                 kind, wet, decay = SPACE[role]
                 d = live.add_device(ti, URIS["reverb" if kind == "reverb" else "delay"])
-                live.set_param(ti, d, "Dry/Wet", float(wet))
+                live.set_param(ti, d, "Dry/Wet", min(0.5, float(wet) * (st.reverb if kind == "reverb" else 1.0)))
                 if decay:
-                    live.set_param(ti, d, "Decay Time", reverb_decay(decay * 1000.0))
+                    live.set_param(ti, d, "Decay Time", reverb_decay(decay * 1000.0 * st.reverb))
             if "glue" in options and role in GLUE_ROLES:
                 d = live.add_device(ti, URIS["drumbuss"])
                 live.set_param(ti, d, "Drive", 0.25)

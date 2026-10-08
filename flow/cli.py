@@ -6,7 +6,7 @@ import os
 import sys
 import tempfile
 
-from . import __version__, analysis, pack as packmod, patterns, arrange, export, plugins, license as lic
+from . import __version__, analysis, pack as packmod, patterns, arrange, export, plugins, license as lic, styles as stylelib
 
 
 def parse_length(s) -> float | None:
@@ -25,7 +25,7 @@ def parse_length(s) -> float | None:
 
 def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, out: str | None, style: str = "house",
               bpm: float | None = None, midi_synth: str | None = None, sidechain: str | None = None, force: bool = False,
-              progress=None, work_dir: str | None = None, finish_opts: set[str] | None = None, on_plan=None) -> dict:
+              progress=None, work_dir: str | None = None, finish_opts: set[str] | None = None, on_plan=None, vocal: str | None = None) -> dict:
     from . import finish as finishmod, transitions
     finish_opts = set(finish_opts) if finish_opts is not None else set(finishmod.DEFAULT_ON)
     prog = progress or (lambda m, p: None if m.startswith("@") else print(f"[{p * 100:5.1f}%] {m}"))
@@ -52,13 +52,20 @@ def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, o
         if s and s.get("key") and s["key"].get("pc") is not None:
             d = (ref["key"]["pc"] - s["key"]["pc"]) % 12
             transpose[role] = d if d <= 6 else d - 12
-    loops = patterns.render_kit_loops(kit, bpm, work, transpose=transpose)
-    prog(f"Rendered {len(loops)} pattern loops", 0.35)
+    style = stylelib.get(style).key
+    loops = patterns.render_kit_loops(kit, bpm, work, transpose=transpose, style=style)
+    prog(f"Rendered {len(loops)} pattern loops ({stylelib.get(style).name})", 0.35)
+    voc = None
+    if vocal:
+        from . import vocal as vocmod
+        info = vocmod.analyze(vocal)
+        voc = vocmod.prepare(info, bpm, ref["key"]["pc"], work, progress=lambda m, p: prog(m, 0.36))
+        prog(f"Vocal: {len(voc['phrases'])} phrases" + (" · " + "; ".join(voc["notes"]) if voc["notes"] else ""), 0.37)
     midi_roles = {}
     if midi_synth:
         midi_roles = {"bass": {"name": midi_synth}, "synth": {"name": midi_synth}}
     plan = arrange.build_plan(ref, kit, loops, bpm=bpm, length_seconds=length, style=style, midi_roles=midi_roles,
-                              sidechain=None)  # ducking is a finish move now
+                              sidechain=None, vocal=voc)  # ducking is a finish move now
     if "transitions" in finish_opts:
         n_sw = transitions.add_sweeps(plan, work, progress=lambda m, p: prog(m, 0.38))
         prog(f"Transition sweeps rendered: {n_sw}", 0.39)
@@ -97,7 +104,8 @@ def main(argv=None) -> int:
     b.add_argument("--length", help="target length, e.g. 6:30 or 390")
     b.add_argument("--target", choices=["ableton", "stems"], default="stems")
     b.add_argument("--out")
-    b.add_argument("--style", choices=sorted(arrange.STYLE_TEMPLATES), default="house")
+    b.add_argument("--style", choices=sorted(stylelib.STYLES) + sorted(stylelib.ALIASES), default="house")
+    b.add_argument("--vocal", help="an acapella, chant or hook to cut into phrases and place")
     b.add_argument("--bpm", type=float)
     b.add_argument("--synth", help="installed synth to drive bass/synth as MIDI (Ableton target), e.g. Serum")
     b.add_argument("--sidechain", help="sidechain plug-in to load on every non-kick track, e.g. 'Kickstart 2'")
@@ -116,7 +124,7 @@ def main(argv=None) -> int:
         return 0
     if args.cmd == "build":
         fin = None if args.finish is None else (set() if args.finish == "none" else {x.strip() for x in args.finish.split(",") if x.strip()})
-        r = run_build(args.ref, args.pack, parse_length(args.length), args.target, args.out, args.style, args.bpm, args.synth, args.sidechain, args.force, finish_opts=fin)
+        r = run_build(args.ref, args.pack, parse_length(args.length), args.target, args.out, args.style, args.bpm, args.synth, args.sidechain, args.force, finish_opts=fin, vocal=args.vocal)
         print(json.dumps({k: v for k, v in r.items() if k != "plan"}, indent=1, default=str))
         for line in arrange.describe(r["plan"]):
             print(" -", line)
