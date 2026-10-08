@@ -39,7 +39,7 @@
   .chip { height:28px; padding:0 10px 0 9px; border-radius:8px; border:1px solid var(--line); background:var(--mod); font-size:11.5px; font-weight:600; display:inline-flex; align-items:center; gap:7px; transition:border-color .2s, transform .2s var(--ease); }
   .chip:hover { border-color:var(--ink); transform:translateY(-1px); }
   .chip svg { stroke:var(--ink); }
-  .lic { font:500 10.5px var(--mono); color:var(--mut); letter-spacing:.08em; text-transform:uppercase; }
+  .lic { font-size:11px; font-weight:500; color:var(--mut); }
   .tsw { width:52px; height:28px; border-radius:8px; border:1px solid var(--line); background:var(--ctrl); position:relative; padding:0; }
   .tsw i { position:absolute; top:3px; left:3px; width:22px; height:20px; border-radius:6px; background:var(--mod); box-shadow:0 1px 3px rgba(0,0,0,.18); transition:transform .3s var(--spring); }
   :root[data-theme=dark] .tsw i { transform:translateX(24px); }
@@ -177,15 +177,15 @@
   .mod { background:var(--mod2); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; min-height:0; transition:background .35s, border-color .3s, box-shadow .3s; }
   .mod.act { border-color:color-mix(in srgb, var(--acc) 45%, var(--line)); }
   .mod .mb .frow2 { padding:0 1px; }
-  .mh { height:36px; flex:0 0 36px; background:transparent; color:var(--ink); display:flex; align-items:center; gap:8px; padding:0 13px; position:relative; border-bottom:1px solid var(--line); transition:border-color .3s; }
+  .mh { height:38px; flex:0 0 38px; background:transparent; color:var(--ink); display:flex; align-items:center; gap:8px; padding:0 13px; position:relative; border-bottom:1px solid var(--line); transition:border-color .3s; }
   .mod.act .mh { border-bottom-color:color-mix(in srgb, var(--acc) 70%, transparent); }
   .led { width:6px; height:6px; border-radius:50%; background:var(--tick); flex:0 0 6px; order:2; margin-left:2px; transition:background .3s; }
   .led.on { background:var(--mc); animation:beat var(--beat) ease-in-out infinite; }
   .led.work { background:var(--mc); animation:beat calc(var(--beat) / 2) ease-in-out infinite; }
   .led.err { background:var(--err); animation:none; }
   @keyframes beat { 0%,100% { opacity:.45; } 18% { opacity:1; } }
-  .num { font:500 10px var(--mono); color:var(--mut); letter-spacing:.06em; order:0; }
-  .mn { font-size:10px; font-weight:600; letter-spacing:.16em; color:var(--ink); order:1; }
+  .num, .led { display:none; }
+  .mn { font-size:13px; font-weight:600; letter-spacing:-.01em; color:var(--ink); }
   .frow2 { display:flex; align-items:center; gap:10px; min-height:28px; }
   .fname { flex:1; min-width:0; }
   .fname b { display:block; font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-.01em; }
@@ -197,7 +197,8 @@
   @keyframes nextring { 0% { box-shadow:0 0 0 0 color-mix(in srgb, var(--acc) 55%, transparent); } 100% { box-shadow:0 0 0 9px color-mix(in srgb, var(--acc) 0%, transparent); } }
   .big button.next { animation:nextring var(--beat) ease-out infinite, none; }
   .ro.big .v.dim, .ro.sm .v.dim { color:var(--mut); }
-  .ms { margin-left:auto; font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; order:3; }
+  .ms { margin-left:auto; font-size:11.5px; font-weight:500; color:var(--mut); white-space:nowrap; transition:color .3s; }
+  .ms.work { color:var(--acc); } .ms.err { color:var(--err); }
   .mb { flex:1; min-height:0; padding:10px 12px 12px; display:flex; flex-direction:column; gap:8px; }
   .pad { flex:1; min-height:0; border:1px solid var(--line); border-radius:10px; background:var(--mod2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; text-align:center; padding:12px; transition:border-color .2s, transform .25s var(--spring), background .2s; }
   .pad:hover { border-color:var(--acc); transform:translateY(-2px); }
@@ -239,7 +240,7 @@
   .vrow { display:flex; align-items:center; gap:9px; padding:0 0 0 2px; margin-top:auto; min-height:26px; }
   .vrow svg { stroke:var(--sec); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:0 0 14px; }
   .vrow.has svg { stroke:var(--acc); }
-  .vrow .body { flex:1; min-width:0; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vrow .body { flex:1; min-width:0; font-size:11.5px; font-weight:500; color:var(--mut); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .vrow.has .body { font:600 11.5px "IBM Plex Sans",sans-serif; letter-spacing:-.01em; text-transform:none; color:var(--ink); }
   .vrow .body small { font:500 9.5px var(--mono); color:var(--mut); font-weight:500; margin-left:8px; letter-spacing:.02em; }
   .vrow .x { background:none; border:0; padding:2px; color:var(--mut); display:flex; } .vrow .x:hover { color:var(--err); }
@@ -302,10 +303,10 @@
   .big.working button:disabled { color:var(--acc); animation:captext var(--beat) ease-in-out infinite; }
   @keyframes captext { 0%,100% { text-shadow:0 0 0 transparent; } 18% { text-shadow:0 0 10px color-mix(in srgb, var(--acc) 80%, transparent); } }
   .big.next { animation:nextring var(--beat) ease-out infinite; }
-  .bst { font:500 9.5px var(--mono); color:var(--sec); text-align:center; letter-spacing:.1em; text-transform:uppercase; min-height:14px; line-height:1.6; max-width:230px; }
+  .bst { font-size:11.5px; font-weight:500; color:var(--ink); text-align:center; min-height:14px; line-height:1.5; max-width:230px; }
   .bsub { font-size:10.5px; color:var(--mut); text-align:center; line-height:1.5; max-width:210px; }
   .acts { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
-  .foot { display:flex; align-items:center; gap:14px; padding:0 18px; font:500 10px var(--mono); color:var(--mut); letter-spacing:.1em; text-transform:uppercase; }
+  .foot { display:flex; align-items:center; gap:14px; padding:0 18px; font-size:11px; font-weight:500; color:var(--mut); }
   .foot .sp { flex:1; }
   .foot .st { display:flex; align-items:center; gap:7px; }
   .foot .st i { width:5px; height:5px; border-radius:50%; background:var(--led-off); } .foot .st i.ok { background:var(--ok); box-shadow:0 0 6px var(--ok); } .foot .st i.bad { background:var(--warn); }
@@ -353,7 +354,7 @@
 
   <section class="deck" id="deck">
     <div class="mod" data-m="ref" style="--mc:var(--c-ref)">
-      <div class="mh"><i class="led" id="ledRef"></i><span class="num">01</span><span class="mn">REFERENCE</span><span class="ms" id="msRef">Empty</span></div>
+      <div class="mh"><i class="led" id="ledRef"></i><span class="num">01</span><span class="mn">Reference</span><span class="ms" id="msRef">Empty</span></div>
       <div class="mb">
         <div class="frow2"><div class="fname empty" id="refName"><b>No track</b></div><button class="sb pri" id="pickRef">Choose</button></div>
         <div class="well">
@@ -366,7 +367,7 @@
       </div>
     </div>
     <div class="mod" data-m="snd" style="--mc:var(--c-snd)">
-      <div class="mh"><i class="led" id="ledSnd"></i><span class="num">02</span><span class="mn">SOUNDS</span><span class="ms" id="msSnd">Empty</span></div>
+      <div class="mh"><i class="led" id="ledSnd"></i><span class="num">02</span><span class="mn">Sounds</span><span class="ms" id="msSnd">Empty</span></div>
       <div class="mb">
         <div class="frow2"><div class="fname empty" id="packName"><b>No sounds</b></div><button class="sb pri" id="pickPack">Choose</button></div>
         <div class="well">
@@ -375,11 +376,11 @@
           <div class="leds" id="roleLeds"></div>
         </div>
         <div class="msg" id="packMsg"></div>
-        <div class="vrow" id="vocalRow"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal · optional</div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="sb" id="pickVocal">Add</button></div>
+        <div class="vrow" id="vocalRow"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal, optional</div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="sb" id="pickVocal">Add</button></div>
       </div>
     </div>
     <div class="mod" data-m="dir" style="--mc:var(--c-dir)">
-      <div class="mh"><i class="led" id="ledDir"></i><span class="num">03</span><span class="mn">DIRECTION</span><span class="ms" id="msDir">House · 4:30</span></div>
+      <div class="mh"><i class="led" id="ledDir"></i><span class="num">03</span><span class="mn">Direction</span><span class="ms" id="msDir">House · 4:30</span></div>
       <div class="mb" style="gap:6px">
         <div class="sel" id="styleSel"><div class="row"><button class="arr" id="stPrev"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="mid"><div class="n" id="stName">House</div><div class="g" id="stGroup">House · 120–128 BPM</div></div><button class="arr" id="stNext"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div><div class="dots" id="stDots"></div></div>
         <div class="knobwrap">
@@ -396,18 +397,18 @@
       </div>
     </div>
     <div class="mod" data-m="bld" style="--mc:var(--c-bld)">
-      <div class="mh"><i class="led" id="ledBld"></i><span class="num">04</span><span class="mn">BUILD</span><span class="ms" id="msBld">Waiting</span></div>
+      <div class="mh"><i class="led" id="ledBld"></i><span class="num">04</span><span class="mn">Build</span><span class="ms" id="msBld">Waiting</span></div>
       <div class="mb">
         <div class="bigwrap">
           <div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div>
-          <div class="bst" id="bst">Waiting for 01 · 02</div><div class="bsub">Builds this arrangement from your sounds and your direction. Nothing is decided for you.</div>
+          <div class="bst" id="bst">Waiting for a reference and your sounds</div><div class="bsub">Builds this arrangement from your sounds and your direction. Nothing is decided for you.</div>
           <div class="acts" id="acts"><button class="sb hidden" id="openOut">Open folder</button><button class="sb hidden" id="again">Build another</button><button class="lk hidden" id="toggleLog">Details</button></div>
         </div>
       </div>
     </div>
   </section>
 
-  <footer class="foot"><span>FLOW <span id="ver"></span> · © 2026 Harel Eliyahu</span><span class="sp"></span><span class="st" id="liveSt"><i id="liveLed"></i><span id="liveTxt">Ableton Live</span></span></footer>
+  <footer class="foot"><span>FLOW <span id="ver"></span> © 2026 Harel Eliyahu</span><span class="sp"></span><span class="st" id="liveSt"><i id="liveLed"></i><span id="liveTxt">Ableton Live</span></span></footer>
 </div>
 
 <script>
@@ -432,7 +433,7 @@ function setBeat(bpm){ document.documentElement.style.setProperty('--beat', bpm 
 
 /* ---------- modules and the display ---------- */
 const LED = {ref:'ledRef', snd:'ledSnd', dir:'ledDir', bld:'ledBld'}, MS = {ref:'msRef', snd:'msSnd', dir:'msDir', bld:'msBld'};
-function setMod(m, word, led){ if(word!=null) $(MS[m]).textContent = word; if(led!=null) $(LED[m]).className = 'led' + (led?' '+led:''); }
+function setMod(m, word, led){ if(word!=null) $(MS[m]).textContent = word; if(led!=null){ $(LED[m]).className = 'led' + (led?' '+led:''); $(MS[m]).className = 'ms' + (led==='work'||led==='err' ? ' '+led : ''); } }
 function setActive(m){ S.active = m; document.querySelectorAll('.mod').forEach(el=>el.classList.toggle('act', el.dataset.m===m)); showView(m==='bld' ? 'build' : (m==='dir' && S.finOpen ? 'fin' : m)); }
 function showView(v){ if(S.view===v) return; document.querySelectorAll('.dv').forEach(d=>d.classList.toggle('on', d.dataset.v===v)); S.view = v; syncIdle(); if(v==='dir') drawDir(); }
 document.querySelectorAll('.mod').forEach(el=>el.addEventListener('pointerdown', ()=>{ if(el.dataset.m==='dir' && S.active==='dir') return; if(el.dataset.m==='dir') S.finOpen=false; setActive(el.dataset.m); }));
@@ -600,7 +601,7 @@ async function describeVocal(){ const p=S.vocalPath; const n=p.split(/[\\/]/).po
   const key = v.key ? `${NOTES[v.key.pc]} ${v.key.mode==='minor'?'min':'maj'}` : 'key unknown'; const bpm = v.bpm ? `${v.bpm} BPM` : 'tempo taken as the project’s';
   $('vocalMeta').textContent = `${v.count} phrase${v.count===1?'':'s'} · ${bpm} · ${key}`; if(S.view==='dir') drawDir(); }
 $('pickVocal').onclick = async ()=>{ const p = await api().pick_vocal(); if(!p) return; S.vocalPath=p; await describeVocal(); };
-$('vocalClear').onclick = ()=>{ S.vocalPath=null; S.vocal=null; $('vocalRow').classList.remove('has'); $('vocalName').textContent='Vocal · optional'; $('vocalRow').title=''; $('vocalClear').classList.add('hidden'); $('pickVocal').textContent='Add'; if(S.view==='dir') drawDir(); };
+$('vocalClear').onclick = ()=>{ S.vocalPath=null; S.vocal=null; $('vocalRow').classList.remove('has'); $('vocalName').textContent='Vocal, optional'; $('vocalRow').title=''; $('vocalClear').classList.add('hidden'); $('pickVocal').textContent='Add'; if(S.view==='dir') drawDir(); };
 
 /* ---------- direction ---------- */
 const STYLE_ALIAS = {afro:'afro_house', techno:'peak_techno'};
@@ -636,7 +637,7 @@ setLen(270);
 document.querySelectorAll('#targetSeg button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#targetSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.target=b.dataset.v; checkTarget(); });
 $('finBtn').onclick = ()=>{ S.finOpen = !S.finOpen; $('finBtn').classList.toggle('on', S.finOpen); setActive('dir'); if(!S.finishLoaded) loadFinish(); };
 async function liveStatus(){ if(S.target!=='ableton'){ $('liveLed').className=''; $('liveTxt').textContent='Stems + MIDI'; return {ok:true,fresh:true}; }
-  const r = await api().ableton_status(); $('liveLed').className = r.ok ? (r.fresh?'ok':'bad') : 'bad'; $('liveTxt').textContent = r.ok ? (r.fresh ? 'Live · empty set in front' : `Live · ${r.tracks} tracks open`) : 'Live not reachable'; return r; }
+  const r = await api().ableton_status(); $('liveLed').className = r.ok ? (r.fresh?'ok':'bad') : 'bad'; $('liveTxt').textContent = r.ok ? (r.fresh ? 'Live is ready, empty set in front' : `Live has ${r.tracks} tracks open`) : 'Live is not reachable'; return r; }
 async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!=='stems'); $('bridgeRow').classList.add('hidden'); if(!S.finishLoaded) loadFinish();
   if(S.target==='ableton'){ $('targetHint').className='hint'; $('targetHint').textContent='Checking Live…'; const r = await liveStatus(); $('targetHint').className = 'hint ' + (r.ok ? (r.fresh?'ok':'warn') : 'warn'); $('targetHint').textContent = r.ok ? (r.fresh?'Live is ready · empty set in front':`Live has ${r.tracks} tracks open. File › New Live Set first.`) : r.reason; if(!r.ok) $('bridgeRow').classList.remove('hidden'); return r; }
   await liveStatus(); $('targetHint').className='hint'; $('targetHint').textContent = 'Full-length stems and a MIDI file with markers, for any DAW.'; return {ok:true, fresh:true}; }
@@ -658,12 +659,12 @@ $('scanPlug').onclick = scanPlugins;
 let TL = null;
 (function meters(){ $('meter').innerHTML = Array.from({length:18},(_,i)=>`<i style="--m:${(.35+Math.abs(Math.sin(i*1.7))*.65).toFixed(2)};animation-delay:${(i*.07).toFixed(2)}s;animation-duration:${(.7+Math.abs(Math.cos(i))*.7).toFixed(2)}s"></i>`).join(''); })();
 function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
-function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; if(!S.building && !S.built){ $('bst').textContent = ok ? (S.target==='ableton' ? 'Ready · into the Live Set in front' : 'Ready · stems + MIDI') : (S.ref ? 'Waiting for 02 · Sounds' : (S.pack ? 'Waiting for 01 · Reference' : 'Waiting for 01 · 02')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
+function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; if(!S.building && !S.built){ $('bst').textContent = ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
 function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
 function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); }
 function resetBuild(){ if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); bigState('working');
-  $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent='BUILDING'; $('buildBtn').disabled=true; $('bst').textContent='Measuring, choosing, rendering, placing.'; setMod('bld','Working','work'); }
+  $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent='BUILDING'; $('buildBtn').disabled=true; $('bst').textContent='Building…'; setMod('bld','Working','work'); }
 function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
 async function startBuild(){ S.building=true; resetBuild(); markNext(); setActive('bld');
   if(S.target==='ableton'){ const st = await liveStatus(); if(!st.ok || !st.fresh){ await sleep(350); window.flowError(st.ok ? `The Live Set in front has ${st.tracks} tracks. In Ableton: File › New Live Set, then press Retry.` : st.reason); return; } }
@@ -672,15 +673,15 @@ $('buildBtn').onclick = startBuild;
 $('toggleLog').onclick = ()=>{ const l=$('log'); l.classList.toggle('hidden'); $('toggleLog').textContent = l.classList.contains('hidden')?'Details':'Hide details'; };
 window.flowPlan = v=>{ S.plan=v; if(TL) TL.destroy(); TL = mountTimeline($('tlCard'), {total:v.bars, bpm:v.bpm, sections:v.sections, layers:v.layers, lanes:familyLanes(v.layers), replay:true, color:getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()||'#5C5BE0'}); };
 window.flowProgress = (msg,pct)=>{ if(msg.startsWith('@track:')){ if(TL) TL.reveal(+msg.slice(7)); return; }
-  setProg(pct); $('log').textContent += msg+'\n'; $('log').scrollTop=1e9; $('statusLine').textContent = msg; $('bst').textContent = msg;
+  setProg(pct); $('log').textContent += msg+'\n'; $('log').scrollTop=1e9; $('statusLine').textContent = msg;
   setPhase(pct<0.15?0 : pct<0.3?1 : pct<0.4?2 : (S.target==='ableton' && pct>=0.85 ? 4 : 3)); };
 window.flowError = msg=>{ S.building=false; markNext(); $('buildTL').classList.remove('building'); bigState('err'); setProg(1); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
-  if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Fix the cause, then retry'; liveStatus(); };
+  if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Stopped. Fix the cause, then retry.'; liveStatus(); };
 window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); bigState('done'); setProg(1); setPhase(5); setMod('bld','Done','on');
-  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; $('bst').textContent = sum.ableton ? 'Your track is in the Live Set in front of you. Press Cmd+S now.' : 'Open the folder: stems, a MIDI file with markers, and your Blueprint.';
+  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; $('bst').textContent = sum.ableton ? 'Done. Your track is in the Live Set in front of you. Press Cmd+S.' : 'Done. Stems, MIDI and the Blueprint are in the folder.';
   if(!TL) window.flowPlan(sum); TL.revealAll();
-  if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bst').textContent += ` · ${warns.length} note${warns.length===1?'':'s'} in Details`; }
+  if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bst').textContent += ` ${warns.length} note${warns.length===1?'':'s'} in Details.`; }
   if(sum.kit){ const n=Object.keys(sum.kit).length; $('roUsed').textContent = `${n} used`; } $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
   $('buildBtn').textContent='BUILD'; $('buildBtn').disabled=false; refreshStatus(); await sleep(900); if(TL) TL.sweep(); };
 $('again').onclick=()=>{ S.built=false; $('buildBtn').textContent='BUILD'; $('again').classList.add('hidden'); $('openOut').classList.add('hidden'); gateBuild(); setActive('ref'); };
