@@ -470,6 +470,13 @@
   .rl.on { color:var(--ink); }
   .rl i { display:none; }
   .mini.off { visibility:hidden; }
+  .kinds { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:2px; margin-top:6px; overflow:hidden; }
+  .kr { display:grid; grid-template-columns:44px 1fr 24px; align-items:center; gap:10px; height:14px; }
+  .kr .kl { font-size:10px; font-weight:500; color:var(--sec); font-family:"IBM Plex Sans",sans-serif; letter-spacing:0; text-transform:none; }
+  .kr .bar { height:3px; border-radius:2px; background:var(--ctrl); overflow:hidden; }
+  .kr .bar i { display:block; height:100%; border-radius:2px; background:var(--acc); transform-origin:left; transform:scaleX(var(--w,0)); transition:transform .7s var(--ease); }
+  .kr b { font:500 10px var(--mono); color:var(--ink); text-align:right; font-variant-numeric:tabular-nums; }
+  .kr.off .kl, .kr.off b { color:var(--mut); }
   .kval { text-align:center; line-height:1; margin-top:2px; }
   .kval b { display:block; font:500 22px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
   .kval small { display:block; margin-top:5px; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
@@ -551,8 +558,8 @@
         <div class="frow2"><div class="fname empty" id="packName"><b>No sounds</b></div><button class="sb pri" id="pickPack">Choose</button></div>
         <div class="well">
           <div class="hero"><span class="v dim" id="roCount">—</span><span class="u">Sounds</span><span class="u" id="roUsed" style="margin-left:auto"></span></div>
-          <canvas class="mini" id="sndMini" aria-hidden="true"></canvas><div class="tip" id="sndTip"></div>
-          <div class="leds" id="roleLeds"></div>
+          <canvas class="mini" id="sndMini" aria-hidden="true" style="display:none"></canvas><div class="tip" id="sndTip"></div>
+          <div class="kinds" id="roleLeds"></div>
         </div>
         <div class="msg" id="packMsg"></div>
         <div class="vrow" id="vocalRow"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal, optional</div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="ta" id="pickVocal">Add</button></div>
@@ -617,7 +624,7 @@ function setActive(m){ S.active = m; document.querySelectorAll('.mod').forEach(e
 function flip(src, target){ if(reduced||!src||!target) return; const a=src.getBoundingClientRect(), b=target.getBoundingClientRect(); if(a.width<4||b.width<4) return; let img; try{ img=new Image(); img.src=src.toDataURL(); }catch(e){ return; }
   img.className='flip'; Object.assign(img.style,{left:a.left+'px', top:a.top+'px', width:a.width+'px', height:a.height+'px'}); document.body.appendChild(img);
   requestAnimationFrame(()=>requestAnimationFrame(()=>{ img.style.transform=`translate(${b.left-a.left}px,${b.top-a.top}px) scale(${b.width/a.width},${b.height/a.height})`; img.style.opacity='0'; })); setTimeout(()=>img.remove(), 560); }
-function flipFor(m){ if(m==='ref' && S.ref) flip($('refMini'), $('refTL').querySelector('.curvewrap') || $('disp')); if(m==='snd' && S.pack) flip($('sndMini'), $('kitView').querySelector('.tiles') || $('disp')); }
+function flipFor(m){ if(m==='ref' && S.ref) flip($('refMini'), $('refTL').querySelector('.curvewrap') || $('disp')); }
 function showView(v){ if(S.view===v) return; document.querySelectorAll('.dv').forEach(d=>d.classList.toggle('on', d.dataset.v===v)); S.view = v; syncIdle(); if(v==='dir') drawDir(); }
 document.querySelectorAll('.mod').forEach(el=>el.addEventListener('pointerdown', ()=>{ if(el.dataset.m==='dir' && S.active==='dir') return; if(el.dataset.m==='dir') S.finOpen=false; setActive(el.dataset.m); }));
 
@@ -798,7 +805,10 @@ async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Read
   if(warn.length){ msg($('packMsg'), warn.join(' '), 'err'); setMod('snd','Check','err'); } else { msg($('packMsg'), ''); setMod('snd','Ready','on'); }
   renderPack(r.pack); }
 const ROLE_LEDS = [['kick','Kick'],['clap','Clap'],['chat','Hats'],['perc','Perc'],['bass','Bass'],['synth','Synth'],['pad','Pad'],['atmos','Atmos'],['fx','FX']];
-function renderLeds(br){ const has = k => k==='chat' ? (br.chat||br.ohat||br.shaker) : (k==='fx' ? (br.fx||br.impact||br.uplifter||br.downlifter) : br[k]); $('roleLeds').innerHTML = ROLE_LEDS.map(([k,n])=>`<span class="rl ${has(k)?'on':''}">${n}</span>`).join(''); $('sndMini').classList.toggle('off', !S.pack); }
+function renderLeds(br){ const n = k => k==='chat' ? ((br.chat||0)+(br.ohat||0)+(br.shaker||0)) : k==='perc' ? ((br.perc||0)+(br.top||0)) : k==='fx' ? ((br.fx||0)+(br.impact||0)+(br.uplifter||0)+(br.downlifter||0)) : (br[k]||0);
+  const counts = ROLE_LEDS.map(([k,l])=>[l, n(k)]); const mx = Math.max(1, ...counts.map(c=>c[1]));
+  $('roleLeds').innerHTML = counts.map(([l,c])=>`<div class="kr ${c?'':'off'}"><span class="kl">${l}</span><div class="bar"><i style="--w:${(c/mx).toFixed(3)}"></i></div><b>${S.pack ? (c||'—') : '—'}</b></div>`).join('');
+  requestAnimationFrame(()=>$('roleLeds').querySelectorAll('.bar i').forEach(i=>{ i.style.transform=`scaleX(${i.style.getPropertyValue('--w')||0})`; })); }
 function kitRows(br){ return Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); }
 function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCount'), pack.count); const br=pack.by_role||{}; renderLeds(br); loadKit();
   const rows = Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); const mx = rows.length ? rows[0][1] : 1;
