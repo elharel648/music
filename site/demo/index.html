@@ -116,7 +116,16 @@
   .dmsg { font:500 11px var(--mono); color:var(--d-sec); margin-top:8px; line-height:1.5; }
   .gate { max-width:420px; margin:28px auto 0; text-align:center; }
   .gate h2 { font-size:18px; margin:0 0 6px; } .gate p { color:var(--d-sec); margin:0 0 16px; font-size:12.5px; line-height:1.5; }
-  .gate .in { display:flex; gap:8px; } .gate.fb { max-width:520px; text-align:left; } .gate.fb h2, .gate.fb p { text-align:left; }
+  .gate .in { display:flex; gap:8px; }
+  .gate.lic { max-width:520px; margin-top:36px; text-align:left; }
+  .gate.lic .mark { width:34px; height:34px; margin-bottom:18px; }
+  .gate.lic h2 { font-size:22px; letter-spacing:-.02em; margin:0 0 8px; } .gate.lic p { text-align:left; font-size:13px; margin:0 0 20px; }
+  .gate.lic textarea { min-height:72px; font:500 12.5px/1.45 ui-monospace, Menlo, monospace; word-break:break-all; resize:none; }
+  .gate.lic .row { display:flex; gap:10px; align-items:center; margin-top:4px; }
+  .gate.lic .row .sp { flex:1; }
+  .gate.lic .facts { display:grid; grid-template-columns:auto 1fr; gap:8px 18px; font-size:12.5px; margin:0 0 22px; }
+  .gate.lic .facts span:nth-child(odd) { color:var(--d-sec); } .gate.lic .facts b { font-weight:500; color:var(--d-ink); }
+  .gate.lic .dbtn.primary { background:var(--d-ink); color:var(--d-bg, #0B0B0D); border-color:var(--d-ink); } .gate.fb { max-width:520px; text-align:left; } .gate.fb h2, .gate.fb p { text-align:left; }
   .gate textarea { width:100%; resize:vertical; min-height:96px; font:400 13px/1.5 "Satoshi",sans-serif; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:var(--d-well); color:var(--d-ink); outline:none; margin-bottom:10px; }
   .gate textarea:focus { border-color:rgba(255,255,255,.3); } .gate .fbrow { display:flex; gap:8px; align-items:center; } .gate .fbrow .sp { flex:1; } .gate input { flex:1; font:500 13px var(--mono); padding:9px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:var(--d-well); color:var(--d-ink); outline:none; }
 
@@ -547,7 +556,7 @@
   </header>
 
   <section class="disp" id="disp">
-    <div class="dv" data-v="gate"><div class="gate"><h2>Your trial has ended.</h2><p>Enter the license key you received after purchase. Keys are verified on this computer; nothing is sent anywhere.</p><div class="in"><input type="text" id="keyInput" placeholder="ALMA-…"><button class="dbtn" id="activateBtn">Activate</button></div><div class="dmsg" id="gateMsg"></div><div class="dmsg" id="gateMeta"></div><div class="fbrow" style="margin-top:14px;justify-content:center"><button class="dbtn hidden" id="gateBack">Not now</button></div></div></div>
+    <div class="dv" data-v="gate"><div class="gate lic" id="gateBox"></div></div>
     <div class="dv" data-v="ref"><canvas class="full" id="waveCv"></canvas><div class="tl hidden" id="refTL"></div><div class="cap" id="refCap">No reference · the display breathes until it has a tempo</div></div>
     <div class="dv" data-v="snd"><div class="seq" id="seqEl" aria-hidden="true"></div><div id="kitView" class="hidden"></div><div class="cap" id="sndCap">No sounds · 16 steps, waiting for a kit</div></div>
     <div class="dv" data-v="dir"><div id="dirView"></div><div class="cap" id="dirCap"></div></div>
@@ -794,9 +803,20 @@ function mountTimeline(el, cfg){
 }
 
 /* ---------- license, session, resume ---------- */
+const MARK_SVG = '<svg class="mark" viewBox="0 0 1000 1000" aria-hidden="true"><path d="M500 0C130 0 0 130 0 500s130 500 500 500 500-130 500-500S870 0 500 0z" fill="#1c1c20"/><circle cx="500" cy="500" r="300" fill="#F4F1EA"/><line x1="500" y1="234" x2="500" y2="326" stroke="#0B0B0D" stroke-width="40" stroke-linecap="round" transform="rotate(32 500 500)"/></svg>';
+function renderGate(st, mode){ // mode: 'expired' | 'enter' | 'licensed'
+  const box=$('gateBox'); const back = mode==='expired' ? '' : `<button class="dbtn" id="gateBack">${mode==='licensed'?'Done':'Not now'}</button>`;
+  if(mode==='licensed'){ box.innerHTML = `${MARK_SVG}<h2>Licensed.</h2><p>This copy of Alma is yours.</p><div class="facts"><span>Licensed to</span><b>${esc(st.email||'')}</b><span>Valid</span><b>${st.expires?('until '+esc(st.expires)):'for good · founding producer'}</b><span>Version</span><b>Alma ${esc(st.version||'')}</b></div><div class="row"><span class="sp"></span>${back}</div>`; }
+  else { box.innerHTML = `${MARK_SVG}<h2>${mode==='expired'?'Your trial has ended.':'Enter your license key.'}</h2><p>${mode==='expired'?'Paste the key from your Alma page to keep building. ':'It is on your Alma page, under Approved. '}Keys are verified on this computer; nothing is sent anywhere.</p><textarea id="keyInput" spellcheck="false" placeholder="ALMA-…"></textarea><div class="row"><span class="dmsg" id="gateMsg" style="margin:0"></span><span class="sp"></span>${back}<button class="dbtn primary" id="activateBtn">Activate</button></div>`;
+    $('activateBtn').onclick = async ()=>{ const k=$('keyInput').value.trim(); if(!k){ $('gateMsg').textContent='Paste the whole key, starting with ALMA-.'; return; } $('activateBtn').disabled=true; const r = await api().activate(k); $('activateBtn').disabled=false; if(r.ok){ const s2 = await refreshStatus(); renderGate(s2, 'licensed'); } else $('gateMsg').textContent = r.error; };
+    $('keyInput').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); $('activateBtn').click(); } }); setTimeout(()=>$('keyInput').focus(), 50); }
+  const b=$('gateBack'); if(b) b.onclick = ()=>{ showView(S.gateFrom || 'ref'); if(S.gateFrom==='build') setActive('bld'); };
+}
+$('statusText').style.cursor='pointer'; $('statusText').title='License';
+$('statusText').onclick = async ()=>{ const st = await api().status(); S.gateFrom=S.view; renderGate(st, st.state==='licensed'?'licensed':'enter'); showView('gate'); };
 async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed`:(st.state==='trial'?`Trial · ${st.days_left} days`:'Trial ended'); $('ver').textContent = st.version||'';
   S.licensed = st.state!=='expired'; $('deck').classList.toggle('locked', !S.licensed);
-  if(!S.licensed){ $('gateMeta').textContent=`Alma ${st.version} · machine ${st.machine}`; showView('gate'); } return st; }
+  if(!S.licensed){ renderGate(st, 'expired'); showView('gate'); } return st; }
 window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle(); checkTarget();
   const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').slice(0,28); $('resumeChip').classList.remove('hidden'); }
   setActive('ref'); liveStatus(); });
@@ -808,10 +828,6 @@ $('fbSend').onclick = async ()=>{ const t=$('fbText').value.trim(); if(!t){ $('f
   if(r.ok && r.sent){ $('fbMsg').textContent='Sent. Thank you — this is how Alma gets better.'; $('fbText').value=''; }
   else if(r.ok){ $('fbMsg').innerHTML=`No connection. Saved to <b>${esc(r.path.split('/').pop())}</b> on your Desktop — send that file to Harel.`; $('fbText').value=''; }
   else $('fbMsg').textContent = r.error || 'Could not send.'; };
-$('statusText').style.cursor='pointer'; $('statusText').title='Enter a license key';
-$('statusText').onclick = ()=>{ if(S.licensed){ $('gateMsg').textContent='This copy is licensed.'; } S.gateFrom=S.view; document.querySelector('.gate h2').textContent = S.licensed ? 'Licensed.' : 'Have a license key?'; document.querySelector('.gate p').textContent = S.licensed ? 'Thank you.' : 'Paste the key from your Alma page. Keys are verified on this computer; nothing is sent anywhere.'; $('gateBack').classList.remove('hidden'); showView('gate'); setTimeout(()=>$('keyInput').focus(),50); };
-$('gateBack').onclick = ()=>{ showView(S.gateFrom || 'ref'); $('gateBack').classList.add('hidden'); };
-$('activateBtn').onclick = async ()=>{ const r = await api().activate($('keyInput').value.trim()); if(r.ok){ $('gateMsg').textContent=`Licensed to ${r.email||'you'}. Thank you.`; await refreshStatus(); setTimeout(()=>{ $('gateBack').classList.add('hidden'); setActive('ref'); }, 900); } else $('gateMsg').textContent = r.error; };
 $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classList.add('hidden'); S.refPath=l.reference; setRefFile(); await analyze(); S.packPath=l.pack; await scanPack(); S.style=l.style||'melodic_techno'; S.target=l.target||'ableton'; S.out=l.out||null; if(S.out) $('outPath').textContent=S.out;
   document.querySelectorAll('#targetSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.target)); renderStyle(); if(l.length) setLen(l.length); if(l.bpm) $('bpmIn').value=l.bpm;
   if(l.synth||l.sidechain){ await scanPlugins(); $('synthSel').value=l.synth||''; $('scSel').value=l.sidechain||''; syncPsel(); }
@@ -1017,7 +1033,7 @@ const Q=new URLSearchParams(location.search);
 const GROUPS=[['Kick',12],['Clap',8],['Closed Hat',20],['Open Hat',6],['Tom',10],['Perc',22],['Shaker Loop',4],['Perc Loop',8],['Bass Shot',15],['Synth Shot',30],['Atmosphere',9],['Ambience',6],['Impact',5],['Uplifter',5],['Downlifter',4],['FX',91]];
 const SAMPLES=[]; GROUPS.forEach(([g,n])=>{ for(let i=1;i<=n;i++) SAMPLES.push({name:`TPS - Oasis - ${g} ${String(i).padStart(2,'0')}${/Loop/.test(g)?' (120 BPM)':''}.wav`, path:`/pack/${g.replace(/\s/g,'')}-${i}.wav`, rel:`${g}/${g} ${i}.wav`, duration:.6, bpm:/Loop/.test(g)?120:null, is_loop:/Loop/.test(g)}); });
 const GIDX=(g)=>SAMPLES.map((s,i)=>s.name.includes(`- ${g} `)?i:-1).filter(i=>i>=0);
-window.pywebview={api:{status:async()=>(Q.has('expired')?{state:'expired',days_left:0,version:'0.6',machine:'demo'}:{state:'trial',days_left:14,version:'0.6',machine:'demo'}),load_session:async()=>null, styles:async()=>STYLES,
+window.pywebview={api:{status:async()=>(window.__lic?{state:'licensed',email:'you@studio.com',expires:null,version:'0.8.4',machine:'demo'}:(Q.has('expired')?{state:'expired',days_left:0,version:'0.8.4',machine:'demo'}:{state:'trial',days_left:14,version:'0.8.4',machine:'demo'})),load_session:async()=>null, styles:async()=>STYLES,
  pick_reference:async()=>'/Users/harel/Desktop/הפקה/tps/TPS - Oasis.wav',
  analyze:async()=>{await wait(900);return {ok:true,ref:{bpm:124,key:{tonic:'A',mode:'minor',confidence:.8},duration:290,bars:144,sections:secs,tempo_info:{source:'estimated'},overview:Array.from({length:720},(_,i)=>{const b=Math.floor(i/5);const e=en[Math.min(143,b)]||.3;return Math.min(1,e*(.55+.45*Math.abs(Math.sin(i*.7)))*(.8+.2*Math.random()));}),elements:{energy:en,kick:en.map(v=>v>.4),hats:en.map(v=>v>.5)}}}},
  pick_folders:async()=>'/Users/harel/Desktop/הפקה/tps/TPS - Oasis - Sample Pack',
@@ -1035,7 +1051,7 @@ window.pywebview={api:{status:async()=>(Q.has('expired')?{state:'expired',days_l
  build:async()=>{ if(Q.has('fail')){ (async()=>{ await wait(1500); window.flowProgress('Listening to the reference',.05); await wait(900); window.flowError('Ableton Live is not reachable. Open Live, enable the Alma Bridge control surface (Settings › Link, Tempo & MIDI), and keep a Live Set in front.'); })(); return {ok:true}; } (async()=>{ await wait(800); window.flowProgress('Listening to the reference',.05); await wait(900); window.flowProgress('Choosing sounds',.2); await wait(900); window.flowPlan({bars:144,bpm:124,sections:secs,layers}); window.flowProgress('Rendering patterns',.35);
    for(let i=0;i<layers.length;i++){ await wait(600); window.flowProgress('Placing clips: '+layers[i].name,.45+i*.04); window.flowProgress('@track:'+i,.5); }
    window.flowProgress('Finishing: Utility, EQ Eight',.9); await wait(1200); window.flowDone({bars:144,bpm:124,sections:secs,layers,rows,placeholders:['Bass','Synth'],export:null,ableton:{warnings:[]},structure:S.structure,style_name:(S.styles.find(x=>x.key===S.style)||{}).name,kit:Object.fromEntries(layers.slice(0,8).map(l=>[l.role,l.name]))}); if(!S.preview||S.previewStale){ await wait(2500); window.flowPreview({url:'demo-preview.wav',seconds:30,bars:144,bpm:124,structure:S.structure,used:8}); } })(); return {ok:true}; },
- open_path:async()=>({ok:true}), pick_folder:async()=>'/Users/harel/Music/Alma', install_bridge:async()=>({ok:true,path:'~/Music/Ableton/User Library/Remote Scripts/Alma',steps:[]}), activate:async()=>({ok:true}), apply_swaps:async(o)=>{ (async()=>{ await wait(700); window.flowProgress('Replacing Clap \u00b7 Clap 04',.3); await wait(1100); window.flowSwapped({replaced:['clap'],names:['Clap \u00b7 Clap 04'],notes:[]}); })(); return {ok:true}; }, send_feedback:async(n)=>{ await wait(700); return {ok:true, sent:false, path:'/Users/harel/Desktop/Alma feedback 2026-10-08 1530.json'}; }}};
+ open_path:async()=>({ok:true}), pick_folder:async()=>'/Users/harel/Music/Alma', install_bridge:async()=>({ok:true,path:'~/Music/Ableton/User Library/Remote Scripts/Alma',steps:[]}), activate:async(k)=>{ await wait(500); if(!/^ALMA-/.test(k)) return {ok:false,error:'This is not an Alma key.'}; window.__lic=true; return {ok:true,email:'you@studio.com'}; }, apply_swaps:async(o)=>{ (async()=>{ await wait(700); window.flowProgress('Replacing Clap \u00b7 Clap 04',.3); await wait(1100); window.flowSwapped({replaced:['clap'],names:['Clap \u00b7 Clap 04'],notes:[]}); })(); return {ok:true}; }, send_feedback:async(n)=>{ await wait(700); return {ok:true, sent:false, path:'/Users/harel/Desktop/Alma feedback 2026-10-08 1530.json'}; }}};
 window.dispatchEvent(new Event('pywebviewready'));
 if(Q.has('update')) setTimeout(()=>window.flowUpdate({available:true,version:'0.7.0',url:'https://example.com/Alma-0.7.0.dmg',notes:'Styles, vocal, device UI'}), 2500);
 

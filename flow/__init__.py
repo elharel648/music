@@ -2,6 +2,6 @@
 
 Copyright (c) 2026 Harel Eliyahu. All rights reserved. Proprietary software; see LICENSE.
 """
-__version__ = "0.8.3"
+__version__ = "0.8.4"
 PRODUCT = "Alma"
 COPYRIGHT = "© 2026 Harel Eliyahu. All rights reserved."
