@@ -42,8 +42,8 @@ if sys.platform == "darwin":
         info_plist={
             "CFBundleName": "Alma",
             "CFBundleDisplayName": "Alma",
-            "CFBundleShortVersionString": "0.8.0",
-            "CFBundleVersion": "0.8.0",
+            "CFBundleShortVersionString": "0.8.1",
+            "CFBundleVersion": "0.8.1",
             "NSHighResolutionCapable": True,
             "NSHumanReadableCopyright": "© 2026 Harel Eliyahu. All rights reserved.",
             "LSMinimumSystemVersion": "12.0",
