@@ -159,7 +159,7 @@ _add(Style("minimal", "Minimal", "Techno", (122, 128),
 
 # backwards compatibility: older sessions and the CLI used 'afro'
 ALIASES = {"afro": "afro_house", "techno": "peak_techno"}
-DEFAULT = "house"
+DEFAULT = "melodic_techno"
 
 
 def get(key: str | None) -> Style:

@@ -629,7 +629,7 @@
 </div>
 
 <script>
-const S = { active:'ref', view:null, ref:null, refPath:null, pack:null, packPath:null, style:'house', structure:'reference', kit:[], kitOverrides:{}, preview:null, previewStale:false, usedCount:null, styles:[], vocalPath:null, vocal:null, target:'ableton', out:null, len:270,
+const S = { active:'ref', view:null, ref:null, refPath:null, pack:null, packPath:null, style:'melodic_techno', structure:'reference', kit:[], kitOverrides:{}, preview:null, previewStale:false, usedCount:null, styles:[], vocalPath:null, vocal:null, target:'ableton', out:null, len:270,
             licensed:false, lastOpts:null, plan:null, finish:null, finishLoaded:false, phase:0, finOpen:false, built:false, building:false };
 const $ = id => document.getElementById(id);
 const ACC = () => getComputedStyle(document.documentElement).getPropertyValue('--acc-rgb').trim() || '92,91,224';
@@ -796,7 +796,7 @@ window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(
   const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').slice(0,28); $('resumeChip').classList.remove('hidden'); }
   setActive('ref'); liveStatus(); });
 $('activateBtn').onclick = async ()=>{ const r = await api().activate($('keyInput').value.trim()); if(r.ok){ $('gateMsg').textContent=''; await refreshStatus(); setActive('ref'); } else $('gateMsg').textContent = r.error; };
-$('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classList.add('hidden'); S.refPath=l.reference; setRefFile(); await analyze(); S.packPath=l.pack; await scanPack(); S.style=l.style||'house'; S.target=l.target||'ableton'; S.out=l.out||null; if(S.out) $('outPath').textContent=S.out;
+$('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classList.add('hidden'); S.refPath=l.reference; setRefFile(); await analyze(); S.packPath=l.pack; await scanPack(); S.style=l.style||'melodic_techno'; S.target=l.target||'ableton'; S.out=l.out||null; if(S.out) $('outPath').textContent=S.out;
   document.querySelectorAll('#targetSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.target)); renderStyle(); if(l.length) setLen(l.length); if(l.bpm) $('bpmIn').value=l.bpm;
   if(l.synth||l.sidechain){ await scanPlugins(); $('synthSel').value=l.synth||''; $('scSel').value=l.sidechain||''; syncPsel(); }
   if(Array.isArray(l.finish)){ S.finish = new Set(l.finish); S.finishLoaded=false; }
@@ -877,7 +877,7 @@ $('vocalClear').onclick = ()=>{ markStale(); S.vocalPath=null; S.vocal=null; $('
 
 /* ---------- direction ---------- */
 const STYLE_ALIAS = {afro:'afro_house', techno:'peak_techno'};
-function curStyle(){ if(!S.styles.some(s=>s.key===S.style)) S.style = STYLE_ALIAS[S.style] || 'house'; return S.styles.find(s=>s.key===S.style); }
+function curStyle(){ if(!S.styles.some(s=>s.key===S.style)) S.style = STYLE_ALIAS[S.style] || 'melodic_techno'; return S.styles.find(s=>s.key===S.style); }
 function renderStyle(){ const st=curStyle(); if(!st) return; const bpm=S.ref?S.ref.bpm:null; const off = bpm && (bpm < st.bpm[0]-4 || bpm > st.bpm[1]+4);
   $('stName').textContent=st.name; $('stGroup').textContent=`${st.group} · ${st.bpm[0]}–${st.bpm[1]} BPM`; $('stGroup').classList.toggle('off', !!off); $('stGroup').title = off ? `The reference runs at ${Math.round(bpm)} BPM` : '';
   setMod('dir', `${st.name} · ${fmt(S.len)}`); if(S.view==='dir') drawDir(); }

@@ -346,7 +346,7 @@ class Api:
             return self._ctx
         fin = opts.get("finish")
         length = flowcli.parse_length(opts.get("length") or None) if isinstance(opts.get("length"), str) else opts.get("length")
-        ctx = flowcli.prepare(opts["reference"], opts["pack"], length, opts.get("style", "house"), opts.get("bpm") or None, opts.get("synth") or None,
+        ctx = flowcli.prepare(opts["reference"], opts["pack"], length, opts.get("style", "melodic_techno"), opts.get("bpm") or None, opts.get("synth") or None,
                               progress=self._emit, work_dir=opts.get("work_dir") or None, finish_opts=set(fin) if isinstance(fin, list) else None,
                               on_plan=self._emit_plan, vocal=opts.get("vocal") or None, structure=opts.get("structure") or "reference",
                               kit_overrides=opts.get("kit") or None)

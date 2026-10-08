@@ -26,7 +26,7 @@ def parse_length(s) -> float | None:
 PREP_KEYS = ("reference", "pack", "length", "style", "bpm", "synth", "finish", "vocal", "structure", "kit")
 
 
-def prepare(ref_path: str, pack_dir: str, length: float | None, style: str = "house", bpm: float | None = None, midi_synth: str | None = None,
+def prepare(ref_path: str, pack_dir: str, length: float | None, style: str = "melodic_techno", bpm: float | None = None, midi_synth: str | None = None,
             progress=None, work_dir: str | None = None, finish_opts: set[str] | None = None, on_plan=None, vocal: str | None = None,
             structure: str = "reference", kit_overrides: dict | None = None) -> dict:
     """Everything up to the plan: measure, choose from the user's sounds, render loops, place the vocal, plan, sweeps.
@@ -110,7 +110,7 @@ def render_preview(ctx: dict, path: str | None = None, progress=None) -> dict:
     return export.render_mix(ctx["plan"], path, progress=progress)
 
 
-def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, out: str | None, style: str = "house",
+def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, out: str | None, style: str = "melodic_techno",
               bpm: float | None = None, midi_synth: str | None = None, sidechain: str | None = None, force: bool = False,
               progress=None, work_dir: str | None = None, finish_opts: set[str] | None = None, on_plan=None, vocal: str | None = None,
               structure: str = "reference", kit_overrides: dict | None = None) -> dict:
@@ -130,7 +130,7 @@ def main(argv=None) -> int:
     b.add_argument("--length", help="target length, e.g. 6:30 or 390")
     b.add_argument("--target", choices=["ableton", "stems"], default="stems")
     b.add_argument("--out")
-    b.add_argument("--style", choices=sorted(stylelib.STYLES) + sorted(stylelib.ALIASES), default="house")
+    b.add_argument("--style", choices=sorted(stylelib.STYLES) + sorted(stylelib.ALIASES), default="melodic_techno")
     b.add_argument("--vocal", help="an acapella, chant or hook to cut into phrases and place")
     b.add_argument("--structure", choices=["reference", "typical"], default="reference", help="follow the reference's sections, or a typical club structure")
     b.add_argument("--bpm", type=float)
@@ -139,7 +139,7 @@ def main(argv=None) -> int:
     b.add_argument("--force", action="store_true", help="write even if the Live Set in front is not empty")
     b.add_argument("--finish", help="comma-separated finish moves (gain,lowcut,duck,space,glue,transitions); 'none' for a bare skeleton")
     pv = sub.add_parser("preview", help="Render a mix of the arrangement to listen to, without writing to a DAW")
-    for arg, kw in (("--ref", {"required": True}), ("--pack", {"required": True}), ("--length", {}), ("--style", {"default": "house"}), ("--vocal", {}),
+    for arg, kw in (("--ref", {"required": True}), ("--pack", {"required": True}), ("--length", {}), ("--style", {"default": "melodic_techno"}), ("--vocal", {}),
                     ("--structure", {"choices": ["reference", "typical"], "default": "reference"}), ("--bpm", {"type": float}), ("--out", {"required": True})):
         pv.add_argument(arg, **kw)
     sub.add_parser("plugins", help="List installed plug-ins Alma recognizes")
