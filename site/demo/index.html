@@ -589,6 +589,11 @@
   .foot .foot-act { margin-right:18px; font-size:11.5px; }
   .kval small { letter-spacing:.08em; }
   @media (max-height:760px) { .deck { gap:10px; padding:8px 12px 8px; } }
+
+  .pp { width:24px; height:24px; flex:0 0 24px; border-radius:50%; border:1px solid var(--ink); background:transparent; display:grid; place-items:center; cursor:pointer; padding:0; transition:background .15s, transform .15s var(--ease); }
+  .pp svg { width:9px; height:9px; fill:var(--ink); display:block; } .pp .pause { display:none; } .pp.on .play { display:none; } .pp.on .pause { display:block; }
+  .pp:hover { background:var(--ink); } .pp:hover svg { fill:var(--bg); } .pp:active { transform:scale(.94); }
+  .well.pick .mini.hit { cursor:pointer; }
 </style>
 </head>
 <body>
@@ -638,10 +643,10 @@
       <div class="mb">
         <div class="well pick" id="pickRef" role="button" tabindex="0" aria-label="Choose a reference track">
           <div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h2M6 8v8M9 4v16M12 7v10M15 10v4M18 6v12M21 11v2"/></svg><span>Choose a track</span></div>
-          <div class="meta"><div class="top"><b id="refName">No track</b><button class="ta" id="refChange">Change</button></div><canvas class="mini" id="refMini" aria-hidden="true"></canvas><div class="facts" id="refFacts"><b id="roBpm">—</b> BPM · <b id="roKey">—</b> · <b id="roBars">—</b> bars · <b id="roLen">—</b><span id="roBpmL" hidden></span><b id="roSec" hidden></b></div></div>
+          <div class="meta"><div class="top"><button class="pp" id="refPlay" aria-label="Play the reference"><svg class="play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg><svg class="pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button><b id="refName">No track</b><button class="ta" id="refChange">Change</button></div><canvas class="mini" id="refMini" aria-hidden="true"></canvas><div class="facts" id="refFacts"><b id="roBpm">—</b> BPM · <b id="roKey">—</b> · <b id="roBars">—</b> bars · <b id="roLen">—</b><span id="roBpmL" hidden></span><b id="roSec" hidden></b></div></div>
         </div>
         <div class="msg" id="refMsg"></div>
-        <div class="mrow hidden" id="refTools"><button class="ta hidden" id="refStop">Stop</button><button class="ta" id="analyzeBtn">Re-analyze</button></div>
+        <div class="mrow hidden" id="refTools"><button class="ta" id="analyzeBtn">Re-analyze</button></div>
       </div>
     </div>
     <div class="mod" data-m="snd" style="--mc:var(--c-snd)">
@@ -747,10 +752,12 @@ async function playRef(x){ const a=$('aud'); if(!S.refPath) return; if(!refAud.u
     t+=.016; if(!reduced) requestAnimationFrame(frame); }; frame();
   cv.addEventListener('click', e=>{ if(!S.ref) return; const r=cv.getBoundingClientRect(); playRef((e.clientX-r.left)/r.width); });
   cv.addEventListener('pointerenter', ()=>cv.classList.toggle('hit', !!S.ref)); })();
-$('refStop').onclick = ()=>{ const a=$('aud'); a.pause(); refAud.active=false; };
-$('aud').addEventListener('play', ()=>$('refStop').classList.toggle('hidden', !refAud.active));
-$('aud').addEventListener('pause', ()=>$('refStop').classList.add('hidden'));
-$('aud').addEventListener('ended', ()=>{ refAud.active=false; $('refStop').classList.add('hidden'); });
+$('refPlay').onclick = e=>{ e.stopPropagation(); const a=$('aud'); if(!S.ref) return; if(refAud.active && !a.paused){ a.pause(); refAud.active=false; return; }
+  const resume = a.src && a.src===refAud.url && a.duration && a.currentTime>0 && a.currentTime<a.duration-0.5; playRef(resume ? a.currentTime/a.duration : 0); };
+const syncRefPlay = ()=>{ const a=$('aud'); const on = refAud.active && !a.paused; $('refPlay').classList.toggle('on', on); if(!on && S.refLenText) $('roLen').textContent=S.refLenText; };
+$('aud').addEventListener('play', syncRefPlay); $('aud').addEventListener('pause', syncRefPlay);
+$('aud').addEventListener('ended', ()=>{ refAud.active=false; syncRefPlay(); });
+$('aud').addEventListener('timeupdate', ()=>{ const a=$('aud'); if(refAud.active && !a.paused && S.refLenText) $('roLen').textContent = `${fmt(a.currentTime)} / ${S.refLenText}`; });
 function KIT_PATHS(){ return new Set(S.kit.filter(r=>r.chosen).map(r=>r.chosen.path)); }
 function kitRoleOf(path){ const r=S.kit.find(x=>x.chosen&&x.chosen.path===path); return r?r.label:null; }
 (function miniSnd(){ const cv=$('sndMini'); const ctx=cv.getContext('2d'); let t=0, hover=-1, L=null; const seeds=Array.from({length:260},(_,i)=>({p:Math.random()*6.28, s:.5+Math.random()*1.1}));
@@ -889,7 +896,7 @@ $('pickRef').onclick = ()=>{ if(!$('pickRef').classList.contains('filled')) pick
 async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=parseFloat($('bpmIn').value)||null;
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ setMod('ref','Error','err'); $('refMsg').className='msg err'; $('refMsg').textContent=r.error; return; }
   S.ref=r.ref; const k=r.ref.key; setBeat(r.ref.bpm); setMod('ref','Measured','on'); const shortRef = r.ref.bars < 48 || r.ref.sections.length < 3; msg($('refMsg'), shortRef ? `Short reference: ${r.ref.bars} bars. A typical ${curStyle()?curStyle().name:''} structure will be used.` : '', shortRef ? 'warn' : '');
-  ['roBpm','roKey','roBars','roLen','roSec'].forEach(id=>$(id).classList.remove('dim')); tickNum($('roBpm'), Math.round(r.ref.bpm)); $('refFacts').title = r.ref.tempo_info.source==='estimated' ? 'Tempo detected from the audio' : 'Tempo taken from the file name'; $('roBpmL').textContent=''; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
+  ['roBpm','roKey','roBars','roLen','roSec'].forEach(id=>$(id).classList.remove('dim')); tickNum($('roBpm'), Math.round(r.ref.bpm)); $('refFacts').title = r.ref.tempo_info.source==='estimated' ? 'Tempo detected from the audio' : 'Tempo taken from the file name'; $('roBpmL').textContent=''; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); S.refLenText=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
   $('sess').innerHTML = `<b>${esc(r.ref.file || S.refPath.split(/[\\/]/).pop())}</b> · ${Math.round(r.ref.bpm)} BPM · ${esc(k.tonic)} ${k.mode==='minor'?'min':'maj'} · ${r.ref.bars} bars`;
   const el = r.ref.elements||{}; const en = el.energy||[]; const mn=Math.min(...en), mx=Math.max(...en); const curve = en.map(v=> mx>mn ? (v-mn)/(mx-mn) : 0.5);
   const lanes = el.kick ? [{name:'Kick', cls:'k', blocks:spansFromBools(el.kick).map(([a,b])=>({a,b,k:'span'}))}, {name:'Hats and top', cls:'', blocks:spansFromBools(el.hats).map(([a,b])=>({a,b,k:'span'}))}] : [];
