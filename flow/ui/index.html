@@ -479,6 +479,11 @@
   .kr.has { cursor:pointer; } .kr.has:hover canvas { opacity:1; } .kr.has:hover .kl { color:var(--ink); }
   .kr b { font:500 10px var(--mono); color:var(--ink); text-align:right; font-variant-numeric:tabular-nums; }
   .kr.off .kl, .kr.off b { color:var(--mut); }
+  .arr2 { transition:color .15s, transform .15s var(--spring); } .arr2:hover { background:transparent; color:var(--ink); } .arr2:active { transform:scale(.86); }
+  .subj .fname { overflow:hidden; }
+  .subj .fname.go-l { animation:slideL .36s var(--spring) both; } .subj .fname.go-r { animation:slideR .36s var(--spring) both; }
+  @keyframes slideL { 0% { opacity:0; transform:translateX(14px); } 100% { opacity:1; transform:none; } }
+  @keyframes slideR { 0% { opacity:0; transform:translateX(-14px); } 100% { opacity:1; transform:none; } }
   .kval { text-align:center; line-height:1; margin-top:2px; }
   .kval b { display:block; font:500 24px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
   .kval small { display:block; margin-top:5px; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
@@ -852,7 +857,8 @@ function curStyle(){ if(!S.styles.some(s=>s.key===S.style)) S.style = STYLE_ALIA
 function renderStyle(){ const st=curStyle(); if(!st) return; const bpm=S.ref?S.ref.bpm:null; const off = bpm && (bpm < st.bpm[0]-4 || bpm > st.bpm[1]+4);
   $('stName').textContent=st.name; $('stGroup').textContent=`${st.group} · ${st.bpm[0]}–${st.bpm[1]} BPM`; $('stGroup').classList.toggle('off', !!off); $('stGroup').title = off ? `The reference runs at ${Math.round(bpm)} BPM` : '';
   setMod('dir', `${st.name} · ${fmt(S.len)}`); if(S.view==='dir') drawDir(); }
-function stepStyle(d){ if(!S.styles.length) return; const i=S.styles.findIndex(s=>s.key===S.style); S.style = S.styles[(i+d+S.styles.length)%S.styles.length].key; renderStyle(); markStale(); }
+function stepStyle(d){ if(!S.styles.length) return; const i=S.styles.findIndex(s=>s.key===S.style); S.style = S.styles[(i+d+S.styles.length)%S.styles.length].key; const f=$('styleSel').querySelector('.fname'); f.classList.remove('go-l','go-r'); void f.offsetWidth; f.classList.add(d>0?'go-l':'go-r'); renderStyle(); markStale(); }
+document.addEventListener('keydown', e=>{ if(S.active!=='dir') return; const t=e.target; if(t && (t.tagName==='INPUT'||t.tagName==='SELECT')) return; if(e.key==='ArrowLeft'||e.key==='ArrowRight'){ if(document.activeElement===$('knob')) return; e.preventDefault(); stepStyle(e.key==='ArrowRight'?1:-1); } });
 $('stPrev').onclick=()=>stepStyle(-1); $('stNext').onclick=()=>stepStyle(1);
 $('styleSel').addEventListener('wheel', e=>{ e.preventDefault(); stepStyle(e.deltaY>0?1:-1); }, {passive:false});
 function userBpm(){ return parseFloat($('bpmIn').value) || (S.ref ? S.ref.bpm : 124); }
