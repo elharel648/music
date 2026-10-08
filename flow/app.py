@@ -418,7 +418,7 @@ def _update_check(api: "Api"):
 def main():
     api = Api()
     window = webview.create_window(f"{PRODUCT}", _ui_path(), js_api=api, width=1180, height=860, min_size=(960, 680),
-                                   background_color="#E6E5E1")
+                                   background_color="#EBEBEE")
     api.window = window
     threading.Timer(2.5, _update_check, args=(api,)).start()
     webview.start(debug=False)

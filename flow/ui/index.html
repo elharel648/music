@@ -10,8 +10,8 @@
   :root { --beat:2.6s; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.3,1.25,.4,1);
           --c-ref:#2BB8D6; --c-snd:#E0588F; --c-dir:#6F6CE0; --c-bld:#D9A520; --acc:#5C5BE0; --acc-rgb:92,91,224;
           --d-bg:#06070A; --d-ink:#EDEEF3; --d-sec:#8A8C99; --d-mut:#4A4C58; --d-line:rgba(255,255,255,.07); --d-well:#0D0E13; }
-  :root, :root[data-theme=light] { color-scheme:light; --bg:#E3E2DE; --dev:#F4F3F0; --mod:#FFFFFF; --mod2:#F7F6F3; --hdr:#141519; --hdr-ink:#F3F3F6; --ink:#141418; --sec:#6A6A73; --mut:#A3A3AA;
-          --line:rgba(20,20,30,.09); --line2:rgba(20,20,30,.05); --ctrl:#F0EFEB; --knob-a:#FFFFFF; --knob-b:#E8E7E2; --knob-c:#C7C6C0; --tick:#D8D7D1;
+  :root, :root[data-theme=light] { color-scheme:light; --bg:#EBEBEE; --dev:#FFFFFF; --mod:#FFFFFF; --mod2:#FFFFFF; --hdr:#141519; --hdr-ink:#F3F3F6; --ink:#141418; --sec:#6A6A73; --mut:#A3A3AA;
+          --line:rgba(20,20,30,.1); --line2:rgba(20,20,30,.06); --ctrl:#F3F3F6; --knob-a:#FFFFFF; --knob-b:#ECECF0; --knob-c:#CFCFD5; --tick:#DCDCE2;
           --shadow:0 30px 70px rgba(20,20,30,.22), 0 2px 6px rgba(20,20,30,.08); --btn:#141418; --btn-ink:#FFFFFF; --led-off:#2C2D36; --ok:#2E8B5F; --warn:#B07A14; --err:#C0392B; }
   :root[data-theme=dark] { color-scheme:dark; --bg:#07070A; --dev:#121216; --mod:#1A1A20; --mod2:#15151A; --hdr:#0B0B0F; --hdr-ink:#F3F3F6; --ink:#F2F2F5; --sec:#9C9CA7; --mut:#5A5A66;
           --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.05); --ctrl:#111116; --knob-a:#3C3D47; --knob-b:#24252C; --knob-c:#111217; --tick:#2A2B33;
@@ -189,7 +189,7 @@
   /* ---------- the deck ---------- */
   .deck { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; min-height:0; }
   .deck.locked { opacity:.35; pointer-events:none; filter:grayscale(1); }
-  .mod { background:var(--mod2); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; min-height:0; transition:background .35s, border-color .3s, box-shadow .3s; }
+  .mod { background:var(--mod2); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; min-height:0; box-shadow:0 1px 2px rgba(20,20,30,.03); transition:background .35s, border-color .3s, box-shadow .3s; }
   .mod.act { border-color:color-mix(in srgb, var(--acc) 45%, var(--line)); }
   .mod .mb .frow2 { padding:0 1px; }
   .mh { height:38px; flex:0 0 38px; background:transparent; color:var(--ink); display:flex; align-items:center; gap:8px; padding:0 13px; position:relative; border-bottom:1px solid var(--line); transition:border-color .3s; }
@@ -292,7 +292,7 @@
   .knob { position:relative; width:100px; height:100px; touch-action:none; cursor:ns-resize; outline:none; -webkit-user-select:none; user-select:none; }
   .knob svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
   .knob .dt { fill:var(--tick); transition:fill .25s; } .knob .dt.lit { fill:var(--acc); }
-  .knob .cap { position:absolute; left:15px; top:15px; width:70px; height:70px; border-radius:50%; background:radial-gradient(circle at 38% 28%, #FFFFFF 0%, #F6F6F4 38%, #E6E6E2 78%, #D4D4CF 100%); box-shadow:0 12px 24px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); transition:transform .45s var(--ease), box-shadow .3s; }
+  .knob .cap { position:absolute; left:15px; top:15px; width:70px; height:70px; border-radius:50%; background:radial-gradient(circle at 38% 28%, #FFFFFF 0%, #F7F7F9 38%, #E7E7EB 78%, #D5D5DB 100%); box-shadow:0 12px 24px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); transition:transform .45s var(--ease), box-shadow .3s; }
   :root[data-theme=dark] .knob .cap { background:radial-gradient(circle at 38% 28%, #4E4F59 0%, #34353E 40%, #22232A 80%, #17181E 100%); box-shadow:0 12px 24px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14), inset 0 -4px 8px rgba(0,0,0,.35); }
   .knob:hover .cap { box-shadow:0 14px 28px rgba(20,20,30,.2), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); }
   .knob.drag .cap { transition:box-shadow .3s; }
@@ -315,7 +315,7 @@
   .fbtn svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; }
   .bigwrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
   .big { position:relative; width:124px; height:124px; border-radius:50%; }
-  .big .bezel { position:absolute; inset:0; border-radius:50%; background:linear-gradient(180deg,#FBFBFA,#E4E4E0); box-shadow:0 10px 24px rgba(20,20,30,.16), 0 1px 2px rgba(20,20,30,.1), inset 0 1px 0 rgba(255,255,255,.9); transition:box-shadow .3s; }
+  .big .bezel { position:absolute; inset:0; border-radius:50%; background:linear-gradient(180deg,#FDFDFE,#E5E5EA); box-shadow:0 10px 24px rgba(20,20,30,.16), 0 1px 2px rgba(20,20,30,.1), inset 0 1px 0 rgba(255,255,255,.9); transition:box-shadow .3s; }
   .big .bezel::after { content:""; position:absolute; inset:8px; border-radius:50%; background:var(--mod); box-shadow:inset 0 2px 5px rgba(20,20,30,.38), inset 0 -1px 0 rgba(255,255,255,.7); }
   :root[data-theme=dark] .big .bezel { background:linear-gradient(180deg,#2E2F37,#1A1B21); box-shadow:0 12px 26px rgba(0,0,0,.6), 0 1px 2px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); }
   :root[data-theme=dark] .big .bezel::after { background:#0F1014; box-shadow:inset 0 2px 6px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.06); }
