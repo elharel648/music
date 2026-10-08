@@ -166,6 +166,7 @@ def main(argv=None) -> int:
         ctx = prepare(args.ref, args.pack, parse_length(args.length), args.style, args.bpm, vocal=args.vocal, structure=args.structure)
         r = render_preview(ctx, args.out)
         print(json.dumps(r, indent=1))
+        return 0
     if args.cmd == "plugins":
         print(json.dumps({k: v for k, v in plugins.scan_installed().items() if k != "all"}, indent=1))
         return 0
