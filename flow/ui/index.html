@@ -81,15 +81,32 @@
   .dgrid .cell.on { background:var(--c-dir); box-shadow:0 0 10px rgba(139,124,255,.45); animation:cellin .4s var(--spring) both; animation-delay:var(--d,0ms); }
   .dgrid .cell.v.on { background:var(--d-ink); box-shadow:none; }
   @keyframes cellin { from { transform:scaleY(.2); opacity:.4; } to { transform:none; opacity:1; } }
-  .fin { display:grid; grid-template-columns:1.1fr 1fr; gap:24px; height:100%; overflow:auto; }
+  .fin { display:grid; grid-template-columns:1.25fr 1fr; gap:28px; height:100%; overflow:auto; }
+  .fgrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .fcell { display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:10px; background:var(--d-well); border:1px solid var(--d-line); cursor:pointer; transition:border-color .2s, background .2s; text-align:left; color:var(--d-ink); }
+  .fcell:hover { border-color:rgba(255,255,255,.16); }
+  .fcell.on { border-color:rgba(139,124,255,.35); }
+  .fcell .body { flex:1; min-width:0; }
+  .fcell .k { font-size:12px; font-weight:600; letter-spacing:-.01em; }
+  .fcell .h { font:500 9.5px var(--mono); color:var(--d-mut); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.02em; }
+  .fcell.on .h { color:var(--d-sec); }
+  .psel { display:flex; align-items:center; gap:2px; background:var(--d-well); border:1px solid var(--d-line); border-radius:10px; padding:4px; margin-top:8px; }
+  .psel .arr { width:26px; height:28px; border:0; background:transparent; color:var(--d-sec); border-radius:6px; display:flex; align-items:center; justify-content:center; }
+  .psel .arr:hover { background:rgba(255,255,255,.06); color:var(--d-ink); }
+  .psel .arr svg { width:11px; height:11px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .psel .mid { flex:1; text-align:center; min-width:0; font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .psel .mid small { display:block; font:500 9px var(--mono); color:var(--d-mut); letter-spacing:.12em; text-transform:uppercase; margin-top:2px; }
+  .prow { display:flex; align-items:center; gap:8px; }
+  .prow .psel { flex:1; }
   .fin h3 { margin:0 0 8px; font:600 10.5px var(--mono); letter-spacing:.14em; color:var(--d-mut); text-transform:uppercase; }
   .frow { display:flex; align-items:center; gap:14px; padding:8px 0; border-top:1px solid var(--d-line); }
   .frow:first-of-type { border-top:0; }
   .frow .k { font-size:12.5px; font-weight:600; } .frow .h { font-size:11px; color:var(--d-sec); margin-top:2px; line-height:1.4; }
   .frow .body { flex:1; min-width:0; }
-  .sw { width:36px; height:21px; border-radius:999px; background:#1A1B23; border:1px solid rgba(255,255,255,.08); position:relative; flex:0 0 36px; padding:0; transition:background .25s; }
-  .sw::after { content:""; position:absolute; top:3px; left:3px; width:13px; height:13px; border-radius:50%; background:#8A8C99; transition:transform .25s var(--spring), background .25s; }
-  .sw.on { background:var(--c-dir); } .sw.on::after { transform:translateX(15px); background:#fff; }
+  .sw { width:34px; height:20px; border-radius:999px; background:#0A0B0F; border:1px solid rgba(255,255,255,.1); box-shadow:inset 0 2px 4px rgba(0,0,0,.8); position:relative; flex:0 0 34px; padding:0; transition:border-color .25s; pointer-events:none; }
+  .sw::after { content:""; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:linear-gradient(180deg,#3A3B45,#1E1F26); box-shadow:0 1px 2px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.12); transition:transform .25s var(--spring), background .25s; }
+  .sw::before { content:""; position:absolute; left:8px; top:50%; width:4px; height:4px; margin-top:-2px; border-radius:50%; background:#2A2B33; transition:background .25s, box-shadow .25s; }
+  .sw.on { border-color:rgba(139,124,255,.45); } .sw.on::after { transform:translateX(14px); background:linear-gradient(180deg,#F4F4F8,#C9C9D4); } .sw.on::before { background:var(--c-dir); box-shadow:0 0 6px var(--c-dir); }
   .dsel { width:100%; font-size:12px; padding:7px 9px; border-radius:8px; border:1px solid rgba(255,255,255,.1); background:var(--d-well); color:var(--d-ink); outline:none; }
   .dbtn { height:28px; padding:0 11px; border-radius:7px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--d-ink); font-size:11.5px; font-weight:600; }
   .dbtn:hover { border-color:rgba(255,255,255,.35); }
@@ -314,10 +331,10 @@
     <div class="dv" data-v="dir"><div id="dirView"></div><div class="cap" id="dirCap"></div></div>
     <div class="dv" data-v="fin">
       <div class="fin">
-        <div><h3>Finish</h3><div id="finishCard"></div><div class="dmsg">Ableton's own devices on every track FLOW builds. Turn off anything you would rather do by hand. For Stems + MIDI only the sweeps apply.</div></div>
+        <div><h3>Finish · Ableton's own devices</h3><div class="fgrid" id="finishCard"></div><div class="dmsg">Turn off anything you would rather do by hand. Stems + MIDI keeps only the sweeps.</div></div>
         <div><h3>Your plug-ins · Ableton only</h3>
-          <div class="frow"><div class="body"><div class="k">Bass and lead</div><div class="h">Drive your own synth as MIDI. Pick a preset in Live afterwards.</div><select class="dsel" id="synthSel" style="margin-top:8px"><option value="">Sample shots (default)</option></select></div></div>
-          <div class="frow"><div class="body"><div class="k">Sidechain</div><div class="h">Loaded on every track except the kick.</div><div style="display:flex;gap:8px;margin-top:8px"><select class="dsel" id="scSel"><option value="">None</option></select><button class="dbtn" id="scanPlug">Scan</button></div></div></div>
+          <div class="frow"><div class="body"><div class="k">Bass and lead</div><div class="h">Your synth as MIDI; pick a preset in Live.</div><select class="dsel hidden" id="synthSel"><option value="">Sample shots (default)</option></select><div class="psel" data-for="synthSel"><button class="arr" data-d="-1"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="mid"><span class="cur">Sample shots (default)</span><small>Instrument</small></div><button class="arr" data-d="1"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div></div></div>
+          <div class="frow"><div class="body"><div class="k">Sidechain</div><div class="h">On every track except the kick.</div><select class="dsel hidden" id="scSel"><option value="">None</option></select><div class="prow"><div class="psel" data-for="scSel"><button class="arr" data-d="-1"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="mid"><span class="cur">None</span><small>Plug-in</small></div><button class="arr" data-d="1"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div><button class="dbtn" id="scanPlug" style="margin-top:8px">Scan</button></div></div></div>
           <div class="dmsg" id="plugMsg"></div>
           <div class="frow hidden" id="outRow"><div class="body"><div class="k">Output folder</div><div class="h" id="outPath">Next to the reference</div></div><button class="dbtn" id="pickOut">Choose</button></div>
           <div class="frow hidden" id="bridgeRow"><div class="body"><div class="k">FLOW Bridge</div><div class="h" id="bridgeMsg">Live is not reachable. Install the bridge, restart Live, enable it under Link, Tempo &amp; MIDI.</div></div><button class="dbtn" id="installBridge">Install</button></div>
@@ -532,7 +549,7 @@ window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(
 $('activateBtn').onclick = async ()=>{ const r = await api().activate($('keyInput').value.trim()); if(r.ok){ $('gateMsg').textContent=''; await refreshStatus(); setActive('ref'); } else $('gateMsg').textContent = r.error; };
 $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classList.add('hidden'); S.refPath=l.reference; setRefFile(); await analyze(); S.packPath=l.pack; await scanPack(); S.style=l.style||'house'; S.target=l.target||'ableton'; S.out=l.out||null; if(S.out) $('outPath').textContent=S.out;
   document.querySelectorAll('#targetSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.target)); renderStyle(); if(l.length) setLen(l.length); if(l.bpm) $('bpmIn').value=l.bpm;
-  if(l.synth||l.sidechain){ await scanPlugins(); $('synthSel').value=l.synth||''; $('scSel').value=l.sidechain||''; }
+  if(l.synth||l.sidechain){ await scanPlugins(); $('synthSel').value=l.synth||''; $('scSel').value=l.sidechain||''; syncPsel(); }
   if(Array.isArray(l.finish)){ S.finish = new Set(l.finish); S.finishLoaded=false; }
   if(l.vocal){ S.vocalPath=l.vocal; await describeVocal(); }
   setActive('dir'); checkTarget(); };
@@ -624,13 +641,16 @@ async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!==
   await liveStatus(); $('targetHint').className='hint'; $('targetHint').textContent = 'Full-length stems and a MIDI file with markers, for any DAW.'; return {ok:true, fresh:true}; }
 $('installBridge').onclick = async ()=>{ $('bridgeMsg').textContent='Installing…'; const r = await api().install_bridge(); $('bridgeMsg').textContent = r.ok ? `Installed to ${r.path}. ${r.steps.join(' ')}` : r.error; };
 async function loadFinish(){ S.finishLoaded = true; const opts = await api().finish_options(); if(!S.finish) S.finish = new Set(opts.filter(o=>o.on).map(o=>o.key));
-  $('finishCard').innerHTML = opts.map(o=>`<div class="frow"><div class="body"><div class="k">${o.name}</div><div class="h">${o.hint}</div></div><button class="sw ${S.finish.has(o.key)?'on':''}" data-k="${o.key}" aria-label="${o.name}"></button></div>`).join('');
-  $('finishCard').querySelectorAll('.sw').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if(S.finish.has(k)) S.finish.delete(k); else S.finish.add(k); b.classList.toggle('on', S.finish.has(k)); }); }
+  const SHORT = {gain:'Levels relative to the kick', lowcut:'High-pass, not on kick or bass', duck:'Pump on every track but the kick', space:'Reverb on pads, claps, vocal, synth', glue:'Drum Buss on claps, perc, toms', transitions:'Rising sweep into every drop'};
+  $('finishCard').innerHTML = opts.map(o=>`<button class="fcell ${S.finish.has(o.key)?'on':''}" data-k="${esc(o.key)}"><div class="body"><div class="k">${esc(o.name)}</div><div class="h">${esc(SHORT[o.key]||o.hint)}</div></div><span class="sw ${S.finish.has(o.key)?'on':''}"></span></button>`).join('');
+  $('finishCard').querySelectorAll('.fcell').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; if(S.finish.has(k)) S.finish.delete(k); else S.finish.add(k); b.classList.toggle('on', S.finish.has(k)); b.querySelector('.sw').classList.toggle('on', S.finish.has(k)); }); }
+function syncPsel(){ document.querySelectorAll('.psel[data-for]').forEach(p=>{ const sel=$(p.dataset.for); const o=sel.options[sel.selectedIndex]; p.querySelector('.cur').textContent = o ? o.textContent : '—'; }); }
+document.querySelectorAll('.psel[data-for]').forEach(p=>p.querySelectorAll('.arr').forEach(a=>a.onclick=()=>{ const sel=$(p.dataset.for); const n=sel.options.length; if(!n) return; sel.selectedIndex=(sel.selectedIndex+ +a.dataset.d+n)%n; syncPsel(); }));
 $('pickOut').onclick = async ()=>{ const p = await api().pick_folder(); if(p){ S.out=p; $('outPath').textContent=p; } };
 async function scanPlugins(){ $('plugMsg').textContent='Scanning this computer…'; const r = await api().scan_plugins(); if(!r.ok){ $('plugMsg').textContent=r.error; return; }
   $('plugMsg').textContent = `${r.plugins.count} plug-ins · synths: ${r.plugins.synths.join(', ')||'none recognized'} · sidechain: ${r.plugins.sidechain.join(', ')||'none'}`;
   $('synthSel').innerHTML = '<option value="">Sample shots (default)</option>' + r.plugins.synths.map(n=>`<option>${esc(n)}</option>`).join('');
-  $('scSel').innerHTML = '<option value="">None</option>' + r.plugins.sidechain.map(n=>`<option>${esc(n)}</option>`).join(''); }
+  $('scSel').innerHTML = '<option value="">None</option>' + r.plugins.sidechain.map(n=>`<option>${esc(n)}</option>`).join(''); syncPsel(); }
 $('scanPlug').onclick = scanPlugins;
 
 /* ---------- build ---------- */
