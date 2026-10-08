@@ -420,3 +420,17 @@ def test_update_manifest_with_dmg_link_and_required(tmp_path):
     assert update.bundle_of("/Users/x/projects/flow/.venv/bin/python") is None
     f = tmp_path / "x.bin"; f.write_bytes(b"alma")
     assert update.sha256_of(str(f)) == __import__("hashlib").sha256(b"alma").hexdigest()
+
+
+def test_choose_kit_accepts_a_sample_from_outside_the_pack(tmp_path):
+    import numpy as np
+    from flow import pack, audio
+    pk = _fake_pack(tmp_path)
+    cands = pack.candidates(pk, 124)
+    other = str(tmp_path / "elsewhere" / "My Kick.wav"); os.makedirs(os.path.dirname(other))
+    audio.write(other, (np.random.default_rng(2).standard_normal((1, 11025)) * 0.3).astype("float32"), 22050)
+    kit = pack.choose_kit(pk, 124, {"kick": other}, cands)
+    assert kit["kick"]["path"] == other and kit["kick"]["external"] is True and kit["kick"]["role"] == "kick"
+    rows = pack.kit_view(pk, 124, {"kick": other}, cands)
+    assert rows[0]["chosen"]["name"] == "My Kick.wav" and rows[0]["chosen"]["external"] is True
+    assert pack.choose_kit(pk, 124, {"kick": "/nowhere/missing.wav"}, cands)["kick"]["path"] == cands["kick"][0]["path"]   # a missing file falls back

@@ -115,6 +115,7 @@ class Api:
         self._kit_cache: dict[tuple, dict] = {}
         self._log: list[str] = []
         self._refs: dict[tuple, dict] = {}
+        self._extra_files: set[str] = set()
         self._last: dict = {}
         self.media = MediaServer()
 
@@ -177,6 +178,21 @@ class Api:
         r = self.window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False,
                                            file_types=("Audio (*.wav;*.aif;*.aiff;*.mp3;*.flac)", "All files (*.*)"))
         return r[0] if r else None
+
+    def pick_sample(self):
+        """Any audio file on disk, for one role of the kit. The file is remembered so it can be played and drawn like a pack sound."""
+        r = self.window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False,
+                                           file_types=("Audio (*.wav;*.aif;*.aiff;*.mp3;*.flac)", "All files (*.*)"))
+        if not r:
+            return None
+        self._extra_files.add(os.path.realpath(r[0]))
+        return r[0]
+
+    def _is_users_file(self, real: str) -> bool:
+        roots = [os.path.realpath(f) for f in self._pack_folders]
+        if self._ctx:
+            roots.append(os.path.realpath(self._ctx["work"]))
+        return real in self._extra_files or getattr(self, "_ref_path", None) == real or any(real == r or real.startswith(r + os.sep) for r in roots)
 
     def pick_vocal(self):
         r = self.window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False,
@@ -242,8 +258,7 @@ class Api:
         """48 peak values of one of the user's sounds (first 6 s), for the tile in the Sounds view."""
         try:
             real = os.path.realpath(path)
-            roots = [os.path.realpath(f) for f in self._pack_folders]
-            if not any(real == r or real.startswith(r + os.sep) for r in roots) or not os.path.isfile(real):
+            if not self._is_users_file(real) or not os.path.isfile(real):
                 return {"ok": False, "error": "Not one of your sounds"}
             cache = getattr(self, "_peaks", None)
             if cache is None:
@@ -264,11 +279,7 @@ class Api:
         """A playable URL for one of the user's own sounds (only files inside the chosen pack folders or Alma's work folder)."""
         try:
             real = os.path.realpath(path)
-            roots = [os.path.realpath(f) for f in self._pack_folders]
-            if self._ctx:
-                roots.append(os.path.realpath(self._ctx["work"]))
-            ok_ref = getattr(self, "_ref_path", None) == real
-            if not (ok_ref or any(real == r or real.startswith(r + os.sep) for r in roots)) or not os.path.isfile(real):
+            if not self._is_users_file(real) or not os.path.isfile(real):
                 return {"ok": False, "error": "Not one of your sounds"}
             return {"ok": True, "url": self.media.register(real)}
         except Exception as e:

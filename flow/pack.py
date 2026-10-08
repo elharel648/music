@@ -252,6 +252,9 @@ def choose_kit(pack: dict, bpm: float, overrides: dict | None = None, cands: dic
             continue                      # the user took this role out
         if ov and ov in by_path:
             kit[role] = by_path[ov]
+        elif ov and os.path.isfile(ov):   # a sample the user picked from anywhere on disk
+            d = _describe(ov, os.path.basename(ov), os.path.basename(ov))
+            kit[role] = dict(d, role=role, external=True) if d else lst[0]
         else:
             kit[role] = lst[0]
     if kit.get("perc_loop2") and kit.get("perc_loop") and kit["perc_loop2"]["path"] == kit["perc_loop"]["path"]:
@@ -269,7 +272,7 @@ def kit_view(pack: dict, bpm: float, overrides: dict | None = None, cands: dict 
     kit = choose_kit(pack, bpm, overrides, cands)
 
     def summ(x):
-        return {"name": x["name"], "path": x["path"], "rel": x.get("rel"), "duration": x["duration"], "bpm": x["bpm"], "is_loop": x["is_loop"]}
+        return {"name": x["name"], "path": x["path"], "rel": x.get("rel"), "duration": x["duration"], "bpm": x["bpm"], "is_loop": x["is_loop"], "external": bool(x.get("external"))}
 
     rows = []
     for role in KIT_ROLES:
