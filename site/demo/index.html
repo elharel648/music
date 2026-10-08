@@ -660,6 +660,24 @@
   .well.pick .mini.row { flex:1; min-height:72px; max-height:none; margin:0; cursor:default; }
   .well.pick .mini.row.hit { cursor:pointer; }
   .well.pick .roles[hidden] { display:none; }
+
+  /* Screens are black and recessed, like the display; controls are white and raised, like the knob. */
+  .well.pick .mid { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:10px; }
+  .screen { position:relative; height:clamp(84px, 34%, 124px); flex:0 0 auto; border-radius:10px; overflow:hidden; padding:10px 12px;
+    background:linear-gradient(180deg,#0F1015 0%,#08090C 60%,#06070A 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.6), inset 0 10px 22px rgba(0,0,0,.42), 0 1px 0 rgba(255,255,255,.7); }
+  :root[data-theme=dark] .screen { box-shadow:inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 1px rgba(0,0,0,.85), inset 0 10px 22px rgba(0,0,0,.6); }
+  .screen canvas { display:block; width:100%; height:100%; }
+  .well.pick .screen .mini { min-height:0; max-height:none; margin:0; flex:none; }
+  .well.pick .mini.row { flex:none; height:66px; min-height:66px; }
+  .well.pick .screen.hit { cursor:pointer; }
+  .pp { width:28px; height:28px; flex:0 0 28px; border:0; background:radial-gradient(circle at 38% 28%, #FFFFFF 0%, #EEEEF2 55%, #D7D7DD 100%);
+    box-shadow:0 2px 5px rgba(20,20,30,.18), 0 0 0 1px rgba(20,20,30,.07), inset 0 1px 0 #fff, inset 0 -2px 3px rgba(20,20,30,.08); transition:transform .12s var(--ease), box-shadow .12s; }
+  .pp:hover { background:radial-gradient(circle at 38% 28%, #FFFFFF 0%, #F4F4F7 55%, #E0E0E6 100%); }
+  .pp:active, .pp.on { transform:translateY(1px); box-shadow:0 1px 2px rgba(20,20,30,.18), 0 0 0 1px rgba(20,20,30,.08), inset 0 1px 2px rgba(20,20,30,.12); }
+  .pp svg { width:10px; height:10px; fill:#111113; } .pp:hover svg { fill:#111113; }
+  :root[data-theme=dark] .pp { background:radial-gradient(circle at 38% 28%, #4E4F59 0%, #34353E 55%, #22232A 100%); box-shadow:0 2px 5px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); } :root[data-theme=dark] .pp svg { fill:#F4F1EA; }
+  @media (max-height:760px) { .screen { height:clamp(64px, 30%, 96px); } .well.pick .mini.row { height:58px; min-height:58px; } }
 </style>
 </head>
 <body>
@@ -710,7 +728,7 @@
         <div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h2M6 8v8M9 4v16M12 7v10M15 10v4M18 6v12M21 11v2"/></svg><span>Choose a track</span></div>
         <div class="meta">
           <div class="top"><button class="pp" id="refPlay" aria-label="Play the reference"><svg class="play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg><svg class="pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button><b id="refName">No track</b><button class="ta" id="refChange">Change</button></div>
-          <canvas class="mini" id="refMini" aria-hidden="true"></canvas>
+          <div class="mid"><div class="screen" id="refScreen"><canvas class="mini" id="refMini" aria-hidden="true"></canvas></div></div>
           <div class="pfoot"><div class="facts" id="refFacts"><b id="roBpm">—</b> BPM · <b id="roKey">—</b> · <b id="roBars">—</b> bars · <b id="roLen">—</b><span id="roBpmL" hidden></span><b id="roSec" hidden></b></div><div class="acts hidden" id="refTools"><button class="ta hidden" id="analyzeBtn">Re-analyze</button></div></div>
         </div>
       </div>
@@ -722,7 +740,7 @@
         <div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Choose your sounds</span></div>
         <div class="meta">
           <div class="top"><b id="packName">No sounds</b><button class="ta" id="packChange">Change</button></div>
-          <canvas class="mini row" id="sndMini" aria-label="The kit, playing at the reference tempo"></canvas><div class="tip" id="sndTip"></div><div class="roles" id="roleLeds" hidden></div>
+          <div class="mid"><canvas class="mini row" id="sndMini" aria-label="The kit: one light per role"></canvas><div class="tip" id="sndTip"></div><div class="screen" id="sndScreen"><canvas id="sndWave" aria-hidden="true"></canvas></div></div><div class="roles" id="roleLeds" hidden></div>
           <div class="vrow" id="vocalRow"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal, optional</div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="ta" id="pickVocal">Add</button></div>
           <div class="pfoot"><div class="facts"><b id="roCount">—</b> sounds<span id="roUsed"></span></div></div>
         </div>
@@ -802,14 +820,15 @@ function beatPhase(){ const b=parseFloat(getComputedStyle(document.documentEleme
 const refAud = {url:null, active:false};
 async function playRef(x){ const a=$('aud'); if(!S.refPath) return; if(!refAud.url){ const r=await api().audition_url(S.refPath); if(!r.ok) return; refAud.url=r.url; } document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on'));
   if(!a.src || a.src!==refAud.url){ a.src=refAud.url; await new Promise(res=>{ a.onloadedmetadata=res; a.onerror=res; a.load(); }); } refAud.active=true; a.currentTime = x*(a.duration||S.ref.duration||0); a.play().catch(()=>{}); }
-(function miniRef(){ const cv=$('refMini'); const ctx=cv.getContext('2d'); let t=0;
-  const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const src=S.ref&&S.ref.overview; const n=64; const gap=W/n, mid=H/2; const head=(t*.07)%1.3-.15; const pulse=1+.05*Math.pow(1-beatPhase(),6);
-      for(let i=0;i<n;i++){ let v; if(src){ const a=Math.floor(i/n*src.length), b=Math.max(a+1,Math.floor((i+1)/n*src.length)); v=Math.max(...src.slice(a,b)); } else v=.18+.1*Math.abs(Math.sin(i*.7)); const lit=src?Math.max(0,1-Math.abs(i/n-head)*5):0; const al=src?(.22+.78*lit):.22;
-        ctx.fillStyle=src?`rgba(${ACC()},${al})`:(document.documentElement.dataset.theme==='dark'?'rgba(255,255,255,.12)':'rgba(20,20,30,.1)'); ctx.shadowBlur=src?10*dpr*lit:0; ctx.shadowColor=`rgba(${ACC()},.8)`;
-        const bh=Math.max(1.5*dpr, v*H*.9*pulse); const bw=Math.max(1,gap*.45); ctx.fillRect(i*gap+gap*.28, mid-bh/2, bw, bh); }
-      const a=$('aud'); if(src && refAud.active && !a.paused && a.duration){ ctx.shadowBlur=0; ctx.fillStyle = document.documentElement.dataset.theme==='dark' ? '#fff' : '#141418'; ctx.fillRect(a.currentTime/a.duration*W - dpr*.5, 0, dpr, H); } }
-    t+=.016; if(!reduced) requestAnimationFrame(frame); }; frame();
-  cv.addEventListener('click', e=>{ if(!S.ref) return; const r=cv.getBoundingClientRect(); playRef((e.clientX-r.left)/r.width); });
+(function miniRef(){ const cv=$('refMini'); const ctx=cv.getContext('2d');
+  const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const src=S.ref&&S.ref.overview; const n=72; const gap=W/n, mid=H/2;
+      const a=$('aud'); const playing = src && refAud.active && !a.paused && a.duration; const prog = playing ? a.currentTime/a.duration : -1;
+      for(let i=0;i<n;i++){ let v; if(src){ const s0=Math.floor(i/n*src.length), s1=Math.max(s0+1,Math.floor((i+1)/n*src.length)); v=Math.max(...src.slice(s0,s1)); } else v=.1+.06*Math.abs(Math.sin(i*.7));
+        const lit = prog>=0 && i/n<=prog; ctx.fillStyle = src ? (lit?`rgba(${ACC()},.95)`:'rgba(244,241,234,.42)') : 'rgba(244,241,234,.12)'; ctx.shadowBlur = lit?8*dpr:0; ctx.shadowColor=`rgba(${ACC()},.8)`;
+        const bh=Math.max(1.5*dpr, v*H*.86); const bw=Math.max(1,gap*.42); ctx.fillRect(i*gap+gap*.29, mid-bh/2, bw, bh); }
+      ctx.shadowBlur=0; if(prog>=0){ ctx.fillStyle='#F4F1EA'; ctx.fillRect(prog*W-dpr*.5, 0, dpr, H); } }
+    if(!reduced) requestAnimationFrame(frame); }; frame();
+  cv.addEventListener('click', e=>{ e.stopPropagation(); if(!S.ref) return; const r=cv.getBoundingClientRect(); playRef((e.clientX-r.left)/r.width); });
   cv.addEventListener('pointerenter', ()=>cv.classList.toggle('hit', !!S.ref)); })();
 $('refPlay').onclick = e=>{ e.stopPropagation(); const a=$('aud'); if(!S.ref) return; if(refAud.active && !a.paused){ a.pause(); refAud.active=false; return; }
   const resume = a.src && a.src===refAud.url && a.duration && a.currentTime>0 && a.currentTime<a.duration-0.5; playRef(resume ? a.currentTime/a.duration : 0); };
@@ -821,36 +840,38 @@ function KIT_PATHS(){ return new Set(S.kit.filter(r=>r.chosen).map(r=>r.chosen.p
 function kitRoleOf(path){ const r=S.kit.find(x=>x.chosen&&x.chosen.path===path); return r?r.label:null; }
 const KIT_ROW = [['kick','Kick',[0,1,2,3],.5],['clap','Clap',[1,3],.45],['chat','Hats',[.5,1.5,2.5,3.5],.22],['perc','Perc',[2.75,3.5],.35],['bass','Bass',[.5,1.5,2.5,3.5],.28],['synth','Synth',[0,2.5],.35],['pad','Pad',null,.12],['atmos','Atmos',null,.1],['fx','FX',[],0]];
 function kindCount(k){ const br=S.pack?(S.pack.by_role||{}):{}; return k==='chat' ? ((br.chat||0)+(br.ohat||0)+(br.shaker||0)) : k==='perc' ? ((br.perc||0)+(br.top||0)) : k==='fx' ? ((br.fx||0)+(br.impact||0)+(br.uplifter||0)+(br.downlifter||0)) : (br[k]||0); }
-(function kitRow(){ const cv=$('sndMini'); const ctx=cv.getContext('2d'); let hover=-1, geo=[]; const FONT=()=>getComputedStyle(document.documentElement).getPropertyValue('--mono')||'Satoshi';
+(function kitRow(){ const cv=$('sndMini'); const ctx=cv.getContext('2d'); const sv=$('sndWave'); const sctx=sv.getContext('2d'); let hover=-1, geo=[]; const FONT=()=>getComputedStyle(document.documentElement).getPropertyValue('--mono')||'Satoshi';
   const focusOf=()=>{ if(S.kitFocus && kindSound(S.kitFocus.k) && kindSound(S.kitFocus.k).path===S.kitFocus.path) return S.kitFocus; const ks=kindSound('kick'); return ks ? {k:'kick', path:ks.path, name:ks.name} : null; };
+  const led=(x,y,r,lit,e,dark,dpr)=>{ ctx.shadowBlur=0; ctx.beginPath(); ctx.arc(x,y,r+1.6*dpr,0,6.283); ctx.fillStyle=dark?'rgba(0,0,0,.45)':'rgba(20,20,30,.10)'; ctx.fill();
+    if(lit){ ctx.shadowBlur=(6+10*e)*dpr; ctx.shadowColor=`rgba(${ACC()},${.45+.4*e})`; const g=ctx.createRadialGradient(x-r*.3,y-r*.35,r*.1,x,y,r); g.addColorStop(0,'#B4B3F6'); g.addColorStop(.55,`rgb(${ACC()})`); g.addColorStop(1,'#4140B8'); ctx.fillStyle=g; }
+    else { const g=ctx.createRadialGradient(x-r*.3,y-r*.35,r*.1,x,y,r); if(dark){ g.addColorStop(0,'#3A3B44'); g.addColorStop(1,'#1E1F26'); } else { g.addColorStop(0,'#F2F2F5'); g.addColorStop(1,'#D2D2D9'); } ctx.fillStyle=g; }
+    ctx.beginPath(); ctx.arc(x,y,r,0,6.283); ctx.fill(); ctx.shadowBlur=0;
+    ctx.beginPath(); ctx.arc(x-r*.25,y-r*.35,r*.42,0,6.283); ctx.fillStyle=lit?'rgba(255,255,255,.22)':'rgba(255,255,255,.45)'; ctx.fill(); };
   const frame=()=>{ const dpr=fitCanvas(cv); if(dpr && S.pack){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const n=KIT_ROW.length, cw=W/n; const dark=document.documentElement.dataset.theme==='dark';
       const aud=$('aud'), pl=$('player'); const live=S.preview&&!S.previewStale&&!pl.paused; const bpm=(S.ref&&S.ref.bpm)||(S.pack&&S.pack.bpm_hint)||124; const barPos=live?((pl.currentTime*bpm/60)%4):-1; geo=[];
-      const y=H*.30, base=Math.max(3.5,Math.min(6.5, cw*.17))*dpr; const focus=focusOf(); const playing = S.auditionPath && !aud.paused && aud.duration;
+      const base=Math.max(4,Math.min(7, cw*.19))*dpr; const y=base+6*dpr; const focus=focusOf(); const playing = S.auditionPath && !aud.paused && aud.duration;
       KIT_ROW.forEach(([k,label,hits,amp],i)=>{ const snd=kindSound(k); const x=(i+.5)*cw; const has=!!snd; let e=0;
         if(has && live && amp && hits){ for(const hh of hits){ let d=barPos-hh; if(d<0) d+=4; const dt=d*60/bpm; if(dt<.3) e=Math.max(e, Math.pow(1-dt/.3,2)); } }
         if(has && playing && snd.path===S.auditionPath) e=1;
-        const r=(has?base:base*.72)*(1+amp*e*1.2)*(i===hover?1.2:1);
-        ctx.beginPath(); ctx.arc(x,y,r,0,6.283);
-        if(has){ ctx.fillStyle=`rgba(${ACC()},${.7+.3*e})`; ctx.fill(); } else { ctx.strokeStyle=dark?'rgba(255,255,255,.2)':'rgba(20,20,30,.2)'; ctx.lineWidth=dpr; ctx.stroke(); }
-        if(e>0){ ctx.beginPath(); ctx.arc(x,y,r+4*dpr,0,6.283); ctx.strokeStyle=`rgba(${ACC()},${.3*e})`; ctx.lineWidth=dpr; ctx.stroke(); }
-        if(focus && has && snd.path===focus.path){ ctx.fillStyle=dark?'#F4F1EA':'#111113'; ctx.beginPath(); ctx.arc(x, y+base+5*dpr, 1.2*dpr, 0, 6.283); ctx.fill(); }
+        led(x, y, base*(i===hover?1.12:1), has, e, dark, dpr);
+        if(focus && has && snd.path===focus.path){ ctx.fillStyle=dark?'#F4F1EA':'#111113'; ctx.beginPath(); ctx.arc(x, y+base+5*dpr, 1.3*dpr, 0, 6.283); ctx.fill(); }
         ctx.textAlign='center'; ctx.textBaseline='top'; ctx.font=`500 ${9*dpr}px ${FONT()}`; ctx.fillStyle = has ? (dark?'rgba(244,241,234,.78)':'#6B6B70') : (dark?'rgba(255,255,255,.32)':'#A3A3A8'); ctx.fillText(label, x, y+base+9*dpr);
-        const cnt=kindCount(k); ctx.font=`500 ${9*dpr}px ${FONT()}`; ctx.fillStyle = cnt ? (dark?'#F4F1EA':'#111113') : (dark?'rgba(255,255,255,.32)':'#A3A3A8'); ctx.fillText(cnt?String(cnt):'—', x, y+base+22*dpr);
+        const cnt=kindCount(k); ctx.fillStyle = cnt ? (dark?'#F4F1EA':'#111113') : (dark?'rgba(255,255,255,.32)':'#A3A3A8'); ctx.fillText(cnt?String(cnt):'—', x, y+base+22*dpr);
         geo.push({x0:i*cw, x1:(i+1)*cw, snd, k}); });
-      /* the strip: the focused sound's waveform, with a playhead while it plays */
-      if(focus){ const pk=PEAKS.get(focus.path); if(pk===undefined) peaksFor(focus.path); const top=H*.60, bot=H*.96, mid=(top+bot)/2, hh=(bot-top)/2; const m=pk?pk.length:48; const gap=W/m; const isP = playing && S.auditionPath===focus.path; const prog = isP ? aud.currentTime/aud.duration : -1;
-        for(let i=0;i<m;i++){ const v = pk ? pk[i] : .06; const lit = prog>=0 && i/m<=prog; ctx.fillStyle = pk ? `rgba(${ACC()},${lit?.95:.38})` : (dark?'rgba(255,255,255,.1)':'rgba(20,20,30,.08)'); const bh=Math.max(1.5*dpr, v*hh*1.9); ctx.fillRect(i*gap+gap*.3, mid-bh/2, Math.max(1,gap*.4), bh); }
-        if(prog>=0){ ctx.fillStyle=dark?'#fff':'#141418'; ctx.fillRect(prog*W-dpr*.5, top, dpr, bot-top); } }
+      /* the screen: the focused sound's waveform, lit as it plays */
+      const d2=fitCanvas(sv); if(d2){ const W2=sv.width,H2=sv.height; sctx.clearRect(0,0,W2,H2); if(focus){ const pk=PEAKS.get(focus.path); if(pk===undefined) peaksFor(focus.path); const m=pk?pk.length:48; const gap=W2/m, mid=H2/2; const isP = playing && S.auditionPath===focus.path; const prog = isP ? aud.currentTime/aud.duration : -1;
+        for(let i=0;i<m;i++){ const v = pk ? pk[i] : .06; const lit = prog>=0 && i/m<=prog; sctx.fillStyle = pk ? (lit?`rgba(${ACC()},.95)`:'rgba(244,241,234,.42)') : 'rgba(244,241,234,.12)'; sctx.shadowBlur = lit?8*d2:0; sctx.shadowColor=`rgba(${ACC()},.8)`; const bh=Math.max(1.5*d2, v*H2*.86); sctx.fillRect(i*gap+gap*.3, mid-bh/2, Math.max(1,gap*.4), bh); }
+        sctx.shadowBlur=0; if(prog>=0){ sctx.fillStyle='#F4F1EA'; sctx.fillRect(prog*W2-d2*.5, 0, d2, H2); } } }
     }
     if(!reduced) requestAnimationFrame(frame); }; frame();
   const tip=$('sndTip');
-  cv.addEventListener('pointermove', e=>{ if(!S.pack||!geo.length) return; const r=cv.getBoundingClientRect(); const x=(e.clientX-r.left)*(cv.width/r.width), yy=(e.clientY-r.top)*(cv.height/r.height); const i=geo.findIndex(g=>x>=g.x0&&x<g.x1); const g=geo[i]; const onRow = yy < cv.height*.5;
-    if(g && g.snd && onRow){ hover=i; tip.textContent = g.snd.name.replace(/\.[^.]+$/,''); const w=cv.closest('.well').getBoundingClientRect(); const half=tip.offsetWidth/2+6; tip.style.left=Math.min(w.width-half, Math.max(half, e.clientX-w.left))+'px'; tip.style.top=Math.max(26, e.clientY-w.top-22)+'px'; tip.style.opacity=1; cv.classList.add('hit'); }
-    else { hover=-1; tip.style.opacity=0; cv.classList.toggle('hit', !onRow && !!focusOf()); } });
+  cv.addEventListener('pointermove', e=>{ if(!S.pack||!geo.length) return; const r=cv.getBoundingClientRect(); const x=(e.clientX-r.left)*(cv.width/r.width); const i=geo.findIndex(g=>x>=g.x0&&x<g.x1); const g=geo[i];
+    if(g && g.snd){ hover=i; tip.textContent = g.snd.name.replace(/\.[^.]+$/,''); const w=cv.closest('.well').getBoundingClientRect(); const half=tip.offsetWidth/2+6; tip.style.left=Math.min(w.width-half, Math.max(half, e.clientX-w.left))+'px'; tip.style.top=Math.max(26, e.clientY-w.top-22)+'px'; tip.style.opacity=1; cv.classList.add('hit'); }
+    else { hover=-1; tip.style.opacity=0; cv.classList.remove('hit'); } });
   cv.addEventListener('pointerleave', ()=>{ hover=-1; tip.style.opacity=0; cv.classList.remove('hit'); });
-  cv.addEventListener('click', e=>{ e.stopPropagation(); const r=cv.getBoundingClientRect(); const yy=(e.clientY-r.top)*(cv.height/r.height); const g=geo[hover];
-    if(g && g.snd && yy < cv.height*.5){ S.kitFocus={k:g.k, path:g.snd.path, name:g.snd.name}; audition(g.snd.path, null); return; }
-    const f=focusOf(); if(f && yy >= cv.height*.5){ const a=$('aud'); if(S.auditionPath===f.path && !a.paused){ a.pause(); } else audition(f.path, null); } });
+  cv.addEventListener('click', e=>{ e.stopPropagation(); const g=geo[hover]; if(g && g.snd){ S.kitFocus={k:g.k, path:g.snd.path, name:g.snd.name}; audition(g.snd.path, null); } });
+  $('sndScreen').addEventListener('pointerenter', ()=>$('sndScreen').classList.toggle('hit', !!focusOf()));
+  $('sndScreen').addEventListener('click', e=>{ e.stopPropagation(); const f=focusOf(); if(!f) return; const a=$('aud'); if(S.auditionPath===f.path && !a.paused) a.pause(); else audition(f.path, null); });
 })();
 let stopWave=null, stopSeq=null;
 function syncIdle(){ const waveOn = S.view==='ref' && !S.ref, seqOn = S.view==='snd' && !S.pack;
