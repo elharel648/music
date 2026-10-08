@@ -158,8 +158,9 @@
   /* ---------- the deck ---------- */
   .deck { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:10px; min-height:0; }
   .deck.locked { opacity:.35; pointer-events:none; filter:grayscale(1); }
-  .mod { background:var(--mod); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; min-height:0; transition:background .35s, border-color .3s, box-shadow .3s; }
+  .mod { background:var(--mod2); border:1px solid var(--line); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; min-height:0; transition:background .35s, border-color .3s, box-shadow .3s; }
   .mod.act { box-shadow:0 0 0 1px color-mix(in srgb, var(--mc) 55%, transparent), 0 10px 30px color-mix(in srgb, var(--mc) 14%, transparent); }
+  .mod .mb .frow2 { padding:0 1px; }
   .mh { height:42px; flex:0 0 42px; background:var(--hdr); color:var(--hdr-ink); display:flex; align-items:center; gap:9px; padding:0 12px; position:relative; }
   .mh::after { content:""; position:absolute; left:0; right:0; bottom:0; height:1px; background:var(--mc); opacity:0; transition:opacity .3s; }
   .mod.act .mh::after { opacity:.9; box-shadow:0 0 10px var(--mc); }
@@ -188,8 +189,9 @@
   .pad:active { transform:scale(.985); }
   .pad svg { stroke:var(--mc); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 6px color-mix(in srgb, var(--mc) 70%, transparent)); margin-bottom:4px; }
   .pad .t { font-size:13px; font-weight:600; letter-spacing:-.01em; } .pad .s { font-size:10.5px; color:var(--sec); line-height:1.45; max-width:200px; }
-  .well { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:space-between; background:var(--ctrl); border:1px solid var(--line); border-radius:10px; padding:12px 12px 10px; box-shadow:inset 0 1px 3px rgba(20,20,30,.06); }
-  :root[data-theme=dark] .well { box-shadow:inset 0 2px 6px rgba(0,0,0,.5); }
+  .well { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:space-between; background:var(--mod); border:1px solid var(--line); border-radius:10px; padding:12px 12px 10px; box-shadow:0 1px 2px rgba(20,20,30,.04), 0 10px 24px rgba(20,20,30,.07); }
+  :root[data-theme=dark] .well { background:var(--ctrl); box-shadow:inset 0 2px 6px rgba(0,0,0,.5); }
+  .mini { flex:1; min-height:36px; width:100%; display:block; margin:8px 0 0; }
   .hero { display:flex; align-items:baseline; gap:9px; }
   .hero .v { font:500 38px var(--mono); letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; }
   .hero .u { font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.14em; text-transform:uppercase; }
@@ -340,6 +342,7 @@
         <div class="frow2"><div class="fname empty" id="refName"><b>No track</b></div><button class="sb pri" id="pickRef">Choose</button></div>
         <div class="well">
           <div class="hero"><span class="v dim" id="roBpm">—</span><span class="u" id="roBpmL">BPM</span></div>
+          <canvas class="mini" id="refMini" aria-hidden="true"></canvas>
           <div class="grid4"><div><div class="v dim" id="roKey">—</div><div class="l">Key</div></div><div><div class="v dim" id="roBars">—</div><div class="l">Bars</div></div><div><div class="v dim" id="roLen">—</div><div class="l">Length</div></div><div><div class="v dim" id="roSec">—</div><div class="l">Sections</div></div></div>
         </div>
         <div class="msg" id="refMsg"></div>
@@ -352,6 +355,7 @@
         <div class="frow2"><div class="fname empty" id="packName"><b>No sounds</b></div><button class="sb pri" id="pickPack">Choose</button></div>
         <div class="well">
           <div class="hero"><span class="v dim" id="roCount">—</span><span class="u">Sounds</span></div>
+          <canvas class="mini" id="sndMini" aria-hidden="true"></canvas>
           <div class="leds" id="roleLeds"></div>
         </div>
         <div class="msg" id="packMsg"></div>
@@ -430,6 +434,20 @@ function startSeq(el){ const pats=[['Kick',[0,4,8,12]],['Clap',[4,12]],['Hat',[2
   const cols=[]; pats.forEach(([name,on])=>{ const rn=document.createElement('div'); rn.className='rn'; rn.textContent=name; el.appendChild(rn); const row=[]; for(let i=0;i<16;i++){ const c=document.createElement('div'); c.className='c'+(i%4===0?' g':'')+(on.includes(i)?' on':''); el.appendChild(c); row.push(c); } cols.push(row); });
   let step=0; const tick=()=>{ cols.forEach(r=>r.forEach((c,i)=>c.classList.toggle('now', i===step))); step=(step+1)%16; }; tick();
   const bpm = S.ref ? S.ref.bpm : 124; const iv = reduced ? null : setInterval(tick, 15000/bpm); return ()=>{ if(iv) clearInterval(iv); }; }
+/* the plates in 01 and 02 are alive: a scanning overview of the reference, a field of sounds that twinkles to the beat */
+function fitCanvas(cv){ const dpr=Math.min(2,window.devicePixelRatio||1); const r=cv.getBoundingClientRect(); if(r.width<2||r.height<2) return null; if(cv.width!==Math.round(r.width*dpr)||cv.height!==Math.round(r.height*dpr)){ cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); } return dpr; }
+function beatPhase(){ const b=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--beat'))||2.6; return (performance.now()/1000 % b)/b; }
+(function miniRef(){ const cv=$('refMini'); const ctx=cv.getContext('2d'); let t=0;
+  const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const src=S.ref&&S.ref.overview; const n=64; const gap=W/n, mid=H/2; const head=(t*.07)%1.3-.15; const pulse=1+.05*Math.pow(1-beatPhase(),6);
+      for(let i=0;i<n;i++){ let v; if(src){ const a=Math.floor(i/n*src.length), b=Math.max(a+1,Math.floor((i+1)/n*src.length)); v=Math.max(...src.slice(a,b)); } else v=.18+.1*Math.abs(Math.sin(i*.7)); const lit=src?Math.max(0,1-Math.abs(i/n-head)*5):0; const al=src?(.22+.78*lit):.22;
+        ctx.fillStyle=src?`rgba(46,211,240,${al})`:(document.documentElement.dataset.theme==='dark'?'rgba(255,255,255,.12)':'rgba(20,20,30,.1)'); ctx.shadowBlur=src?10*dpr*lit:0; ctx.shadowColor='rgba(46,211,240,.8)';
+        const bh=Math.max(1.5*dpr, v*H*.9*pulse); const bw=Math.max(1,gap*.45); ctx.fillRect(i*gap+gap*.28, mid-bh/2, bw, bh); } }
+    t+=.016; if(!reduced) requestAnimationFrame(frame); }; frame(); })();
+(function miniSnd(){ const cv=$('sndMini'); const ctx=cv.getContext('2d'); let t=0; const seeds=Array.from({length:260},(_,i)=>({p:Math.random()*6.28, s:.6+Math.random()*1.2}));
+  const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const n=S.pack?Math.min(240,S.pack.count):120; const cols=Math.ceil(Math.sqrt(n*W/H)), rows=Math.ceil(n/cols); const cw=W/cols, ch=H/rows; const r=Math.max(1,Math.min(cw,ch)*.18); const kick=Math.pow(1-beatPhase(),8);
+      for(let i=0;i<n;i++){ const x=(i%cols+.5)*cw, y=(Math.floor(i/cols)+.5)*ch; const sd=seeds[i%seeds.length]; const tw=S.pack?Math.pow(Math.max(0,Math.sin(sd.p+t*sd.s)),10):0; const al=S.pack?(.2+.8*Math.max(tw, kick*(i%17===0?1:0))):.14;
+        ctx.fillStyle=S.pack?`rgba(255,92,168,${al})`:(document.documentElement.dataset.theme==='dark'?'rgba(255,255,255,.12)':'rgba(20,20,30,.1)'); ctx.shadowBlur=S.pack?8*dpr*tw:0; ctx.shadowColor='rgba(255,92,168,.9)'; ctx.beginPath(); ctx.arc(x,y,r*(1+.6*tw),0,6.28); ctx.fill(); } }
+    t+=.016; if(!reduced) requestAnimationFrame(frame); }; frame(); })();
 let stopWave=null, stopSeq=null;
 function syncIdle(){ const waveOn = S.view==='ref' && !S.ref, seqOn = S.view==='snd' && !S.pack;
   if(waveOn && !stopWave) stopWave=startWave($('waveCv')); if(!waveOn && stopWave){ stopWave(); stopWave=null; }
