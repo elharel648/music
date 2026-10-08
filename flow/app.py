@@ -421,6 +421,27 @@ class Api:
 
         return self._run(go)
 
+    def apply_swaps(self, opts: dict):
+        """The user swapped sounds after a build into Live: replace just those tracks' clips, then re-render the mix."""
+        ctx = self._ctx
+        if not ctx or not ctx.get("ableton"):
+            return {"ok": False, "error": "Build into Live first; then swapped sounds can be replaced in the set."}
+
+        def go():
+            from .ableton_bridge import Live
+            from . import arrange
+            res = flowcli.swap_roles(ctx, opts.get("kit") or {}, live=Live(), progress=lambda m, p: self._emit(m, 0.1 + 0.6 * p))
+            self._ctx_key = self._prep_key(opts)
+            self._emit_plan(arrange.plan_view(ctx["plan"]))
+            self.window.evaluate_js(f"window.flowSwapped({json.dumps(res, default=str)})")
+            if res.get("replaced"):
+                try:
+                    self._emit_preview(ctx, lambda m, p: None)
+                except Exception:
+                    pass
+
+        return self._run(go)
+
     def send_feedback(self, note: str):
         """What the user heard, next to what was built. Posted when an endpoint is configured, else saved to the Desktop."""
         try:

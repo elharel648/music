@@ -20,7 +20,7 @@ NOTICE = '''# Alma Bridge for Ableton Live — a Remote Script that lets the Alm
 # Alma additions (c) 2026 Harel Eliyahu. Listens on 127.0.0.1:9878 only.
 '''
 
-MAIN_THREAD_ADD = '"create_locator", "set_track_volume", "set_track_pan", "set_send", "load_on_master", "set_master_parameter"]:'
+MAIN_THREAD_ADD = '"create_locator", "set_track_volume", "set_track_pan", "set_send", "load_on_master", "set_master_parameter", "replace_track_clips"]:'
 
 DISPATCH_ADD = '''                        elif command_type == "set_track_volume":
                             result = self._set_track_volume(params.get("track_index", 0), params.get("db", 0.0))
@@ -30,6 +30,9 @@ DISPATCH_ADD = '''                        elif command_type == "set_track_volume
                             result = self._set_send(params.get("track_index", 0), params.get("send_index", 0), params.get("value", 0.0))
                         elif command_type == "load_on_master":
                             result = self._load_on_master(params.get("uri", ""))
+                        elif command_type == "replace_track_clips":
+                            result = self._replace_track_clips(params.get("track_index", 0), params.get("path", ""), params.get("spans", []),
+                                                               params.get("clip_bars", 4), params.get("hits", []), params.get("sweeps", []), params.get("name"))
                         elif command_type == "set_master_parameter":
                             result = self._set_master_parameter(params.get("device_index", 0), params.get("parameter_index", 0), params.get("value", 0.0))
                         elif command_type == "set_tempo":'''
@@ -40,6 +43,41 @@ READ_ADD = '''            elif command_type == "get_master_parameters":
 
 METHODS = '''
     # ---- Alma additions -------------------------------------------------
+    def _replace_track_clips(self, track_index, path, spans, clip_bars, hits, sweeps, name):
+        """Swap one track's sound after a build: drop every arrangement clip on the track, import the new file into
+        slot 0 (the sweep into slot 1) and lay it out again on the same bars. Devices, volume and routing stay."""
+        track = self._song.tracks[track_index]
+        if not hasattr(track, "delete_clip"):
+            raise Exception("Track.delete_clip is unavailable in this Live version (needs Live 11 or newer)")
+        for clip in list(track.arrangement_clips):
+            track.delete_clip(clip)
+        for i in (0, 1):
+            if i < len(track.clip_slots) and track.clip_slots[i].has_clip:
+                track.clip_slots[i].delete_clip()
+        slot = track.clip_slots[0]
+        slot.create_audio_clip(path)
+        clip = slot.clip
+        step = max(1, int(clip_bars or 4))
+        n = 0
+        for s, e in spans:
+            b = s
+            while b < e:
+                track.duplicate_clip_to_arrangement(clip, (b - 1) * 4.0)
+                b += step
+                n += 1
+        for hb in hits or []:
+            track.duplicate_clip_to_arrangement(clip, (float(hb) - 1) * 4.0)
+            n += 1
+        if sweeps:
+            track.clip_slots[1].create_audio_clip(sweeps[0][1])
+            sw = track.clip_slots[1].clip
+            for sb, _p in sweeps:
+                track.duplicate_clip_to_arrangement(sw, (float(sb) - 1) * 4.0)
+                n += 1
+        if name:
+            track.name = str(name)[:60]
+        return {"track_index": track_index, "clips": n, "name": track.name}
+
     @staticmethod
     def _db_to_volume(db):
         """Live's volume slider: 0.85 = 0 dB, 1.0 = +6 dB; below 0 dB roughly 0.025 per dB, curving to -inf."""

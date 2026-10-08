@@ -150,6 +150,12 @@ class Live:
         return True
 
     # ---- writes
+    def replace_track_clips(self, track_index: int, path: str, spans: list, clip_bars: int, hits: list | None = None,
+                            sweeps: list | None = None, name: str | None = None) -> dict:
+        """Swap one built track's sound in place: same bars, new file. Devices and mixer settings stay."""
+        return self.call("replace_track_clips", track_index=int(track_index), path=path, spans=[[int(a), int(b)] for a, b in spans],
+                         clip_bars=int(clip_bars or 4), hits=[float(h) for h in (hits or [])], sweeps=[[float(b), pth] for b, pth in (sweeps or [])], name=name)
+
     def apply_plan(self, plan: dict, progress: Callable[[str, float], None] | None = None, force: bool = False) -> dict:
         prog = progress or (lambda m, p: None)
         if not force and not self.is_fresh_set():

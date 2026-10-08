@@ -98,11 +98,71 @@ def commit(ctx: dict, target: str, out: str | None = None, sidechain: str | None
             rep.setdefault("warnings", []).extend(warns)
             rep["finish"] = sorted(moves)
         result["ableton"] = rep
+        ctx["ableton"] = {"base": base, "report": rep}
     else:
         out_dir = out or os.path.join(os.path.dirname(ctx["ref_path"]), "Alma export")
         exp = export.export_all(plan, ref, out_dir, progress=lambda m, p: prog(m, 0.4 + 0.6 * p))
         result["export"] = exp
     return result
+
+
+DEPENDENT_ROLES = {"tom": ("tom_b", "tom_c"), "clap": ("snare_roll",)}   # rendered from the same sample
+
+
+def swap_roles(ctx: dict, overrides: dict, live=None, progress=None) -> dict:
+    """After a build into Live: the user swapped sounds in the kit; re-render those roles and replace their clips in the
+    set, on the same bars, leaving everything else the user did in Live untouched. Mutates ctx (kit, loops, plan)."""
+    from . import transitions
+    prog = progress or (lambda m, p: None)
+    pk, plan, bpm, work = ctx["pack"], ctx["plan"], ctx["bpm"], ctx["work"]
+    style = plan["style"]
+    old_kit = ctx["kit"]
+    new_kit = packmod.choose_kit(pk, bpm, overrides=overrides)
+    changed = [r for r in new_kit if (old_kit.get(r) or {}).get("path") != new_kit[r]["path"]]
+    for r in list(changed):
+        changed += [d for d in DEPENDENT_ROLES.get(r, ()) if d not in changed]
+    by_role = {t["role"]: t for t in plan["tracks"]}
+    changed = [r for r in changed if r in by_role and by_role[r].get("kind") != "midi"]
+    if not changed:
+        return {"replaced": [], "notes": ["Nothing changed: the sounds in Live are the ones you chose."]}
+    report = (ctx.get("ableton") or {}).get("report") or {}
+    index_of = {t["role"]: rt["index"] for t, rt in zip(plan["tracks"], report.get("tracks", []))}
+    ref = ctx["ref"]
+    transpose = {}
+    for role in ("bass", "synth"):
+        s_ = new_kit.get(role)
+        if s_ and s_.get("key") and s_["key"].get("pc") is not None:
+            d = (ref["key"]["pc"] - s_["key"]["pc"]) % 12
+            transpose[role] = d if d <= 6 else d - 12
+    loops = patterns.render_kit_loops({r: new_kit[r] for r in new_kit if r in changed or r in ("tom", "clap", "snare")}, bpm, work, transpose=transpose, style=style)
+    done = []
+    for i, role in enumerate(changed):
+        t = by_role[role]
+        base_role = next((k for k, deps in DEPENDENT_ROLES.items() if role in deps), role)
+        s = new_kit.get(base_role)
+        if not s:
+            continue
+        if role in loops:
+            src = {"path": loops[role]["path"], "bars": loops[role]["bars"], "kind": "loop", "name": loops[role]["source"]}
+        else:
+            bars = max(1, int(round(s["duration"] / (240.0 / bpm)))) if s.get("is_loop") else None
+            src = {"path": s["path"], "bars": bars, "kind": "loop" if s.get("is_loop") else "oneshot", "name": s["name"]}
+        t["source"] = src
+        t["name"] = arrange._track_name(role, src["name"])
+        t["clip_bars"] = src["bars"] or 4
+        if t.get("sweeps"):
+            name = "".join(ch for ch in t["name"] if ch.isalnum() or ch in " -_")[:60]
+            path = os.path.join(work, f"{name} - sweep {transitions.SWEEP_BARS}bar.wav")
+            transitions.render_sweep(src["path"], bpm, path, loop_bars=t.get("clip_bars") or None)
+            t["sweeps"] = [(b, path) for b, _p in t["sweeps"]]
+        prog(f"Replacing {t['name']}", (i + 0.5) / len(changed))
+        if live is not None and role in index_of:
+            live.replace_track_clips(index_of[role], src["path"], t.get("spans", []), t["clip_bars"], t.get("hits"), t.get("sweeps"), t["name"][:60])
+        done.append(role)
+    ctx["kit"] = new_kit
+    ctx["loops"].update(loops)
+    prog("Replaced in Live", 1.0)
+    return {"replaced": done, "names": [by_role[r]["name"] for r in done], "notes": []}
 
 
 def render_preview(ctx: dict, path: str | None = None, progress=None) -> dict:

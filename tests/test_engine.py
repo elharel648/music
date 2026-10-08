@@ -351,3 +351,33 @@ def test_techno_profile_measured_rules():
     out, _ = arrange.normalize_sections([{"label": "Intro", "start": 1, "end": 41, "bars": 40, "kick_ratio": 1}, {"label": "Drop", "start": 41, "end": 73, "bars": 32, "kick_ratio": 1},
                                          {"label": "Breakdown", "start": 73, "end": 89, "bars": 16, "kick_ratio": 0}, {"label": "Drop 2", "start": 89, "end": 121, "bars": 32, "kick_ratio": 1}], profiles.TECHNO)
     assert out[0]["bars"] == 16 and out[1]["label"] == "Groove"          # a 40-bar intro becomes 16 + groove
+
+
+def test_swap_roles_replaces_only_changed_tracks(tmp_path):
+    """After a build into Live, swapping one sound re-renders that role and replaces exactly that track's clips, on the same bars."""
+    from flow import pack, patterns, arrange, cli
+    pk = _fake_pack(tmp_path)
+    cands = pack.candidates(pk, 124)
+    kit = pack.choose_kit(pk, 124, cands=cands)
+    work = str(tmp_path / "work")
+    loops = patterns.render_kit_loops(kit, 124, work, style="house")
+    plan = arrange.build_plan(_fake_ref(), kit, loops, bpm=124, style="house")
+    report = {"tracks": [{"index": 3 + i, "name": t["name"], "clips": 1} for i, t in enumerate(plan["tracks"])]}
+    ctx = {"ref": _fake_ref(), "pack": pk, "kit": kit, "loops": loops, "plan": plan, "work": work, "bpm": 124.0, "ableton": {"base": 3, "report": report}}
+    clap_i = next(i for i, t in enumerate(plan["tracks"]) if t["role"] == "clap")
+    old = dict(plan["tracks"][clap_i])
+    other = cands["clap"][1]["path"]
+
+    class FakeLive:
+        calls = []
+        def replace_track_clips(self, *a, **k):
+            self.calls.append(a)
+            return {"clips": 1}
+
+    live = FakeLive()
+    res = cli.swap_roles(ctx, {"clap": other}, live=live)
+    assert res["replaced"] == ["clap"] and len(live.calls) == 1
+    idx, path, spans, clip_bars, hits, sweeps, name = live.calls[0]
+    assert idx == 3 + clap_i and spans == old["spans"] and name.startswith("Clap ·") and "clap1" in path and path != old["source"]["path"]
+    assert os.path.exists(path) and ctx["kit"]["clap"]["path"] == other and plan["tracks"][clap_i]["source"]["path"] == path
+    assert cli.swap_roles(ctx, {"clap": other}, live=live)["replaced"] == [] and len(live.calls) == 1   # nothing else changed: nothing touched
