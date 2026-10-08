@@ -48,7 +48,7 @@
   :root[data-theme=light] .tsw .sun, :root[data-theme=dark] .tsw .moon { stroke:var(--ink); }
 
   /* ---------- the display ---------- */
-  .disp { margin:0 10px; border-radius:10px; background:var(--d-bg); position:relative; overflow:hidden; color:var(--d-ink); box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(0,0,0,.6); }
+  .disp { margin:0 10px; border-radius:12px; background:linear-gradient(180deg,#0F1015 0%,#08090C 55%,#06070A 100%); position:relative; overflow:hidden; color:var(--d-ink); box-shadow:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.03); }
   .dv { position:absolute; inset:0; padding:16px 18px; display:none; }
   .dv.on { display:block; animation:dvin .55s var(--ease) both; }
   @keyframes dvin { from { clip-path:inset(0 0 0 100%); opacity:.6; } to { clip-path:inset(0 0 0 0); opacity:1; } }
@@ -58,6 +58,7 @@
   .dv .capr { left:auto; right:18px; }
   .dvhead { display:flex; align-items:baseline; justify-content:space-between; gap:14px; margin-bottom:10px; }
   .dvhead .t { font-size:13px; font-weight:600; letter-spacing:-.01em; }
+  .tl .dvhead { margin-bottom:8px; } .tl .dvhead .t { font-size:12.5px; } .tl .dvhead .r { font-size:11.5px; }
   .dvhead .t small { font:500 11px var(--mono); color:var(--d-sec); margin-left:10px; letter-spacing:.02em; }
   .dvhead .r { font:500 11px var(--mono); color:var(--d-sec); }
   .dvhead .r b { color:var(--d-ink); font-weight:600; }
@@ -127,14 +128,14 @@
   .tl .band { position:relative; height:6px; margin-top:10px; }
   .tl .seg { position:absolute; top:0; bottom:0; border-radius:3px; background:#E9EAF0; transform-origin:left center; transform:scaleX(0); animation:grow .75s var(--ease) forwards; }
   .tl .seg.hi { background:var(--tlc, #8B7CFF); box-shadow:0 0 10px rgba(var(--acc-rgb),.5); } .tl .seg.lo { background:#2A2B36; }
-  .tl .names { position:relative; height:28px; margin-top:7px; }
-  .tl .names > div { position:absolute; top:0; white-space:nowrap; font-size:11px; font-weight:600; color:var(--d-ink); opacity:0; animation:rise .5s var(--ease) forwards; }
+  .tl .names { position:relative; height:30px; margin-top:8px; }
+  .tl .names > div { position:absolute; top:0; white-space:nowrap; font-size:12px; font-weight:600; color:var(--d-ink); opacity:0; animation:rise .5s var(--ease) forwards; }
   .tl .names > div.hi { color:var(--tlc, #B9B0FF); }
-  .tl .names small { display:block; font:500 9.5px var(--mono); color:var(--d-mut); margin-top:1px; }
+  .tl .names small { display:block; font:500 10.5px var(--mono); color:var(--d-mut); margin-top:2px; }
   @keyframes rise { from { opacity:0; transform:translateY(6px);} to { opacity:1; transform:none;} }
-  .tl .lanes { display:flex; flex-direction:column; gap:7px; margin-top:4px; }
+  .tl .lanes { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
   .tl .lane { position:relative; height:6px; opacity:0; animation:rise .45s var(--ease) forwards; }
-  .tl .lane .ln { position:absolute; left:-110px; top:50%; transform:translateY(-50%); width:96px; font-size:10.5px; font-weight:500; color:var(--d-mut); white-space:nowrap; transition:color .18s; }
+  .tl .lane .ln { position:absolute; left:-110px; top:50%; transform:translateY(-50%); width:96px; font-size:11.5px; font-weight:500; color:var(--d-mut); white-space:nowrap; transition:color .18s; }
   .tl .lane .tr { position:absolute; inset:0; } .tl .lane .tr::before { content:""; position:absolute; left:0; right:0; top:50%; height:1px; background:rgba(255,255,255,.05); }
   .tl .lane.act .ln { color:var(--d-ink); font-weight:600; }
   .tl .blk { position:absolute; top:0; height:6px; border-radius:2px; background:var(--tlc, #8B7CFF); box-shadow:0 0 8px rgba(var(--acc-rgb),.5); transform-origin:left center; transform:scaleX(0); }
@@ -145,15 +146,15 @@
   .tl .ticks { position:relative; height:18px; margin-top:8px; border-top:1px solid rgba(255,255,255,.08); opacity:0; animation:fadein .6s ease .8s forwards; }
   @keyframes fadein { to { opacity:1; } }
   .tl .ticks i { position:absolute; top:-1px; width:1px; height:4px; background:rgba(255,255,255,.22); }
-  .tl .ticks span { position:absolute; top:6px; font:500 9.5px var(--mono); color:var(--d-mut); transform:translateX(-50%); }
+  .tl .ticks span { position:absolute; top:6px; font:500 10.5px var(--mono); color:var(--d-mut); transform:translateX(-50%); }
   .tl .veil { position:absolute; top:-6px; bottom:-6px; left:0; right:0; background:rgba(6,7,10,.76); pointer-events:none; opacity:0; }
   .tl .ph { position:absolute; top:-6px; bottom:-6px; width:1px; margin-left:-.5px; background:#fff; box-shadow:0 0 10px 1px rgba(255,255,255,.6); pointer-events:none; opacity:0; transition:opacity .15s; }
   .tl .ph .phl { position:absolute; bottom:-3px; left:50%; transform:translateX(-50%); background:#fff; color:#06070A; font:600 9.5px var(--mono); padding:2px 5px; border-radius:3px; white-space:nowrap; }
   .tl .dot { position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:#fff; border:2px solid var(--tlc, #8B7CFF); box-shadow:0 0 12px var(--tlc, #8B7CFF); opacity:0; pointer-events:none; transition:opacity .15s; }
   .tl .skel { flex:1; border-radius:8px; background:linear-gradient(90deg,#0B0C12 0 40%,#13141C 50%,#0B0C12 60% 100%); background-size:250% 100%; animation:shimmer 1.8s ease-in-out infinite; }
   @keyframes shimmer { from { background-position:150% 0; } to { background-position:-50% 0; } }
-  .bhead { display:flex; align-items:center; gap:18px; margin-bottom:10px; }
-  .phases { display:flex; gap:18px; font:500 10.5px var(--mono); color:var(--d-mut); letter-spacing:.08em; text-transform:uppercase; }
+  .bhead { display:flex; align-items:center; gap:18px; margin-bottom:12px; min-height:26px; }
+  .phases { display:none; gap:18px; font:500 10.5px var(--mono); color:var(--d-mut); letter-spacing:.08em; text-transform:uppercase; }
   .phases span { position:relative; padding-bottom:7px; transition:color .3s; }
   .phases span::after { content:""; position:absolute; left:0; right:0; bottom:0; height:2px; border-radius:1px; background:#181920; }
   .phases .done { color:var(--d-sec); } .phases .done::after { background:var(--acc); }
@@ -175,9 +176,10 @@
   .kb { width:20px; height:20px; border-radius:5px; border:1px solid rgba(255,255,255,.12); background:transparent; color:var(--d-sec); display:flex; align-items:center; justify-content:center; padding:0; transition:border-color .15s, color .15s; }
   .kb:hover { color:var(--d-ink); border-color:rgba(255,255,255,.35); } .kb.on { color:var(--d-bg); background:var(--d-ink); border-color:var(--d-ink); } .kb:disabled { opacity:.3; }
   .kb svg { width:9px; height:9px; stroke:currentColor; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; } .kb svg.f { fill:currentColor; stroke:none; }
-  .statusline { flex:1; font:500 11px var(--mono); color:var(--d-sec); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; }
+  .statusline { flex:1; font-size:12px; font-weight:500; color:var(--d-sec); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; }
   .meter { display:flex; gap:2px; align-items:flex-end; height:16px; opacity:0; transition:opacity .4s; }
   .building .meter { opacity:1; }
+  .building .phases, .stopped .phases { display:flex; }
   .meter i { width:3px; height:100%; border-radius:1px; background:var(--acc); transform-origin:bottom; transform:scaleY(.12); }
   .building .meter i { animation:vu 1s ease-in-out infinite; }
   @keyframes vu { 0%,100% { transform:scaleY(.14);} 50% { transform:scaleY(var(--m,.9));} }
@@ -617,7 +619,7 @@ function mountTimeline(el, cfg){
   const blockHtml=(b,l,li,bi)=>{ const live=b.t!=null && !cfg.all; const kcls=b.k==='hit'?'hit':(b.k==='sw'?'swp':(l.cls||''));
     const w=b.k==='hit'?'':`width:${pc(b.b-b.a)}%;`; return `<i class="blk ${kcls}${live?'':' on'}" data-t="${b.t??''}" style="left:${pc(b.a-1)}%;${w}animation-delay:${live?0:600+li*70+bi*30}ms"></i>`; };
   const lanesHtml = lanes.map((l,li)=>`<div class="lane" data-li="${li}" style="animation-delay:${520+li*70}ms"><div class="ln">${l.name}</div><div class="tr">${l.blocks.map((b,bi)=>blockHtml(b,l,li,bi)).join('')}</div></div>`).join('');
-  const dflt = cfg.hint || 'Move across to scrub';
+  const dflt = cfg.hint || '';
   el.innerHTML = `<div class="dvhead"><div class="t"><span class="rb">${total} bars</span><small class="rs">${fmt(total*240/bpm)}</small></div><div class="r"><span class="rn">${dflt}</span>${cfg.replay?' <button class="dbtn rp" style="display:none;height:22px;padding:0 8px;margin-left:10px">Replay</button>':''}</div></div>
     <div class="plot"><div class="curvewrap ${layers?'':'wipe'}"><canvas class="ov"></canvas><svg class="curve" viewBox="0 0 1000 ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${cfg.color||'#8B7CFF'}" stop-opacity=".35"/><stop offset="1" stop-color="${cfg.color||'#8B7CFF'}" stop-opacity="0"/></linearGradient></defs><path class="area" d=""/><path class="line" d=""/></svg></div>
       <div class="band">${band}</div><div class="names">${names}</div><div class="lanes">${lanesHtml}</div><div class="ticks">${ticks}</div>
@@ -799,7 +801,7 @@ function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).le
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
 function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
 function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); }
-function resetBuild(){ stopPlayer(); $('tp').classList.add('hidden'); if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); bigState('working');
+function resetBuild(){ stopPlayer(); $('tp').classList.add('hidden'); $('buildTL').classList.remove('stopped'); if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); bigState('working');
   $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent='BUILDING'; $('buildBtn').disabled=true; $('bst').textContent='Building…'; setMod('bld','Working','work'); }
 function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, structure:S.structure, kit:S.kitOverrides, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
 async function startPreview(){ S.building=true; resetBuild(); markNext(); setActive('bld'); $('buildBtn').textContent='BUILD'; $('bst').textContent='Preparing your track to listen to…'; setMod('bld','Preparing','work'); $('listenBtn').disabled=true;
@@ -815,8 +817,8 @@ player.addEventListener('ended', ()=>{ player.currentTime = 0; });
 $('playBtn').onclick = ()=>{ if(!S.preview || S.previewStale) return; if(player.paused) player.play().catch(()=>{}); else player.pause(); };
 document.addEventListener('keydown', e=>{ if(e.code!=='Space' || !S.preview || S.previewStale) return; const t=e.target; if(t && (t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA')) return; e.preventDefault(); $('playBtn').click(); });
 window.flowPreview = p=>{ S.building=false; S.preview=p; S.previewStale=false; player.src=p.url; player.load(); $('ptime').textContent = `0:00 / ${fmt(p.seconds)}`; $('tp').classList.remove('hidden'); $('playBtn').disabled=false; $('listenBtn').disabled=false; if(p.used){ S.usedCount=p.used; renderKit(); }
-  if(S.built){ listenLabel(); if(TL && !S.plan) {} $('statusLine').textContent = 'Done · play it from the map, or press Cmd+S in Live'; return; }   // the mix of what was just written: ready, not forced on you
-  $('buildTL').classList.remove('building'); bigState('ready'); setProg(0); setPhase(5); if(TL){ TL.revealAll(); } $('statusLine').textContent='Press play, or click anywhere on the map'; $('bst').textContent='Listen. When it is right, build.'; $('bsub').textContent='Builds exactly what you heard: your sounds, your direction.'; setMod('bld','Preview','on'); $('buildBtn').disabled=false; markNext();
+  if(S.built){ listenLabel(); if(TL && !S.plan) {} $('statusLine').textContent = 'In Live. Press Cmd+S. Play it here any time.'; return; }   // the mix of what was just written: ready, not forced on you
+  $('buildTL').classList.remove('building'); bigState('ready'); setProg(0); setPhase(5); if(TL){ TL.revealAll(); } $('statusLine').textContent='Listen. Click anywhere on the map to jump.'; $('bst').textContent='Listen. When it is right, build.'; $('bsub').textContent='Builds exactly what you heard: your sounds, your direction.'; setMod('bld','Preview','on'); $('buildBtn').disabled=false; markNext();
   setActive('bld'); listenLabel(); player.play().catch(()=>{}); };
 async function startBuild(){ S.building=true; resetBuild(); markNext(); setActive('bld');
   if(S.target==='ableton'){ const st = await liveStatus(); if(!st.ok || !st.fresh){ await sleep(350); window.flowError(st.ok ? `The Live Set in front has ${st.tracks} tracks. In Ableton: File › New Live Set, then press Retry.` : st.reason); return; } }
@@ -827,11 +829,11 @@ window.flowPlan = v=>{ S.plan=v; if(TL) TL.destroy(); TL = mountTimeline($('tlCa
 window.flowProgress = (msg,pct)=>{ if(msg.startsWith('@track:')){ if(TL) TL.reveal(+msg.slice(7)); return; }
   setProg(pct); $('log').textContent += msg+'\n'; $('log').scrollTop=1e9; $('statusLine').textContent = msg;
   setPhase(pct<0.15?0 : pct<0.3?1 : pct<0.4?2 : (S.target==='ableton' && pct>=0.85 ? 4 : 3)); };
-window.flowError = msg=>{ S.building=false; $('listenBtn').disabled=false; markNext(); $('buildTL').classList.remove('building'); bigState('err'); setProg(1); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
+window.flowError = msg=>{ S.building=false; $('listenBtn').disabled=false; markNext(); $('buildTL').classList.remove('building'); $('buildTL').classList.add('stopped'); bigState('err'); setProg(1); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
   if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Stopped. Fix the cause, then retry.'; liveStatus(); };
 window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); bigState('done'); setProg(1); setPhase(5); setMod('bld','Done','on');
-  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; const nUsed = sum.kit ? Object.keys(sum.kit).length : null; const from = `From your sounds${nUsed?` (${nUsed} used)`:''}, ${sum.style_name||curStyle().name} · ${fmt(S.len)}, ${sum.structure==='typical'?'typical structure':'reference structure'}.`; $('bst').textContent = sum.ableton ? 'Your track is in Live. Press Cmd+S.' : 'Your track is in the folder.'; $('bsub').textContent = from;
+  $('statusLine').textContent = sum.ableton ? 'In Live. Press Cmd+S.' : 'In the folder.'; const nUsed = sum.kit ? Object.keys(sum.kit).length : null; const from = `From your sounds${nUsed?` (${nUsed} used)`:''}, ${sum.style_name||curStyle().name} · ${fmt(S.len)}, ${sum.structure==='typical'?'typical structure':'reference structure'}.`; $('bst').textContent = sum.ableton ? 'Your track is in Live. Press Cmd+S.' : 'Your track is in the folder.'; $('bsub').textContent = from;
   if(!TL) window.flowPlan(sum); TL.revealAll();
   if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bsub').textContent += ` ${warns.length} note${warns.length===1?'':'s'} in Details.`; }
   if(sum.kit){ S.usedCount=Object.keys(sum.kit).length; renderKit(); } $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
