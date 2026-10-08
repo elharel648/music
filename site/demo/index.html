@@ -951,6 +951,14 @@
   .hs .track .tick { margin-left:-.5px; }
   /* A switch that cannot be used says so, and does not pretend to move. */
   .tg.sm.off { opacity:.5; } .tg.sm.off button, .tg.sm.off .pill { cursor:default; } .tg.sm.off button:disabled { opacity:1; }
+
+  /* The theme switch is the same pill and black knob as the others. */
+  .tsw { all:unset; cursor:pointer; display:inline-flex; align-items:center; padding:6px 2px; }
+  .tsw:focus-visible .pill { box-shadow:inset 0 1px 3px rgba(20,20,30,.16), 0 0 0 2px var(--acc); }
+  .tsw .pill { position:relative; width:34px; height:18px; border-radius:9px; background:#E6E6EA; box-shadow:inset 0 1px 3px rgba(20,20,30,.16), inset 0 0 0 1px rgba(20,20,30,.05); flex:0 0 34px; }
+  .tsw .pill i { position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #3A3B44 0%, #111113 70%); box-shadow:0 2px 4px rgba(20,20,30,.35), inset 0 1px 0 rgba(255,255,255,.18); transition:transform .22s var(--ease); }
+  :root[data-theme=dark] .tsw .pill { background:#111218; box-shadow:inset 0 1px 3px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.05); }
+  :root[data-theme=dark] .tsw .pill i { transform:translateX(16px); background:radial-gradient(circle at 35% 30%, #FFFFFF 0%, #DCDCE2 70%); box-shadow:0 2px 4px rgba(0,0,0,.5); }
 </style>
 </head>
 <body>
@@ -961,7 +969,7 @@
     <div class="right">
       <button class="chip upd hidden" id="updChip" title=""><i></i><span id="updTxt">Update</span></button>
       <button class="chip hidden" id="resumeChip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9"/><path d="M3 3v6h6"/></svg><span id="resumeTxt">Resume</span></button>
-      <button class="tsw" id="themeBtn" aria-label="Theme"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><i></i><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
+      <button class="tsw" id="themeBtn" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode"><span class="pill"><i></i></span></button>
       <span class="lic" id="statusText">Starting</span>
     </div>
   </header>
@@ -1065,7 +1073,8 @@ const DEFAULT_SECS = [{label:'Intro',start:1,end:17,bars:16},{label:'Groove',sta
 const ROLE_ORDER = [['kick','Kick'],['clap','Clap'],['chat','Closed hat'],['ohat','Open hat'],['hat_loop','Hat loop'],['shaker_loop','Shaker'],['perc','Perc'],['perc_loop','Perc loop'],['perc_loop2','Perc loop 2'],['tom','Tom'],['tom_b','Tom B'],['tom_c','Tom C'],['snare_roll','Build roll'],['bass','Bass'],['synth','Synth'],['pad','Pad'],['atmos','Atmosphere']];
 
 /* ---------- theme ---------- */
-$('themeBtn').onclick = ()=>{ const t = document.documentElement.dataset.theme==='dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try{ localStorage.setItem('flow-theme', t); }catch(e){} };
+const syncTheme=()=>$('themeBtn').setAttribute('aria-checked', document.documentElement.dataset.theme==='dark' ? 'true' : 'false'); syncTheme();
+$('themeBtn').onclick = ()=>{ const t = document.documentElement.dataset.theme==='dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; try{ localStorage.setItem('flow-theme', t); }catch(e){} syncTheme(); };
 
 /* ---------- heartbeat ---------- */
 function setBeat(bpm){ document.documentElement.style.setProperty('--beat', bpm ? (60/bpm).toFixed(4)+'s' : '2.6s'); }
@@ -1422,11 +1431,11 @@ function renderStruct(){ requestAnimationFrame(syncSwitches); const ok=refUsable
 document.querySelectorAll('#structSeg button').forEach(b=>b.onclick=()=>{ if(b.disabled) return; S.structure=b.dataset.v; renderStruct(); markStale(); });
 $('bpmIn').addEventListener('change', ()=>{ if(S.view==='dir') drawDir(); setLen(S.len); markStale(); if(S.pack) loadKit(); });
 $('finBtn').onclick = ()=>{ S.finOpen = !S.finOpen; $('finBtn').classList.toggle('on', S.finOpen); setActive('dir'); if(!S.finishLoaded) loadFinish(); };
-async function liveStatus(){ if(S.target!=='ableton'){ $('liveLed').className=''; $('liveTxt').textContent='Stems + MIDI'; return {ok:true,fresh:true}; }
+async function liveStatus(){ $('liveSt').classList.toggle('hidden', S.target!=='ableton'); if(S.target!=='ableton'){ $('liveLed').className=''; $('liveTxt').textContent=''; return {ok:true,fresh:true}; }
   const r = await api().ableton_status(); $('liveLed').className = r.ok ? ((r.fresh||r.rebuild)?'ok':'bad') : 'bad'; $('liveTxt').textContent = r.ok ? (r.fresh ? 'Live is ready, empty set in front' : (r.rebuild ? 'Live has your last build open' : `Live has ${r.tracks} tracks open`)) : 'Live is not reachable'; return r; }
 async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!=='stems'); $('bridgeRow').classList.add('hidden'); if(!S.finishLoaded) loadFinish();
   if(S.target==='ableton'){ $('targetHint').className='hint hidden'; $('targetHint').textContent=''; const r = await liveStatus(); if(r.ok && r.bridge_outdated){ $('bridgeRow').classList.remove('hidden'); $('bridgeMsg').textContent = 'This version of Alma ships a newer bridge. Install it, then quit and reopen Live.'; } $('targetHint').className = 'hint ' + (r.ok ? ((r.fresh||r.rebuild)?'ok':'warn') : 'warn'); $('targetHint').textContent = r.ok ? (r.fresh?'':(r.rebuild?`Your last build is open in Live · Build replaces its ${r.alma_tracks} tracks, nothing else`:`Live has ${r.tracks} tracks open. File › New Live Set first.`)) : r.reason; $('targetHint').classList.toggle('hidden', !$('targetHint').textContent); if(!r.ok) $('bridgeRow').classList.remove('hidden'); return r; }
-  await liveStatus(); $('targetHint').className='hint'; $('targetHint').textContent = 'Full-length stems and a MIDI file with markers, for any DAW.'; return {ok:true, fresh:true}; }
+  await liveStatus(); $('targetHint').className='hint hidden'; $('targetHint').textContent=''; return {ok:true, fresh:true}; }
 $('installBridge').onclick = async ()=>{ $('bridgeMsg').textContent='Installing…'; const r = await api().install_bridge(); $('bridgeMsg').textContent = r.ok ? `Installed to ${r.path}. ${r.steps.join(' ')}` : r.error; };
 async function loadFinish(){ S.finishLoaded = true; const opts = await api().finish_options(); if(!S.finish) S.finish = new Set(opts.filter(o=>o.on).map(o=>o.key));
   const SHORT = {gain:'Levels relative to the kick', lowcut:'High-pass, not on kick or bass', duck:'Pump on every track but the kick', space:'Reverb on pads, claps, vocal, synth', glue:'Drum Buss on claps, perc, toms', transitions:'Rising sweep into every drop'};

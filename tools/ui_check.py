@@ -87,6 +87,18 @@ async def toggles(browser, base):
     await pg.wait_for_timeout(350)
     after = await pg.evaluate(f"({SW})('structSeg')")
     check(before["on"] != after["on"], "a real mouse click on the pill flips it")
+    th = await pg.evaluate("({n: document.querySelectorAll('#themeBtn .pill').length, right0: document.documentElement.dataset.theme})")
+    for want in ("dark", "light"):
+        await pg.evaluate("document.getElementById('themeBtn').click()")
+        await pg.wait_for_timeout(350)
+        t2 = await pg.evaluate("(()=>{ const p=document.querySelector('#themeBtn .pill'), i=p.querySelector('i'); return {theme: document.documentElement.dataset.theme, knobRight: (i.getBoundingClientRect().left-p.getBoundingClientRect().left)>8, aria: document.getElementById('themeBtn').getAttribute('aria-checked')}; })()")
+        check(t2["theme"] == want and t2["knobRight"] == (want == "dark") and t2["aria"] == ("true" if want == "dark" else "false"), f"the theme switch goes {want}: knob and state agree", str(t2))
+    await pg.evaluate("document.querySelector('#targetSeg button[data-v=stems]').click()")
+    await pg.wait_for_timeout(400)
+    check(await pg.evaluate("getComputedStyle(document.getElementById('liveSt')).display") == "none", "Stems + MIDI mode shows no status in the footer")
+    await pg.evaluate("document.querySelector('#targetSeg button[data-v=ableton]').click()")
+    await pg.wait_for_timeout(600)
+    check(await pg.evaluate("getComputedStyle(document.getElementById('liveSt')).display") != "none", "Live mode shows its status in the footer again")
     check(not errs, "no script errors", str(errs))
     await pg.close()
 
