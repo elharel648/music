@@ -1,7 +1,7 @@
 {
   "hosting": {
-    "public": ".",
-    "ignore": ["firebase.json", "firebase/**", "README.md", "**/.*"],
+    "public": ".deploy",
+    "ignore": ["**/.*"],
     "headers": [
       { "source": "/latest.json", "headers": [{ "key": "Cache-Control", "value": "no-cache" }, { "key": "Access-Control-Allow-Origin", "value": "*" }] },
       { "source": "**", "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }, { "key": "X-Content-Type-Options", "value": "nosniff" }] }
