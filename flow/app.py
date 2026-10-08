@@ -53,7 +53,7 @@ class Api:
 
     def save_session(self, opts: dict):
         try:
-            keep = {k: opts.get(k) for k in ("reference", "pack", "length", "target", "out", "style", "bpm", "synth", "sidechain", "finish", "vocal")}
+            keep = {k: opts.get(k) for k in ("reference", "pack", "length", "target", "out", "style", "bpm", "synth", "sidechain", "finish", "vocal", "structure")}
             with open(self._session_path(), "w") as f:
                 json.dump(keep, f)
             return {"ok": True}
@@ -208,7 +208,7 @@ class Api:
                     opts.get("target", "stems"), opts.get("out") or None, opts.get("style", "house"), opts.get("bpm") or None,
                     opts.get("synth") or None, opts.get("sidechain") or None, bool(opts.get("force")), progress=self._emit,
                     work_dir=opts.get("work_dir") or None, finish_opts=set(fin) if isinstance(fin, list) else None,
-                    on_plan=self._emit_plan, vocal=opts.get("vocal") or None)
+                    on_plan=self._emit_plan, vocal=opts.get("vocal") or None, structure=opts.get("structure") or "reference")
                 res.pop("reference", None)
                 plan = res.get("plan", {})
                 from . import arrange

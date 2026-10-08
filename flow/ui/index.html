@@ -244,7 +244,7 @@
   .vrow.has .body { font:600 11.5px "IBM Plex Sans",sans-serif; letter-spacing:-.01em; text-transform:none; color:var(--ink); }
   .vrow .body small { font:500 9.5px var(--mono); color:var(--mut); font-weight:500; margin-left:8px; letter-spacing:.02em; }
   .vrow .x { background:none; border:0; padding:2px; color:var(--mut); display:flex; } .vrow .x:hover { color:var(--err); }
-  .sel { border-radius:10px; background:var(--ctrl); border:1px solid var(--line); padding:6px 6px 7px; }
+  .sel { border-radius:10px; background:var(--ctrl); border:1px solid var(--line); padding:5px 6px 6px; }
   .sel .row { display:flex; align-items:center; gap:4px; }
   .sel .arr { width:26px; height:26px; border:0; background:transparent; color:var(--sec); display:flex; align-items:center; justify-content:center; border-radius:6px; transition:background .15s, color .15s; }
   .sel .arr:hover { background:var(--mod); color:var(--ink); }
@@ -257,23 +257,28 @@
   .sel .dots i { width:4px; height:4px; border-radius:50%; background:var(--tick); transition:background .2s, box-shadow .2s, transform .2s; }
   .sel .dots i.on { background:var(--acc); box-shadow:0 0 6px var(--acc); transform:scale(1.3); }
   .knobwrap { display:flex; flex-direction:column; align-items:center; gap:2px; margin:0; }
-  .knob { position:relative; width:118px; height:112px; touch-action:none; cursor:ns-resize; outline:none; -webkit-user-select:none; user-select:none; }
-  .knob svg { position:absolute; left:3px; top:0; width:112px; height:112px; overflow:visible; }
+  .knob { position:relative; width:118px; height:100px; touch-action:none; cursor:ns-resize; outline:none; -webkit-user-select:none; user-select:none; }
+  .knob svg { position:absolute; left:7px; top:0; width:104px; height:104px; overflow:visible; }
   .knob .dt { fill:var(--tick); transition:fill .25s; } .knob .dt.lit { fill:var(--acc); }
-  .knob .cap { position:absolute; left:19px; top:16px; width:80px; height:80px; border-radius:50%; background:radial-gradient(circle at 38% 28%, #FFFFFF 0%, #F6F6F4 38%, #E6E6E2 78%, #D4D4CF 100%); box-shadow:0 12px 24px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); transition:transform .45s var(--ease), box-shadow .3s; }
+  .knob .cap { position:absolute; left:22px; top:15px; width:74px; height:74px; border-radius:50%; background:radial-gradient(circle at 38% 28%, #FFFFFF 0%, #F6F6F4 38%, #E6E6E2 78%, #D4D4CF 100%); box-shadow:0 12px 24px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); transition:transform .45s var(--ease), box-shadow .3s; }
   :root[data-theme=dark] .knob .cap { background:radial-gradient(circle at 38% 28%, #4E4F59 0%, #34353E 40%, #22232A 80%, #17181E 100%); box-shadow:0 12px 24px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14), inset 0 -4px 8px rgba(0,0,0,.35); }
   .knob:hover .cap { box-shadow:0 14px 28px rgba(20,20,30,.2), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(20,20,30,.05); }
   .knob.drag .cap { transition:box-shadow .3s; }
   .knob .pip { position:absolute; left:50%; top:9px; width:6px; height:6px; margin-left:-3px; border-radius:50%; background:var(--acc); box-shadow:0 0 7px var(--acc); }
-  .knob .kend { position:absolute; bottom:0; font:500 9px var(--mono); color:var(--mut); letter-spacing:.04em; } .knob .kend.l { left:2px; } .knob .kend.r { right:0; }
+  .knob .kend { position:absolute; bottom:-2px; font:500 9px var(--mono); color:var(--mut); letter-spacing:.04em; } .knob .kend.l { left:2px; } .knob .kend.r { right:0; }
   .knob:focus-visible .cap { outline:2px solid var(--acc); outline-offset:3px; }
   .knobl { font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; } .knobl b { color:var(--ink); font-weight:600; font-size:11.5px; letter-spacing:0; }
+  .drow { display:flex; align-items:center; gap:6px; }
+  .bpmbox { display:flex; align-items:center; gap:5px; } .bpmbox .in { width:46px; height:24px; padding:0 6px; }
+  .dl { font:500 9.5px var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--mut); }
+  .tg.sm { padding:2px; border-radius:7px; } .tg.sm button { height:20px; font-size:10.5px; padding:0 8px; flex:0 0 auto; }
+  .tg button:disabled { opacity:.35; }
   .tg { display:flex; background:var(--ctrl); border:1px solid var(--line); border-radius:9px; padding:3px; }
   .tg button { flex:1; border:0; background:transparent; height:24px; border-radius:6px; font-size:11px; font-weight:600; color:var(--sec); transition:all .2s var(--ease); }
   .tg button.on { background:var(--mod); color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.14); }
   .hint { font:500 10px var(--mono); color:var(--mut); line-height:1.4; min-height:13px; }
   .hint.ok { color:var(--ok); } .hint.warn { color:var(--warn); } .hint.err { color:var(--err); }
-  .fbtn { height:28px; border-radius:8px; border:1px solid var(--line); background:var(--mod); font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:space-between; padding:0 10px; transition:border-color .2s; }
+  .fbtn { height:26px; flex:0 0 26px; border-radius:8px; border:1px solid var(--line); background:var(--mod); font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:space-between; padding:0 10px; transition:border-color .2s; }
   .fbtn:hover { border-color:var(--ink); } .fbtn.on { border-color:var(--acc); }
   .fbtn svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; }
   .bigwrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
@@ -303,7 +308,7 @@
   .big.working button:disabled { color:var(--acc); animation:captext var(--beat) ease-in-out infinite; }
   @keyframes captext { 0%,100% { text-shadow:0 0 0 transparent; } 18% { text-shadow:0 0 10px color-mix(in srgb, var(--acc) 80%, transparent); } }
   .big.next { animation:nextring var(--beat) ease-out infinite; }
-  .bst { font-size:11.5px; font-weight:500; color:var(--ink); text-align:center; min-height:14px; line-height:1.5; max-width:230px; }
+  .bst { font-size:11.5px; font-weight:500; color:var(--ink); text-align:center; min-height:14px; line-height:1.5; max-width:236px; }
   .bsub { font-size:10.5px; color:var(--mut); text-align:center; line-height:1.5; max-width:210px; }
   .acts { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
   .foot { display:flex; align-items:center; gap:14px; padding:0 18px; font-size:11px; font-weight:500; color:var(--mut); }
@@ -344,7 +349,7 @@
     </div>
     <div class="dv" data-v="build">
       <div class="tl" id="buildTL" style="height:100%">
-        <div class="bhead"><div class="phases" id="phases"><span>Listening</span><span>Choosing</span><span>Arranging</span><span>Building</span><span>Finishing</span></div><div class="meter" id="meter" aria-hidden="true"></div><div class="statusline" id="statusLine"></div></div>
+        <div class="bhead"><div class="phases" id="phases"><span>Measuring</span><span>From your sounds</span><span>Arranging</span><span>Writing</span><span>Finishing</span></div><div class="meter" id="meter" aria-hidden="true"></div><div class="statusline" id="statusLine"></div></div>
         <div class="tl" id="tlCard" style="flex:1;min-height:0"><div class="skel"></div></div>
       </div>
       <div class="stop hidden" id="stopCard"><div class="t" id="stopTitle">The build stopped</div><div class="m" id="stopMsg"></div><div class="note">Nothing was lost. Fix the cause and press Retry; your settings are kept, even after a restart.</div></div>
@@ -363,7 +368,7 @@
           <div class="grid4"><div><div class="v dim" id="roKey">—</div><div class="l">Key</div></div><div><div class="v dim" id="roBars">—</div><div class="l">Bars</div></div><div><div class="v dim" id="roLen">—</div><div class="l">Length</div></div><div><div class="v dim" id="roSec">—</div><div class="l">Sections</div></div></div>
         </div>
         <div class="msg" id="refMsg"></div>
-        <div class="mrow hidden" id="refTools"><input class="in" type="text" id="bpmIn" placeholder="auto" title="Tempo override"><button class="sb" id="analyzeBtn">Re-analyze</button></div>
+        <div class="mrow hidden" id="refTools"><button class="sb" id="analyzeBtn">Re-analyze</button></div>
       </div>
     </div>
     <div class="mod" data-m="snd" style="--mc:var(--c-snd)">
@@ -381,7 +386,7 @@
     </div>
     <div class="mod" data-m="dir" style="--mc:var(--c-dir)">
       <div class="mh"><i class="led" id="ledDir"></i><span class="num">03</span><span class="mn">Direction</span><span class="ms" id="msDir">House · 4:30</span></div>
-      <div class="mb" style="gap:6px">
+      <div class="mb" style="gap:5px;padding-top:9px">
         <div class="sel" id="styleSel"><div class="row"><button class="arr" id="stPrev"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="mid"><div class="n" id="stName">House</div><div class="g" id="stGroup">House · 120–128 BPM</div></div><button class="arr" id="stNext"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div><div class="dots" id="stDots"></div></div>
         <div class="knobwrap">
           <div class="knob" id="knob" tabindex="0" role="slider" aria-label="Length" aria-valuemin="120" aria-valuemax="600" aria-valuenow="270">
@@ -391,8 +396,9 @@
           </div>
           <div class="knobl">Length · <b id="lcdBig">4:30</b> · <span id="lcdSub">136 bars</span></div>
         </div>
+        <div class="drow"><div class="bpmbox" title="Your tempo. Empty follows the reference."><input class="in" type="text" id="bpmIn" placeholder="—"><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" style="margin-left:auto" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
         <div class="tg" id="targetSeg"><button data-v="ableton" class="on">Ableton Live</button><button data-v="stems">Stems + MIDI</button></div>
-        <div class="hint" id="targetHint"></div>
+        <div class="hint hidden" id="targetHint"></div>
         <button class="fbtn" id="finBtn"><span>Finish &amp; plug-ins</span><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
     </div>
@@ -412,7 +418,7 @@
 </div>
 
 <script>
-const S = { active:'ref', view:null, ref:null, refPath:null, pack:null, packPath:null, style:'house', styles:[], vocalPath:null, vocal:null, target:'ableton', out:null, len:270,
+const S = { active:'ref', view:null, ref:null, refPath:null, pack:null, packPath:null, style:'house', structure:'reference', styles:[], vocalPath:null, vocal:null, target:'ableton', out:null, len:270,
             licensed:false, lastOpts:null, plan:null, finish:null, finishLoaded:false, phase:0, finOpen:false, built:false, building:false };
 const $ = id => document.getElementById(id);
 const ACC = () => getComputedStyle(document.documentElement).getPropertyValue('--acc-rgb').trim() || '92,91,224';
@@ -554,6 +560,7 @@ $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classL
   if(l.synth||l.sidechain){ await scanPlugins(); $('synthSel').value=l.synth||''; $('scSel').value=l.sidechain||''; syncPsel(); }
   if(Array.isArray(l.finish)){ S.finish = new Set(l.finish); S.finishLoaded=false; }
   if(l.vocal){ S.vocalPath=l.vocal; await describeVocal(); }
+  S.structure = l.structure||'reference'; renderStruct();
   setActive('dir'); checkTarget(); };
 
 /* ---------- reference ---------- */
@@ -570,7 +577,7 @@ async function analyze(){ setMod('ref','Listening','work'); $('refMsg').classNam
   const lanes = el.kick ? [{name:'Kick', cls:'k', blocks:spansFromBools(el.kick).map(([a,b])=>({a,b,k:'span'}))}, {name:'Hats and top', cls:'', blocks:spansFromBools(el.hats).map(([a,b])=>({a,b,k:'span'}))}] : [];
   $('refTL').classList.remove('hidden'); $('refCap').textContent = ''; syncIdle();
   if(REFTL) REFTL.destroy(); REFTL = mountTimeline($('refTL'), {total:r.ref.bars, bpm:r.ref.bpm, sections:r.ref.sections, curve, lanes, overview:r.ref.overview, color:getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()||'#5C5BE0', rightInfo: bar=>`Kick ${el.kick&&el.kick[bar-1]?'on':'off'} · ${fmt((bar-1)*240/r.ref.bpm)}`});
-  setLen(Math.max(150, Math.min(600, Math.ceil(r.ref.duration/30)*30))); renderStyle(); if(S.view==='dir') drawDir(); gateBuild(); if(stopSeq){ stopSeq(); stopSeq=null; syncIdle(); } }
+  $('bpmIn').placeholder = String(Math.round(r.ref.bpm)); if(refUsable()) S.structure='reference'; renderStruct(); setLen(Math.max(150, Math.min(600, Math.ceil(r.ref.duration/30)*30))); renderStyle(); if(S.view==='dir') drawDir(); gateBuild(); if(stopSeq){ stopSeq(); stopSeq=null; syncIdle(); } }
 $('analyzeBtn').onclick = analyze;
 function tickNum(n, target){ if(reduced){ n.textContent=target; return; } const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
 
@@ -612,9 +619,10 @@ function renderStyle(){ const st=curStyle(); if(!st) return; const bpm=S.ref?S.r
 function stepStyle(d){ if(!S.styles.length) return; const i=S.styles.findIndex(s=>s.key===S.style); S.style = S.styles[(i+d+S.styles.length)%S.styles.length].key; renderStyle(); }
 $('stPrev').onclick=()=>stepStyle(-1); $('stNext').onclick=()=>stepStyle(1);
 $('styleSel').addEventListener('wheel', e=>{ e.preventDefault(); stepStyle(e.deltaY>0?1:-1); }, {passive:false});
-function drawDir(){ const st=curStyle(); if(!st) return; const shortRef = !S.ref || S.ref.bars < 48 || S.ref.sections.length < 3; const secs = shortRef ? DEFAULT_SECS : S.ref.sections; const tmpl=st.template; const lab = l => tmpl[l] ? l : (l.startsWith('Drop')?'Drop 2':'Groove');
-  const roles = ROLE_ORDER.filter(([r])=>Object.values(tmpl).some(a=>a.includes(r))); const bpm = S.ref?S.ref.bpm:124; const bars = Math.max(64, Math.round(S.len*bpm/240/8)*8);
-  let html = `<div class="dvhead"><div class="t">${st.name}<small>${st.blurb}</small></div><div class="r"><b>${bars}</b> bars at ${fmt(S.len)} · ${shortRef?'typical structure':'reference structure'}</div></div>`;
+function userBpm(){ return parseFloat($('bpmIn').value) || (S.ref ? S.ref.bpm : 124); }
+function drawDir(){ const st=curStyle(); if(!st) return; const shortRef = !refUsable() || S.structure==='typical'; const secs = shortRef ? DEFAULT_SECS : S.ref.sections; const tmpl=st.template; const lab = l => tmpl[l] ? l : (l.startsWith('Drop')?'Drop 2':'Groove');
+  const roles = ROLE_ORDER.filter(([r])=>Object.values(tmpl).some(a=>a.includes(r))); const bpm = userBpm(); const bars = Math.max(64, Math.round(S.len*bpm/240/8)*8);
+  let html = `<div class="dvhead"><div class="t">${st.name}<small>${st.blurb}</small></div><div class="r">${S.ref?`Reference ${S.ref.bars} bars · ${fmt(S.ref.duration)} → `:''}<b>Your track ${bars} bars · ${fmt(S.len)}</b> · ${Math.round(bpm)} BPM · ${shortRef?'typical structure':'structure from the reference'}</div></div>`;
   html += `<div class="dgrid" style="grid-template-columns:96px repeat(${secs.length},1fr)"><div></div>` + secs.map(s=>`<div class="h ${/^Drop|Return/.test(s.label)?'hi':''}">${s.label}<small>${s.bars||s.end-s.start} bars</small></div>`).join('');
   roles.forEach(([r,n],ri)=>{ html += `<div class="rl">${n}</div>` + secs.map((s,ci)=>`<i class="cell ${tmpl[lab(s.label)].includes(r)?'on':''}" style="--d:${ci*40+ri*12}ms"></i>`).join(''); });
   if(S.vocal){ html += `<div class="rl v">Vocal</div>` + secs.map((s,ci)=>`<i class="cell v ${st.vocal_sections.includes(lab(s.label))?'on':''}" style="--d:${ci*40+roles.length*12}ms"></i>`).join(''); }
@@ -625,7 +633,7 @@ const angleOf = v => K.a0 + (v-K.min)/(K.max-K.min)*(K.a1-K.a0);
 (function buildDots(){ const g=$('knobDots'); let o=''; const n=31; for(let i=0;i<n;i++){ const a=K.a0+i*(K.a1-K.a0)/(n-1), rad=a*Math.PI/180, r=92; o+=`<circle class="dt" data-a="${a.toFixed(2)}" cx="${(100+r*Math.sin(rad)).toFixed(2)}" cy="${(100-r*Math.cos(rad)).toFixed(2)}" r="${i%5===0?3.4:2.6}"/>`; } g.innerHTML=o; })();
 function setLen(v){ v=Math.max(K.min,Math.min(K.max,Math.round(v/K.step)*K.step)); S.len=v; const a=angleOf(v); $('knobBody').style.transform=`rotate(${a}deg)`; $('knob').setAttribute('aria-valuenow',v);
   document.querySelectorAll('#knobDots .dt').forEach(t=>t.classList.toggle('lit', +t.dataset.a<=a+.01));
-  const bpm = S.ref ? S.ref.bpm : 124, bars = Math.max(64, Math.round(v*bpm/240/8)*8); $('lcdBig').textContent = fmt(v); $('lcdSub').textContent=`${bars} bars`;
+  const bpm = userBpm(), bars = Math.max(64, Math.round(v*bpm/240/8)*8); $('lcdBig').textContent = fmt(v); $('lcdSub').textContent=`${bars} bars`;
   const st = S.styles.length ? curStyle() : null; if(st) setMod('dir', `${st.name} · ${fmt(v)}`); if(S.view==='dir') drawDir(); }
 (function knobInput(){ const k=$('knob'); let y0=0, v0=0, drag=false;
   k.addEventListener('pointerdown', e=>{ drag=true; y0=e.clientY; v0=S.len; k.classList.add('drag'); k.setPointerCapture(e.pointerId); k.focus(); e.preventDefault(); });
@@ -634,7 +642,11 @@ function setLen(v){ v=Math.max(K.min,Math.min(K.max,Math.round(v/K.step)*K.step)
   k.addEventListener('wheel', e=>{ e.preventDefault(); setLen(S.len + (e.deltaY<0?1:-1)*K.step); }, {passive:false});
   k.addEventListener('keydown', e=>{ const d={ArrowUp:1,ArrowRight:1,ArrowDown:-1,ArrowLeft:-1,PageUp:4,PageDown:-4}[e.key]; if(d){ e.preventDefault(); setLen(S.len+d*K.step); } }); })();
 setLen(270);
-document.querySelectorAll('#targetSeg button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#targetSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.target=b.dataset.v; checkTarget(); });
+document.querySelectorAll('#targetSeg button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#targetSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.target=b.dataset.v; checkTarget(); gateBuild(); });
+function refUsable(){ return !!(S.ref && S.ref.bars >= 48 && S.ref.sections.length >= 3); }
+function renderStruct(){ const ok=refUsable(); if(!ok && S.structure==='reference') S.structure='typical'; const rb=document.querySelector('#structSeg button[data-v="reference"]'); rb.disabled=!ok; rb.title = ok ? '' : 'The reference is too short to carry a structure'; document.querySelectorAll('#structSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===S.structure)); if(S.view==='dir') drawDir(); }
+document.querySelectorAll('#structSeg button').forEach(b=>b.onclick=()=>{ if(b.disabled) return; S.structure=b.dataset.v; renderStruct(); });
+$('bpmIn').addEventListener('change', ()=>{ if(S.view==='dir') drawDir(); setLen(S.len); });
 $('finBtn').onclick = ()=>{ S.finOpen = !S.finOpen; $('finBtn').classList.toggle('on', S.finOpen); setActive('dir'); if(!S.finishLoaded) loadFinish(); };
 async function liveStatus(){ if(S.target!=='ableton'){ $('liveLed').className=''; $('liveTxt').textContent='Stems + MIDI'; return {ok:true,fresh:true}; }
   const r = await api().ableton_status(); $('liveLed').className = r.ok ? (r.fresh?'ok':'bad') : 'bad'; $('liveTxt').textContent = r.ok ? (r.fresh ? 'Live is ready, empty set in front' : `Live has ${r.tracks} tracks open`) : 'Live is not reachable'; return r; }
@@ -665,7 +677,7 @@ function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.
 function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); }
 function resetBuild(){ if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); bigState('working');
   $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent='BUILDING'; $('buildBtn').disabled=true; $('bst').textContent='Building…'; setMod('bld','Working','work'); }
-function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
+function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, structure:S.structure, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
 async function startBuild(){ S.building=true; resetBuild(); markNext(); setActive('bld');
   if(S.target==='ableton'){ const st = await liveStatus(); if(!st.ok || !st.fresh){ await sleep(350); window.flowError(st.ok ? `The Live Set in front has ${st.tracks} tracks. In Ableton: File › New Live Set, then press Retry.` : st.reason); return; } }
   S.lastOpts = currentOpts(); const r = await api().build(S.lastOpts); if(!r.ok){ window.flowError(r.error); } }
@@ -679,7 +691,7 @@ window.flowError = msg=>{ S.building=false; markNext(); $('buildTL').classList.r
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
   if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Stopped. Fix the cause, then retry.'; liveStatus(); };
 window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); bigState('done'); setProg(1); setPhase(5); setMod('bld','Done','on');
-  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; $('bst').textContent = sum.ableton ? 'Done. Your track is in the Live Set in front of you. Press Cmd+S.' : 'Done. Stems, MIDI and the Blueprint are in the folder.';
+  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; const nUsed = sum.kit ? Object.keys(sum.kit).length : null; const from = `Built from your sounds${nUsed?` (${nUsed} used)`:''}, your direction (${sum.style_name||curStyle().name} · ${fmt(S.len)}) and ${sum.structure==='typical'?'a typical structure':'the reference\u2019s structure'}.`; $('bst').textContent = (sum.ableton ? 'Done. Your track is in Live. Press Cmd+S. ' : 'Done. Stems, MIDI and the Blueprint are in the folder. ') + from;
   if(!TL) window.flowPlan(sum); TL.revealAll();
   if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bst').textContent += ` ${warns.length} note${warns.length===1?'':'s'} in Details.`; }
   if(sum.kit){ const n=Object.keys(sum.kit).length; $('roUsed').textContent = `${n} used`; } $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }

@@ -18,11 +18,22 @@ SHORT_REF_BARS = 48  # below this (or fewer than 3 sections) the reference is a 
 TYPICAL_STRUCTURE = [("Intro", 16, 1.0), ("Groove", 24, 1.0), ("Drop", 32, 1.0), ("Breakdown", 16, 0.0), ("Build", 8, 0.0), ("Drop 2", 32, 1.0), ("Outro", 16, 1.0)]
 
 
-def reference_sections(ref: dict) -> tuple[list[dict], str | None]:
-    """The reference's own sections, or a typical club structure when the reference is too short to carry one."""
+def reference_usable(ref: dict) -> bool:
+    return int(ref.get("bars") or 0) >= SHORT_REF_BARS and len(ref.get("sections") or []) >= 3
+
+
+def reference_sections(ref: dict, structure: str = "reference") -> tuple[list[dict], str | None]:
+    """The reference's own sections ('reference'), or a typical club structure ('typical').
+    A reference too short to carry a structure falls back to 'typical' with a note."""
     secs = ref.get("sections") or []
-    if int(ref.get("bars") or 0) >= SHORT_REF_BARS and len(secs) >= 3:
+    if structure == "reference" and reference_usable(ref):
         return secs, None
+    if structure == "typical":
+        start, out = 1, []
+        for label, bars, kr in TYPICAL_STRUCTURE:
+            out.append({"label": label, "start": start, "end": start + bars, "bars": bars, "kick_ratio": kr})
+            start += bars
+        return out, None
     start, out = 1, []
     for label, bars, kr in TYPICAL_STRUCTURE:
         out.append({"label": label, "start": start, "end": start + bars, "bars": bars, "kick_ratio": kr})
@@ -76,7 +87,8 @@ def scale_sections(sections: list[dict], total: int) -> list[dict]:
 
 
 def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, length_seconds: float | None = None,
-               style: str = "house", midi_roles: dict | None = None, sidechain: str | None = None, vocal: dict | None = None) -> dict:
+               style: str = "house", midi_roles: dict | None = None, sidechain: str | None = None, vocal: dict | None = None,
+               structure: str = "reference") -> dict:
     """Return the plan. midi_roles: {'bass': {'name': 'Serum', 'uri': ...}, ...} makes those roles MIDI tracks.
     vocal: the output of flow.vocal.prepare (phrases already at the project tempo and key), placed where the style wants it."""
     bpm = bpm or ref["bpm"]
@@ -84,7 +96,8 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
     st = stylelib.get(style)
     style = st.key
     tmpl = st.template
-    ref_secs, note = reference_sections(ref)
+    structure = structure if structure in ("reference", "typical") else "reference"
+    ref_secs, note = reference_sections(ref, structure)
     total = target_bars(length_seconds, bpm, ref["bars"] if note is None else sum(s["bars"] for s in ref_secs))
     sections = scale_sections(ref_secs, total)
     tonic = ref["key"]["pc"]
@@ -174,6 +187,7 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
         "reference": {"file": ref["file"], "bars": ref["bars"], "bpm": ref["bpm"]},
         "placeholders": [t["name"] for t in tracks if t["role"] in MELODIC],
         "notes": [note] if note else [],
+        "structure": "reference" if (structure == "reference" and note is None) else "typical",
     }
 
 
@@ -228,7 +242,9 @@ def plan_view(plan: dict) -> dict:
                        "sweeps": [int(b) for b, _p in t.get("sweeps", [])], "sweep_bars": int(t.get("sweep_bars") or 8)})
     return {"bars": int(plan.get("bars") or 0), "bpm": float(plan.get("bpm") or 120),
             "sections": [{"label": s["label"], "start": s["start"], "end": s["end"], "bars": s["bars"]} for s in plan.get("sections", [])],
-            "layers": layers, "rows": describe_rows(plan), "steps": describe(plan), "placeholders": plan.get("placeholders", []), "notes": plan.get("notes", [])}
+            "layers": layers, "rows": describe_rows(plan), "steps": describe(plan), "placeholders": plan.get("placeholders", []), "notes": plan.get("notes", []),
+            "structure": plan.get("structure", "reference"), "style": plan.get("style"), "style_name": plan.get("style_name"),
+            "reference": {"bars": plan.get("reference", {}).get("bars"), "bpm": plan.get("reference", {}).get("bpm")}}
 
 
 def describe_rows(plan: dict) -> list[dict]:

@@ -231,3 +231,5 @@ def test_short_reference_falls_back_to_typical_structure():
     assert note and len(secs) == 7 and secs[0]["label"] == "Intro" and secs[-1]["end"] == 145
     full = {"bars": 144, "sections": [{"label": l, "start": 1, "end": 2, "bars": 1} for l in ("Intro", "Drop", "Outro")]}
     assert arrange.reference_sections(full)[1] is None
+    typ, note2 = arrange.reference_sections(full, "typical")
+    assert note2 is None and len(typ) == 7
