@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Build Alma.app and a DMG on macOS.
-#   ./packaging/build_mac.sh            -> dist/Alma.app + dist/ALMA-<version>-mac.dmg (unsigned)
+#   ./packaging/build_mac.sh            -> dist/Alma.app + dist/Alma-<version>-mac.dmg (unsigned)
 #   DEVELOPER_ID="Developer ID Application: Name (TEAMID)" APPLE_ID=.. APPLE_TEAM_ID=.. APPLE_APP_PASSWORD=.. ./packaging/build_mac.sh
 #                                       -> signed + notarized (needs an Apple Developer Program membership)
 set -euo pipefail
@@ -17,7 +17,7 @@ if [ -n "${DEVELOPER_ID:-}" ]; then
   codesign --deep --force --options runtime --timestamp --sign "$DEVELOPER_ID" "$APP"
   codesign --verify --deep --strict "$APP"
 fi
-DMG="dist/ALMA-$VERSION-mac.dmg"
+DMG="dist/Alma-$VERSION-mac.dmg"
 rm -f "$DMG"
 STAGE=$(mktemp -d)
 cp -R "$APP" "$STAGE/"
