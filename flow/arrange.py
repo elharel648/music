@@ -195,7 +195,7 @@ def shape_layers(wanted: dict[str, list[dict]], sections: list[dict], total: int
                 elif label == "Intro" and g == 0 and r not in ("atmos", "pad"):
                     delay = kick_delay                   # bass and percussion arrive with the kick, never before it
                 elif label == "Intro" and g >= 1:
-                    delay = kick_delay + g * phrase      # after the kick, the next layers wait a phrase (corpus: hats/claps/synths at kick +16)
+                    delay = kick_delay + g * p.entry_phrase   # after the kick, the next groups wait a full phrase (corpus: kick +16), usually into the next section
                 if delay and delay < bars:
                     active[r][sct["start"]:sct["start"] + delay] = False
                 elif delay >= bars:
