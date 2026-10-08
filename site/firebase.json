@@ -1,12 +1,60 @@
 {
   "hosting": {
     "public": ".deploy",
-    "ignore": ["**/.*"],
+    "ignore": [
+      "**/.*"
+    ],
     "headers": [
-      { "source": "/latest.json", "headers": [{ "key": "Cache-Control", "value": "no-cache" }, { "key": "Access-Control-Allow-Origin", "value": "*" }] },
-      { "source": "**", "headers": [{ "key": "X-Frame-Options", "value": "SAMEORIGIN" }, { "key": "X-Content-Type-Options", "value": "nosniff" }] }
+      {
+        "source": "/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/latest.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }
+        ]
+      },
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "X-Frame-Options",
+            "value": "SAMEORIGIN"
+          },
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          }
+        ]
+      }
     ]
   },
-  "firestore": { "rules": "firebase/firestore.rules" },
-  "storage": { "rules": "firebase/storage.rules" }
+  "firestore": {
+    "rules": "firebase/firestore.rules"
+  },
+  "storage": {
+    "rules": "firebase/storage.rules"
+  }
 }

@@ -240,7 +240,7 @@ async function refresh(u) {
     const rel = (await getDoc(doc(db, "releases", "mac"))).data();
     $("dl").href = await getDownloadURL(ref(storage, "releases/" + rel.path));
     $("ver").textContent = `Alma ${rel.version}`;
-  } catch (err) { $("ver").textContent = "The download is not ready yet; try again in a minute."; }
+  } catch (err) { $("ver").textContent = "Download not available: " + (err.code || err.message); console.error(err); }
   $("approved").classList.remove("hidden");
 }
 onAuthStateChanged(auth, refresh);
