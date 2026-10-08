@@ -928,6 +928,12 @@
   @keyframes spWord { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
   @media (prefers-reduced-motion: reduce) { .sp-glow, .sp-mark, .sp-word, .sp-cta { animation:none; } }
   @media (max-height:760px) { .splash { gap:10px; } .sp-cta { margin-top:6px; height:30px; } }
+
+  /* The real logo: the squircle with its cap; the pip turns from the minimum to its resting angle as the screen arrives. */
+  .sp-mark { width:clamp(64px, 12.5vh, 104px); }
+  .sp-mark .sp-pip { transform-origin:500px 500px; transform:rotate(32deg); animation:spTurn 1.9s cubic-bezier(.22,.9,.24,1) .35s both; }
+  @keyframes spTurn { from { transform:rotate(-142deg); } to { transform:rotate(32deg); } }
+  @media (prefers-reduced-motion: reduce) { .sp-mark .sp-pip { animation:none; } }
 </style>
 </head>
 <body>
@@ -945,7 +951,7 @@
 
   <section class="disp" id="disp">
     <div class="dv" data-v="gate"><div class="gate lic" id="gateBox"></div></div>
-    <div class="dv" data-v="ref"><canvas class="full" id="waveCv" title="Choose a reference track"></canvas><div class="splash" id="splash"><div class="sp-glow"></div><svg class="sp-mark" viewBox="0 0 1000 1000" aria-hidden="true"><defs><radialGradient id="spcap" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#F1EEE6"/><stop offset="1" stop-color="#CFCBC0"/></radialGradient></defs><circle cx="500" cy="500" r="330" fill="url(#spcap)"/><line x1="500" y1="226" x2="500" y2="330" stroke="#0B0B0D" stroke-width="44" stroke-linecap="round" transform="rotate(32 500 500)"/></svg><div class="sp-word">alma</div><button class="sp-cta" id="spCta" type="button">Choose a reference</button></div><div class="tl hidden" id="refTL"></div><div class="cap" id="refCap"></div></div>
+    <div class="dv" data-v="ref"><canvas class="full" id="waveCv" title="Choose a reference track"></canvas><div class="splash" id="splash"><div class="sp-glow"></div><svg class="sp-mark" viewBox="0 0 1000 1000" aria-hidden="true"><defs><radialGradient id="spbg" cx="50%" cy="28%" r="85%"><stop offset="0" stop-color="#17181C"/><stop offset="1" stop-color="#0B0B0D"/></radialGradient><radialGradient id="spcap" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#F3F0E8"/><stop offset="1" stop-color="#D2CEC3"/></radialGradient><linearGradient id="sprim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"/><stop offset=".45" stop-color="#FFFFFF" stop-opacity=".05"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".10"/></linearGradient></defs><path id="spBody" fill="url(#spbg)" stroke="url(#sprim)" stroke-width="7"/><circle cx="500" cy="500" r="300" fill="url(#spcap)"/><circle cx="500" cy="500" r="300" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="2"/><g class="sp-pip"><line x1="500" y1="234" x2="500" y2="326" stroke="#0B0B0D" stroke-width="22" stroke-linecap="round"/></g></svg><div class="sp-word">alma</div><button class="sp-cta" id="spCta" type="button">Choose a reference</button></div><div class="tl hidden" id="refTL"></div><div class="cap" id="refCap"></div></div>
     <div class="dv" data-v="snd"><div class="seq" id="seqEl" aria-hidden="true"></div><div id="kitView" class="hidden"></div><div class="cap" id="sndCap"></div></div>
     <div class="dv" data-v="dir"><div id="dirView"></div><div class="cap" id="dirCap"></div></div>
     <div class="dv" data-v="fb"><div class="gate fb"><h2>What did you hear?</h2><p>Where it stopped feeling like a track: the bar, the layer, the section. Alma attaches what it built so Harel can see exactly what you heard.</p><textarea id="fbText" rows="5" placeholder="The break at bar 77 is too long. The bass should wait for the drop. The build needs a snare roll…"></textarea><div class="fbrow"><button class="dbtn" id="fbCancel">Back</button><span class="sp"></span><button class="dbtn" id="fbSend">Send</button></div><div class="dmsg" id="fbMsg"></div></div></div>
@@ -1220,6 +1226,7 @@ let REFTL = null;
 function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('pickRef').classList.add('filled'); $('refName').textContent=n; $('refName').title=S.refPath; $('sess').innerHTML = `<b>${esc(n)}</b>`; }
 async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; refAud.url=null; refAud.active=false; setRefFile(); setActive('ref'); analyze(); }
 $('waveCv').addEventListener('click', ()=>{ if(!S.ref) pickRef(); }); $('waveCv').style.cursor='pointer'; $('spCta').onclick=()=>{ if(!S.ref) pickRef(); };
+(function(){ const n=4.6, r=500, pts=[]; for(let i=0;i<160;i++){ const t=i/160*Math.PI*2, c=Math.cos(t), s=Math.sin(t); pts.push([r+Math.sign(c)*r*Math.pow(Math.abs(c),2/n), r+Math.sign(s)*r*Math.pow(Math.abs(s),2/n)]); } $('spBody').setAttribute('d','M'+pts.map(q=>q[0].toFixed(1)+' '+q[1].toFixed(1)).join('L')+'Z'); })();
 $('pickRef').onclick = ()=>{ if(!$('pickRef').classList.contains('filled')) pickRef(); }; $('refChange').onclick = e=>{ e.stopPropagation(); pickRef(); }; $('pickRef').onkeydown = e=>{ if((e.key==='Enter'||e.key===' ') && !$('pickRef').classList.contains('filled')){ e.preventDefault(); pickRef(); } };
 async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=null;   /* the reference is always measured on its own grid */
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ setMod('ref','Error','err'); $('refMsg').className='msg err'; $('refMsg').textContent=r.error; return; }
