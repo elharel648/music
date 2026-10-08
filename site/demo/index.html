@@ -934,6 +934,13 @@
   .sp-mark .sp-pip { transform-origin:500px 500px; transform:rotate(32deg); animation:spTurn 1.9s cubic-bezier(.22,.9,.24,1) .35s both; }
   @keyframes spTurn { from { transform:rotate(-142deg); } to { transform:rotate(32deg); } }
   @media (prefers-reduced-motion: reduce) { .sp-mark .sp-pip { animation:none; } }
+
+  /* Darker: a hint of deep blue in near-black, a quieter glow, a dimmer wave. */
+  .disp { background:radial-gradient(120% 90% at 50% 38%, #0B0C1B 0%, #06070F 52%, #040407 100%); }
+  .sp-glow { background:radial-gradient(closest-side, rgba(var(--acc-rgb),.15), rgba(var(--acc-rgb),.05) 55%, rgba(var(--acc-rgb),0) 100%); }
+  .sp-mark { filter:drop-shadow(0 0 16px rgba(var(--acc-rgb),.28)) drop-shadow(0 8px 18px rgba(0,0,0,.6)); }
+  .dv[data-v=ref] canvas.full { opacity:.5; }
+  .sp-word { background:linear-gradient(180deg,#F4F1EA 0%, #C9C7E8 72%, #8F8EDB 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 </style>
 </head>
 <body>
