@@ -51,8 +51,28 @@ window.pywebview={api:{status:async()=>(Q.has('expired')?{state:'expired',days_l
  open_path:async()=>({ok:true}), pick_folder:async()=>'/Users/harel/Music/Alma', install_bridge:async()=>({ok:true,path:'~/Music/Ableton/User Library/Remote Scripts/Alma',steps:[]}), activate:async()=>({ok:true}), send_feedback:async(n)=>{ await wait(700); return {ok:true, sent:false, path:'/Users/harel/Desktop/Alma feedback 2026-10-08 1530.json'}; }}};
 window.dispatchEvent(new Event('pywebviewready'));
 if(Q.has('update')) setTimeout(()=>window.flowUpdate({available:true,version:'0.7.0',url:'https://example.com/Alma-0.7.0.dmg',notes:'Styles, vocal, device UI'}), 2500);
+
+/* site: ?auto=1 runs the whole flow by itself until the visitor touches anything; ?state=ref|snd|dir|built jumps there (screenshots) */
+const stop={v:false}; document.addEventListener('pointerdown',()=>{stop.v=true;},{capture:true,once:true}); document.addEventListener('keydown',()=>{stop.v=true;},{capture:true,once:true});
+const go=async(ms,fn)=>{ await wait(ms); if(stop.v) return false; fn(); return true; };
+if(Q.has('auto')){ (async()=>{ await wait(1200);
+  if(!await go(0,()=>$('pickRef').click())) return; if(!await go(3200,()=>$('pickPack').click())) return; if(!await go(4200,()=>setActive('dir'))) return;
+  if(!await go(1600,()=>stepStyle(1))) return; if(!await go(1300,()=>stepStyle(1))) return; if(!await go(1800,()=>startBuild())) return;
+  if(!await go(9500,()=>{ const b=$('listenBtn'); if(b && !b.classList.contains('hidden')) b.click(); })) return;
+  await wait(16000); if(!stop.v) location.replace(location.pathname+location.search); })(); }
+const st=Q.get('state');
+if(st){ (async()=>{ await wait(500); $('pickRef').click(); if(st==='ref') return; await wait(2200); $('pickPack').click(); if(st==='snd') return; await wait(3000); setActive('dir'); if(st==='dir') return; await wait(600); startBuild(); })(); }
 })();
 </script>
 </body>""" % json.dumps(styles.listing(), ensure_ascii=False)
-open(os.path.join(root, "demo.html"), "w", encoding="utf-8").write(s.replace("</body>", mock, 1))
+html = s.replace("</body>", mock, 1)
+open(os.path.join(root, "demo.html"), "w", encoding="utf-8").write(html)
 print("demo.html written")
+if "--site" in sys.argv:
+    import shutil
+    site = os.path.join(os.path.dirname(root), "..", "site", "demo")
+    os.makedirs(site, exist_ok=True)
+    open(os.path.join(site, "index.html"), "w", encoding="utf-8").write(html.replace("<title>Alma</title>", "<title>Alma demo</title>"))
+    shutil.copytree(os.path.join(root, "fonts"), os.path.join(site, "fonts"), dirs_exist_ok=True)
+    shutil.copy(os.path.join(root, "demo-preview.wav"), os.path.join(site, "demo-preview.wav"))
+    print("site/demo written")

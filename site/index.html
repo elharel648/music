@@ -5,39 +5,63 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Alma</title>
 <meta name="description" content="Alma listens to a reference track and writes an arrangement from your own sounds into Ableton Live. Private beta.">
+<meta property="og:title" content="Alma"><meta property="og:description" content="A reference in. Your sounds in. An arrangement in Ableton, in minutes."><meta property="og:image" content="img/built.jpg">
 <link rel="icon" href="mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://api.fontshare.com">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 <style>
-  :root { --paper:#FFFFFF; --ink:#111113; --sec:#6B6B70; --mut:#A3A3A8; --line:#ECECEE; --canvas:#0B0B0D; --warm:#F4F1EA; --acc:#5C5BE0; }
+  :root { --paper:#FFFFFF; --ink:#111113; --sec:#6B6B70; --mut:#A3A3A8; --line:#ECECEE; --canvas:#0B0B0D; --warm:#F4F1EA; --dim:#8E8C85; --acc:#5C5BE0; }
   * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
   html, body { margin:0; background:var(--paper); color:var(--ink); font-family:"Satoshi",-apple-system,sans-serif; -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums; }
   a { color:inherit; }
-  .wrap { max-width:760px; margin:0 auto; padding:0 24px; }
-  header { display:flex; align-items:center; justify-content:space-between; height:72px; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 24px; }
+  .narrow { max-width:720px; }
+  header { display:flex; align-items:center; justify-content:space-between; height:68px; }
   .brand { display:flex; align-items:center; gap:9px; font-weight:500; font-size:17px; letter-spacing:-.02em; text-decoration:none; }
   .brand svg { display:block; }
-  .tag { font-size:12px; color:var(--sec); }
-  .hero { padding:72px 0 40px; }
-  h1 { font-size:clamp(34px, 6vw, 56px); line-height:1.02; letter-spacing:-.035em; font-weight:500; margin:0 0 20px; max-width:620px; }
-  .lead { font-size:18px; line-height:1.5; color:var(--sec); max-width:560px; margin:0 0 32px; }
-  .btn { display:inline-flex; align-items:center; justify-content:center; height:44px; padding:0 20px; border-radius:11px; border:1px solid var(--ink); background:var(--ink); color:#fff; font:500 14px "Satoshi",sans-serif; cursor:pointer; text-decoration:none; }
+  nav { display:flex; gap:22px; align-items:center; font-size:13.5px; }
+  nav a { text-decoration:none; color:var(--sec); } nav a:hover { color:var(--ink); }
+  .btn { display:inline-flex; align-items:center; justify-content:center; height:42px; padding:0 18px; border-radius:11px; border:1px solid var(--ink); background:var(--ink); color:#fff; font:500 14px "Satoshi",sans-serif; cursor:pointer; text-decoration:none; white-space:nowrap; }
   .btn.ghost { background:transparent; color:var(--ink); }
+  .btn.light { background:var(--warm); border-color:var(--warm); color:var(--ink); }
+  .btn.dimline { background:transparent; border-color:#2a2a2e; color:var(--warm); }
   .btn:disabled { opacity:.5; cursor:default; }
-  .display { background:var(--canvas); color:var(--warm); border-radius:18px; padding:28px 28px 24px; margin:8px 0 56px; }
-  .display .row { display:grid; grid-template-columns:72px 1fr; gap:14px; align-items:center; font-size:12px; color:#9a978f; margin:7px 0; }
-  .display .row b { font-weight:500; color:var(--warm); }
-  .display .bar { height:12px; display:flex; gap:2px; }
-  .display .bar i { flex:1; background:#2a2a2e; border-radius:2px; }
-  .display .bar i.on { background:var(--warm); }
-  .display .cues { display:flex; flex-wrap:wrap; gap:6px 14px; justify-content:space-between; font-size:11px; color:#6d6b66; margin-top:12px; padding-top:12px; border-top:1px solid #1e1e21; }
-  h2 { font-size:22px; letter-spacing:-.02em; font-weight:500; margin:0 0 10px; }
-  .steps { display:grid; grid-template-columns:repeat(4, 1fr); gap:18px; margin:24px 0 64px; }
-  .steps div { border-top:1px solid var(--line); padding-top:14px; }
-  .steps b { display:block; font-weight:500; margin-bottom:4px; }
-  .steps p { margin:0; font-size:13px; color:var(--sec); line-height:1.5; }
-  .beta { border:1px solid var(--line); border-radius:16px; padding:28px; margin-bottom:64px; }
-  .beta p { color:var(--sec); line-height:1.55; margin:0 0 18px; font-size:15px; }
+
+  /* hero: the app itself */
+  .hero { background:var(--canvas); color:var(--warm); padding:72px 0 0; margin-top:8px; border-radius:28px 28px 0 0; }
+  .hero h1 { font-size:clamp(36px, 5.6vw, 66px); line-height:1.0; letter-spacing:-.04em; font-weight:500; margin:0 auto 22px; max-width:900px; text-align:center; }
+  .hero .lead { font-size:clamp(16px, 1.6vw, 19px); line-height:1.5; color:var(--dim); max-width:620px; margin:0 auto 30px; text-align:center; }
+  .hero .cta { display:flex; gap:10px; justify-content:center; margin-bottom:56px; }
+  .stage { position:relative; }
+  .frame { border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 40px 120px rgba(0,0,0,.55), 0 0 0 1px #1c1c20; }
+  .frame iframe { display:block; width:100%; aspect-ratio:1480/940; border:0; background:#fff; }
+  .frame img { display:block; width:100%; height:auto; }
+  .frame .mobile { display:none; }
+  .caption { display:flex; justify-content:space-between; gap:16px; font-size:12.5px; color:var(--dim); padding:16px 4px 0; }
+  .caption b { color:var(--warm); font-weight:500; }
+  .hero-bottom { height:120px; background:linear-gradient(var(--canvas), var(--canvas) 50%, var(--paper) 50%); margin-top:-60px; position:relative; z-index:-1; }
+  .herofill { background:var(--canvas); height:80px; }
+  .cut { position:relative; background:linear-gradient(to bottom, var(--canvas) 0, var(--canvas) 120px, var(--paper) 120px); padding-bottom:0; }
+
+  /* stages */
+  .stagesec { padding:96px 0 0; }
+  .stagesec .head { display:grid; grid-template-columns:1fr 1.4fr; gap:40px; align-items:end; margin-bottom:28px; }
+  .stagesec .n { font-size:12px; color:var(--mut); letter-spacing:.04em; margin-bottom:10px; }
+  .stagesec h2 { font-size:clamp(28px, 3.4vw, 40px); line-height:1.05; letter-spacing:-.035em; font-weight:500; margin:0; }
+  .stagesec p { font-size:16px; line-height:1.55; color:var(--sec); margin:0; max-width:520px; }
+  .shot { border-radius:14px; overflow:hidden; box-shadow:0 1px 0 var(--line), 0 30px 80px rgba(17,17,19,.12); border:1px solid var(--line); }
+  .shot img { display:block; width:100%; height:auto; }
+
+  /* the honest part */
+  .honest { margin:120px 0 0; padding:40px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+  .honest h3 { font-size:14px; font-weight:500; margin:0 0 12px; }
+  .honest ul { margin:0; padding-left:18px; color:var(--sec); font-size:14.5px; line-height:1.8; }
+
+  /* beta */
+  .beta { padding:96px 0 40px; display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start; }
+  .beta h2 { font-size:clamp(28px, 3.4vw, 40px); line-height:1.05; letter-spacing:-.035em; font-weight:500; margin:0 0 14px; }
+  .beta p { color:var(--sec); line-height:1.55; margin:0 0 18px; font-size:15.5px; max-width:480px; }
   form { display:grid; gap:10px; max-width:460px; }
   label { font-size:12px; color:var(--sec); display:grid; gap:5px; }
   input, textarea { font:400 14px "Satoshi",sans-serif; padding:11px 12px; border-radius:9px; border:1px solid var(--line); background:#FAFAFA; color:var(--ink); outline:none; width:100%; }
@@ -49,74 +73,103 @@
   .key { font:500 13px ui-monospace, Menlo, monospace; word-break:break-all; padding:12px 14px; border-radius:9px; background:#FAFAFA; border:1px solid var(--line); }
   .hidden { display:none !important; }
   footer { padding:28px 0 48px; font-size:12px; color:var(--mut); display:flex; justify-content:space-between; border-top:1px solid var(--line); }
-  @media (max-width:640px) { .steps { grid-template-columns:1fr 1fr; } .display { padding:20px 16px; } .display .row { grid-template-columns:56px 1fr; } }
+  @media (max-width:900px) {
+    .frame iframe { display:none; } .frame .mobile { display:block; }
+    .stagesec .head, .honest, .beta { grid-template-columns:1fr; gap:18px; }
+    .hero { padding-top:56px; border-radius:20px 20px 0 0; } .hero .cta { flex-wrap:wrap; }
+    nav a.hide-m { display:none; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <a class="brand" href="/"><svg width="22" height="22" viewBox="0 0 1000 1000" aria-hidden="true"><path d="M500 0C130 0 0 130 0 500s130 500 500 500 500-130 500-500S870 0 500 0z" fill="#111113"/><circle cx="500" cy="500" r="300" fill="#F4F1EA"/><line x1="500" y1="234" x2="500" y2="326" stroke="#111113" stroke-width="40" stroke-linecap="round" transform="rotate(32 500 500)"/></svg>alma</a>
-    <span class="tag">Private beta · macOS · Ableton Live 11+</span>
+    <nav><a class="hide-m" href="#reference">How it works</a><a class="hide-m" href="#honest">What it is not</a><a class="btn ghost" href="#access" style="height:36px;padding:0 14px;font-size:13px">Request access</a></nav>
   </header>
+</div>
 
+<div class="wrap">
   <section class="hero">
-    <h1>A reference in. Your sounds in. An arrangement in Ableton, in minutes.</h1>
-    <p class="lead">Alma measures a track you love — tempo, key, where the kick leaves and comes back — and lays out a full arrangement from your own sample pack as editable clips in the Live Set in front of you. You keep every decision.</p>
-    <a class="btn" href="#access">Request access</a>
+    <div class="wrap">
+      <h1>A reference in. Your sounds in.<br>An arrangement in Ableton.</h1>
+      <p class="lead">Alma measures a track you love — tempo, key, where the kick leaves and comes back — and writes a full arrangement from your own sample pack into the Live Set in front of you. Every clip editable. Nothing decided for you.</p>
+      <div class="cta"><a class="btn light" href="#access">Request access</a><a class="btn dimline" href="#reference">See each step</a></div>
+      <div class="stage">
+        <div class="frame">
+          <iframe src="demo/index.html?auto=1" title="Alma, running a demo build" loading="eager" allow="autoplay"></iframe>
+          <img class="mobile" src="img/built.jpg" alt="Alma after a build: the arrangement map above, the four plates below" width="1480" height="940">
+        </div>
+        <div class="caption"><span><b>This is the app</b> — not a mockup. It is running a demo build with a sample pack. Click anything; it is yours.</span><span>macOS · Ableton Live 11+</span></div>
+      </div>
+    </div>
+    <div class="herofill"></div>
+  </section>
+</div>
+
+<div class="wrap" style="margin-top:-80px">
+  <section class="stagesec" id="reference">
+    <div class="head"><div><div class="n">01 · Reference</div><h2>Drop in a track you love.</h2></div><p>Alma listens to it bar by bar: tempo and key, the sections, how long the intro really is, where the kick leaves for the break and where it returns. That structure becomes the shape of your track.</p></div>
+    <div class="shot"><img src="img/ref.jpg" alt="Reference measured: 124 BPM, A minor, 144 bars, 7 sections" loading="lazy" width="1480" height="940"></div>
   </section>
 
-  <div class="display" aria-label="Example arrangement">
-    <div class="row"><b>Kick</b><div class="bar" data-on="1111111111111111111111111111111000000000111111111111111111110000111111111111"></div></div>
-    <div class="row"><b>Bass</b><div class="bar" data-on="0000000011111111111111111111111111111111111111111111111111111111111111111111"></div></div>
-    <div class="row"><b>Hats</b><div class="bar" data-on="1111111111111111111111111111111000000000111111111111111111110000111111111100"></div></div>
-    <div class="row"><b>Synth</b><div class="bar" data-on="0000000000000000000000001111111111111111111111111111111111111111111111111111"></div></div>
-    <div class="row"><b>Pad</b><div class="bar" data-on="1111111111111111111111111111111111111111111111111111111111111111111111111111"></div></div>
-    <div class="cues"><span>Intro 1</span><span>Groove 17</span><span>Drop 49</span><span>Break 77</span><span>Drop 2 97</span><span>Outro 145</span></div>
-  </div>
+  <section class="stagesec" id="sounds">
+    <div class="head"><div><div class="n">02 · Sounds</div><h2>Point it at your sample pack.</h2></div><p>It picks a kit — kick, clap, hats, percussion, bass, synths, atmosphere — and shows every candidate it considered. Swap any sound. Audition it in place. Add a vocal if you have one.</p></div>
+    <div class="shot"><img src="img/snd.jpg" alt="Sounds: 255 samples scanned, 16 roles chosen, each one swappable" loading="lazy" width="1480" height="940"></div>
+  </section>
 
-  <h2>How it works</h2>
-  <div class="steps">
-    <div><b>Reference</b><p>Drop in a track. Alma measures its tempo, key and structure, bar by bar.</p></div>
-    <div><b>Sounds</b><p>Point it at your sample pack. It picks a kit — kick, bass, hats, percussion, synths — and you can swap any of them.</p></div>
-    <div><b>Direction</b><p>Choose a style and a length. Listen to the result before anything is written.</p></div>
-    <div><b>Build</b><p>Alma writes the clips, markers and sidechain into the empty Live Set in front. Edit everything.</p></div>
-  </div>
+  <section class="stagesec" id="direction">
+    <div class="head"><div><div class="n">03 · Direction</div><h2>Style, length, tempo. Then listen.</h2></div><p>Choose the style — Melodic Techno, Afro House, Tech House, eight in all — and turn the length to where you want it. Alma renders a mix of the whole track before anything is written, so you hear it first.</p></div>
+    <div class="shot"><img src="img/dir.jpg" alt="Direction: style switcher, length knob, tempo, reference or typical structure" loading="lazy" width="1480" height="940"></div>
+  </section>
+
+  <section class="stagesec" id="build">
+    <div class="head"><div><div class="n">04 · Build</div><h2>Press Build. Open Live.</h2></div><p>Tracks, clips, section locators and sidechain — written into the empty Live Set in front of you in about a minute. Not a bounce: an arrangement you keep working on. Or export stems and MIDI for any other DAW.</p></div>
+    <div class="shot"><img src="img/built.jpg" alt="Build done: the arrangement map with every layer and section, written into Live" loading="lazy" width="1480" height="940"></div>
+  </section>
+
+  <section class="honest" id="honest">
+    <div><h3>What Alma does</h3><ul><li>Measures a reference the way a producer would: bars, sections, energy, kick in and out</li><li>Arranges your sounds with the rules we measured from 150+ techno tracks and 25 professional project files</li><li>Writes editable clips into Ableton Live, or stems + MIDI</li><li>Lets you hear the result before it writes anything</li></ul></div>
+    <div><h3>What Alma does not do</h3><ul><li>It does not generate audio. Every sound is yours</li><li>It does not compose melodies or chords. Bass and synth lines are placeholders in your key, meant to be replaced</li><li>It does not master, and it does not finish the track for you</li><li>It does not upload your sounds or your reference anywhere</li></ul></div>
+  </section>
 
   <section class="beta" id="access">
-    <h2>Founding producers</h2>
-    <p>Alma is in a private beta. The first fifty producers who build with it and tell me what they hear keep it free, for good. Access is by application; I read each one.</p>
-
-    <div id="stepEmail">
-      <form id="emailForm">
-        <label>Email<input type="email" id="email" required placeholder="you@studio.com" autocomplete="email"></label>
-        <button class="btn" type="submit" id="emailBtn">Send me a sign-in link</button>
-        <div class="msg" id="emailMsg">No password. A link arrives by email; opening it signs you in on this device.</div>
-      </form>
+    <div>
+      <h2>Founding producers.</h2>
+      <p>Alma is in a private beta. The first fifty producers who build with it and tell me what they hear keep it free, for good — their names on this page if they want them there.</p>
+      <p>Access is by application; I read each one myself. A verified email, a line about what you make, a link to it.</p>
     </div>
-
-    <div id="stepApply" class="hidden">
-      <form id="applyForm">
-        <label>Name<input type="text" id="name" required></label>
-        <label>What you produce (style, where you play or release)<textarea id="about" rows="3" required></textarea></label>
-        <label>A link to your music (SoundCloud, Instagram, Beatport…)<input type="url" id="link" placeholder="https://" required></label>
-        <button class="btn" type="submit" id="applyBtn">Apply</button>
-        <div class="msg" id="applyMsg"></div>
-      </form>
-    </div>
-
-    <div id="stepStatus" class="hidden status">
-      <div><span class="pill" id="pill">Pending</span></div>
-      <p id="statusText"></p>
-      <div id="approved" class="hidden">
-        <p>Your license key. Alma asks for it after the trial; paste it there once.</p>
-        <div class="key" id="keyBox"></div>
-        <p style="margin-top:16px"><a class="btn" id="dl" href="#">Download Alma for Mac</a> <span class="msg" id="ver"></span></p>
+    <div>
+      <div id="stepEmail">
+        <form id="emailForm">
+          <label>Email<input type="email" id="email" required placeholder="you@studio.com" autocomplete="email"></label>
+          <button class="btn" type="submit" id="emailBtn">Send me a sign-in link</button>
+          <div class="msg" id="emailMsg">No password. A link arrives by email; opening it signs you in on this device.</div>
+        </form>
       </div>
-      <div><button class="btn ghost" id="signOut">Sign out</button></div>
+      <div id="stepApply" class="hidden">
+        <form id="applyForm">
+          <label>Name<input type="text" id="name" required></label>
+          <label>What you produce (style, where you play or release)<textarea id="about" rows="3" required></textarea></label>
+          <label>A link to your music (SoundCloud, Instagram, Beatport…)<input type="url" id="link" placeholder="https://" required></label>
+          <button class="btn" type="submit" id="applyBtn">Apply</button>
+          <div class="msg" id="applyMsg"></div>
+        </form>
+      </div>
+      <div id="stepStatus" class="hidden status">
+        <div><span class="pill" id="pill">Pending</span></div>
+        <p id="statusText"></p>
+        <div id="approved" class="hidden">
+          <p>Your license key. Alma asks for it after the trial; paste it there once.</p>
+          <div class="key" id="keyBox"></div>
+          <p style="margin-top:16px"><a class="btn" id="dl" href="#">Download Alma for Mac</a> <span class="msg" id="ver"></span></p>
+        </div>
+        <div><button class="btn ghost" id="signOut">Sign out</button></div>
+      </div>
     </div>
   </section>
 
-  <footer><span>© 2026 Harel Eliyahu</span><span id="contact"></span></footer>
+  <footer><span>© 2026 Harel Eliyahu</span><span>Made in Tel Aviv</span></footer>
 </div>
 
 <script type="module">
@@ -138,9 +191,6 @@ const auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
 const $ = id => document.getElementById(id);
 const show = id => { for (const s of ["stepEmail", "stepApply", "stepStatus"]) $(s).classList.toggle("hidden", s !== id); };
 
-document.querySelectorAll(".bar").forEach(b => { b.innerHTML = [...b.dataset.on].map(c => `<i class="${c === "1" ? "on" : ""}"></i>`).join(""); });
-
-// finishing a magic-link sign-in: the link brings the user back here
 if (isSignInWithEmailLink(auth, location.href)) {
   let email = localStorage.getItem("alma.email") || prompt("Confirm your email to finish signing in");
   if (email) signInWithEmailLink(auth, email, location.href).then(() => { localStorage.removeItem("alma.email"); history.replaceState(null, "", "/#access"); }).catch(e => { $("emailMsg").className = "msg err"; $("emailMsg").textContent = e.message; });
