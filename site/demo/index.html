@@ -639,6 +639,22 @@
   .well.pick.next, .well.bld.next { border-color:var(--ink); }     /* the next step: a solid line, no motion */
   .next { animation:none !important; }
   @media (max-height:760px) { .mod > .well, .well.pick, .well.dir, .well.bld { padding-top:30px; } .well > .mh { top:9px; } .well.dir { gap:2px; } }
+
+  /* One size and one axis for the two round controls: the knob and the BUILD button share --ctl and sit on --axis in their plates. */
+  .well.dir, .well.bld { --ctl:clamp(120px, 20vh, 140px); --axis:calc(34px + (100% - 76px) / 2); }
+  .well.bld { justify-content:flex-end; }
+  .well.bld .bigbox { position:absolute; left:0; right:0; top:var(--axis); transform:translateY(-50%); display:grid; place-items:center; flex:none; }
+  .well.bld .big, .big { width:var(--ctl, 140px); height:var(--ctl, 140px); }
+  .well.dir { padding:0; display:block; }
+  .well.dir .frow2.subj { position:absolute; top:34px; left:12px; right:12px; margin:0; }
+  .well.dir .knob { position:absolute; left:50%; top:var(--axis); transform:translate(-50%,-50%); --k:var(--ctl); width:var(--k); height:var(--k); margin:0; }
+  .well.dir .knob .cap { left:11%; top:11%; width:78%; height:78%; }
+  .well.dir .kval { position:absolute; left:0; right:0; top:calc(var(--axis) + var(--ctl) / 2 + 6px); text-align:center; display:flex; flex-direction:column; align-items:center; }
+  .well.dir .drow { position:absolute; left:12px; right:12px; bottom:12px; margin:0; padding:0; width:auto; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .well.dir .drow .tg.sm { margin-left:0; flex:0 0 auto; } .well.dir .bpmbox .in { width:44px; }
+  @media (max-width:1060px) { .well.dir .bpmbox .dl { display:none; } .well.dir .bpmbox .in { width:40px; } }
+  .well.dir .kval b { font-size:clamp(20px, 3vh, 26px); } .well.dir .kval small { display:block; }
+  .knob .kend { display:block; }
 </style>
 </head>
 <body>
