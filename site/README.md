@@ -14,7 +14,7 @@ no Cloud Functions, no Blaze plan, no card. Nobody downloads anything without a 
 4. **Project settings › General › Your apps → Web app (</>)**, register "alma site", copy the `firebaseConfig` block into
    `site/index.html` (top of the module script). Copy `apiKey` and `projectId` into `flow/endpoints.py` too.
 5. **Project settings › Service accounts → Generate new private key** → save as `keys/firebase-admin.json` (never committed).
-6. `.venv/bin/pip install firebase-admin` (done once on this Mac).
+6. `uv pip install --python .venv/bin/python firebase-admin` (already done on this Mac).
 
 ### 2. Hosting (same project, one command)
 Install the CLI once (`brew install firebase-cli`), then from the repo root:
