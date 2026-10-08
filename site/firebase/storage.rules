@@ -1,0 +1,15 @@
+rules_version = '2';
+// Alma beta. Paste into Firebase console › Storage › Rules › Publish.
+// The DMG lives at releases/<file>. Only a signed-in, approved user can fetch it; nobody uploads from the web.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /releases/{file} {
+      allow read: if request.auth != null
+                  && firestore.get(/databases/(default)/documents/profiles/$(request.auth.uid)).data.get("approved", false) == true;
+      allow write: if false;
+    }
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

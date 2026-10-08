@@ -1,43 +1,45 @@
-# Alma site: application, approval, gated download, license keys
+# Alma site: application, approval, gated download, license keys — on Firebase
 
-Static page (`index.html`) on Netlify + a Supabase project for sign-in, the applicant table, the private download
-bucket, and one edge function that issues keys. Nobody downloads anything without a verified email and your approval.
+Static page (`index.html`) on Netlify + a Firebase project for sign-in (email link), the applicant table (Firestore),
+the private download (Storage) and feedback from inside the app. Keys are signed on your Mac by `tools/approve.py`;
+no Cloud Functions, no Blaze plan, no card. Nobody downloads anything without a verified email and your approval.
 
-## One-time setup (about 30 minutes, needs your accounts)
+## One-time setup (about 20 minutes)
 
-### 1. Supabase (free tier)
-1. supabase.com → New project. Note **Project URL** and **anon key** (Project Settings › API).
-2. SQL Editor → paste `supabase/schema.sql` → Run.
-3. Authentication › Providers › Email: keep **Magic link** on, turn **Confirm email** on. Authentication › URL Configuration:
-   Site URL = your Netlify URL, add it to Redirect URLs too.
-4. Storage: the `releases` bucket is created by the SQL (private). Upload `dist/Alma-0.8.0-mac.dmg` into it.
-   Then Table Editor › `releases` → Insert row: `version` = `0.8.0`, `platform` = `mac`, `path` = `Alma-0.8.0-mac.dmg`.
-5. Edge function, from the repo root (install the CLI once: `brew install supabase/tap/supabase`):
-   ```bash
-   supabase login && supabase link --project-ref <ref> && supabase functions deploy issue --project-ref <ref> && supabase secrets set ALMA_PRIVATE_SEED_HEX=$(.venv/bin/python tools/keygen.py export-seed) ALMA_PUBLIC_KEY_HEX=$(grep -o 'PUBLIC_KEY_HEX = "[0-9a-f]*"' flow/license.py | cut -d'"' -f2) --project-ref <ref>
-   ```
-   (The edge function lives in `site/supabase/functions/issue`; run the command with `--workdir site` if the CLI does not find it.)
+### 1. Firebase (console.firebase.google.com)
+1. Add project (or reuse one). **Authentication › Sign-in method › Email/Password → enable, and turn on "Email link
+   (passwordless sign-in)"**. Authentication › Settings › Authorized domains → add your Netlify domain.
+2. **Firestore Database → Create** (production mode). Rules tab → paste `firebase/firestore.rules` → Publish.
+3. **Storage → Get started**. Rules tab → paste `firebase/storage.rules` → Publish.
+4. **Project settings › General › Your apps → Web app (</>)**, register "alma site", copy the `firebaseConfig` block into
+   `site/index.html` (top of the module script). Copy `apiKey` and `projectId` into `flow/endpoints.py` too.
+5. **Project settings › Service accounts → Generate new private key** → save as `keys/firebase-admin.json` (never committed).
+6. `.venv/bin/pip install firebase-admin` (done once on this Mac).
 
 ### 2. Netlify
-New site from Git → repo `elharel648/music`, base directory `site`, publish directory `site`. Custom domain when you have one.
+New site from Git → repo `elharel648/music`, base directory `site`, publish directory `site`. Custom domain when you have one;
+add that domain to Firebase › Authentication › Authorized domains as well.
 
-### 3. Paste the two values
-- `site/index.html`: `SUPABASE_URL`, `SUPABASE_ANON` (top of the `<script type="module">`).
-- `flow/endpoints.py`: the same two. Rebuild the app so feedback from inside Alma lands in the `feedback` table.
+### 3. First release
+```bash
+.venv/bin/python tools/approve.py release 0.8.0 dist/Alma-0.8.0-mac.dmg
+```
+Uploads the DMG to `releases/` and points `releases/mac` at it. Rebuild the app after filling `flow/endpoints.py` so
+feedback from inside Alma lands in Firestore.
 
 ## Daily (2 minutes)
-- Table Editor › `profiles`: new applicants have `applied_at` set and `approved` unchecked. Read `about` and `link`.
-  Tick `approved`. That is the whole approval.
-- Tell them (WhatsApp, email): "approved — open the same page, your key and download are there." The page issues the
-  key on their next visit; founders (`founding` = true) get a key with no expiry, everyone else 365 days.
-- Table Editor › `feedback`: what they heard, with the build that produced it (`payload.plan`, `payload.log`).
-
-## New release
-Upload the new DMG to the `releases` bucket, insert a `releases` row with the new version. Approved users see it on
-their next visit; the app's own update check uses `packaging/latest.json` (signed, `tools/keygen.py sign-update`).
+```bash
+.venv/bin/python tools/approve.py list              # who is waiting, with their note and link
+.venv/bin/python tools/approve.py approve someone@x.com        # founding producer: key with no expiry
+.venv/bin/python tools/approve.py approve someone@x.com --days 365
+.venv/bin/python tools/approve.py feedback          # what they heard, newest first
+```
+Approve signs the key with `keys/private.pem` and writes it into their profile. Tell them (WhatsApp, email):
+"approved — open the same page, your key and the download are there."
 
 ## What is and is not protected
-- Download links are signed and expire after an hour; the bucket is private; only approved + signed-in users get one.
-- Keys are Ed25519-signed and verified offline in the app; the private seed exists only in `keys/private.pem` on your Mac
-  and as a Supabase secret. Never commit it.
-- A beta tester can share the DMG. The app still needs a key after 14 days, and keys carry the email they were issued to.
+- The DMG is readable only by a signed-in user whose profile says `approved: true` (Storage rules check Firestore).
+- Keys are Ed25519-signed and verified offline in the app; the private key exists only in `keys/private.pem`.
+- Users can edit their own application but cannot set `approved`, `founding` or `key` (Firestore rules).
+- Feedback is create-only for the public API key; only the console (and `approve.py feedback`) reads it.
+- A beta tester can pass the DMG on. The app still needs a key after 14 days, and keys carry the email they were issued to.

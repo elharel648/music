@@ -1,7 +1,7 @@
-"""Where the packaged app talks to. Filled once the Supabase project exists; empty strings mean "work offline".
+"""Where the packaged app talks to. Filled once the Firebase project exists; empty strings mean "work offline".
 
-SUPABASE_URL  = Supabase › Project Settings › API › Project URL
-SUPABASE_ANON = Supabase › Project Settings › API › anon public key (safe to ship; the database rules decide what it may do)
+FIREBASE_PROJECT = Firebase console › Project settings › General › Project ID
+FIREBASE_API_KEY = the web app's apiKey from the same page (public by design; Firestore rules decide what it may do)
 """
-SUPABASE_URL = ""
-SUPABASE_ANON = ""
+FIREBASE_PROJECT = ""
+FIREBASE_API_KEY = ""

@@ -1,8 +1,8 @@
 """Send what the user heard, together with what Alma built, to the maker.
 
 Beta feedback is only useful next to the plan that produced it: version, style, the sections and spans, the last log
-lines. When FEEDBACK_URL is set (a Supabase REST endpoint with an insert-only policy) the report is posted there;
-otherwise, or when the network fails, it is written to the Desktop so it can be sent by hand. Nothing is sent without
+lines. When flow/endpoints.py names a Firebase project the report is added to its `feedback` collection (Firestore REST,
+create-only rules); otherwise, or when the network fails, it is written to the Desktop so it can be sent by hand. Nothing is sent without
 the user pressing Send.
 """
 from __future__ import annotations
@@ -14,8 +14,9 @@ import urllib.request
 
 from . import __version__, endpoints, license as lic
 
-FEEDBACK_URL = f"{endpoints.SUPABASE_URL}/rest/v1/feedback" if endpoints.SUPABASE_URL else ""
-FEEDBACK_KEY = endpoints.SUPABASE_ANON
+FEEDBACK_URL = (f"https://firestore.googleapis.com/v1/projects/{endpoints.FIREBASE_PROJECT}/databases/(default)/documents/feedback"
+                f"?key={endpoints.FIREBASE_API_KEY}") if endpoints.FIREBASE_PROJECT and endpoints.FIREBASE_API_KEY else ""
+FEEDBACK_KEY = endpoints.FIREBASE_API_KEY
 TIMEOUT = 12.0
 
 
@@ -30,10 +31,17 @@ def report(note: str, plan: dict | None, log: list[str], extra: dict | None = No
     }
 
 
+def firestore_doc(rep: dict) -> dict:
+    """The report as a Firestore document: a few plain fields to list by, the whole thing as one JSON string."""
+    s = lambda v: {"stringValue": str(v or "")}
+    return {"fields": {"note": s(rep["note"]), "version": s(rep["version"]), "email": s(rep.get("email")),
+                       "created": {"timestampValue": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")},
+                       "payload": s(json.dumps(rep, default=str)[:900000])}}
+
+
 def post(rep: dict) -> None:
-    body = json.dumps({"payload": rep}, default=str).encode()
-    req = urllib.request.Request(FEEDBACK_URL, data=body, method="POST", headers={
-        "Content-Type": "application/json", "apikey": FEEDBACK_KEY, "Authorization": f"Bearer {FEEDBACK_KEY}", "Prefer": "return=minimal"})
+    body = json.dumps(firestore_doc(rep)).encode()
+    req = urllib.request.Request(FEEDBACK_URL, data=body, method="POST", headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
         if r.status not in (200, 201, 204):
             raise RuntimeError(f"feedback endpoint answered {r.status}")
