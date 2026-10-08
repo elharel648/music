@@ -852,6 +852,33 @@
   .kl-c.play .kl-pl, .kl-row.play .kl-name { color:var(--acc); } .kl-c.play .kl-pl { background:var(--acc); } .kl-c.play .kl-pl svg { fill:#fff; }
   :root[data-theme=dark] .kl-pl { background:#2A2B33; box-shadow:0 0 0 1px rgba(255,255,255,.08); } :root[data-theme=dark] .kl-pl svg { fill:#F4F1EA; }
   @media (max-height:760px) { .well.pick .klist { top:62px; bottom:68px; } .kl-line { padding:4px 8px; } }
+
+  /* Premium pass: the glass dissolves its content, rows glide open, the cursor is a soft bar, a sample's shape sits beside its name. */
+  .well.pick .klist { outline:none; box-shadow:inset 0 2px 7px rgba(20,20,30,.11), inset 0 0 0 1px rgba(20,20,30,.05), inset 0 -18px 24px -22px rgba(20,20,30,.08), 0 1px 0 rgba(255,255,255,.95); }
+  .well.pick .klist::before { content:""; position:absolute; left:10px; right:10px; top:0; height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent); z-index:2; pointer-events:none; }
+  .well.pick .klist::after { background:linear-gradient(112deg, rgba(255,255,255,.7) 0 30%, rgba(255,255,255,0) 30.15%); opacity:.5; }
+  .kl-head { padding:10px 14px 8px; }
+  .kl-body { padding:0 6px 10px; -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 26px), transparent 100%); mask-image:linear-gradient(to bottom, transparent 0, #000 12px, #000 calc(100% - 26px), transparent 100%); }
+  .kl-body::-webkit-scrollbar { width:0; } .kl-body { scrollbar-width:none; }
+  .kl-row, .kl-row.open { background:transparent; }
+  .kl-line { padding:6px 8px; transition:background .15s; } .kl-line:hover, .kl-line.cur { background:rgba(20,20,30,.045); }
+  .kl-row.open > .kl-line { background:rgba(20,20,30,.055); }
+  .kl-role { width:72px; flex:0 0 72px; }
+  .kl-name { font-size:12.5px; }
+  .kl-sp { width:30px; height:12px; flex:0 0 30px; align-self:center; opacity:.34; transition:opacity .2s; } .kl-line:hover .kl-sp, .kl-row.open .kl-sp, .kl-row.play .kl-sp { opacity:.9; }
+  .kl-drawer { display:grid; grid-template-rows:0fr; transition:grid-template-rows .26s var(--ease); } .kl-row.open > .kl-drawer { grid-template-rows:1fr; }
+  .kl-cands { overflow:hidden; min-height:0; padding:0 4px; opacity:0; transition:opacity .2s; } .kl-row.open .kl-cands { opacity:1; padding-bottom:6px; transition:opacity .25s .06s; }
+  .kl-any, .kl-c { position:relative; } .kl-c.cur, .kl-any.cur { background:rgba(20,20,30,.06); }
+  .kl-c.on::before { content:""; position:absolute; left:-1px; top:7px; bottom:7px; width:2px; border-radius:1px; background:var(--acc); }
+  .kl-c.play { background:linear-gradient(90deg, rgba(var(--acc-rgb),.12) var(--p,0%), rgba(var(--acc-rgb),0) var(--p,0%)); }
+  .kl-row.play > .kl-line .kl-name { color:var(--acc); }
+  .kl-row.ov > .kl-line .kl-name::after { content:""; display:inline-block; width:4px; height:4px; border-radius:50%; background:var(--acc); margin-left:7px; vertical-align:middle; }
+  :root[data-theme=dark] .kl-line:hover, :root[data-theme=dark] .kl-line.cur, :root[data-theme=dark] .kl-row.open > .kl-line { background:rgba(255,255,255,.06); }
+  :root[data-theme=dark] .well.pick .klist::before { background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); }
+
+  .kl-line { gap:6px; padding:6px 7px; } .kl-role { width:62px; flex:0 0 62px; font-size:8.5px; letter-spacing:.05em; }
+  .kl-sp { width:22px; flex:0 0 22px; height:11px; }
+  .kl-name { font-size:12.5px; }
 </style>
 </head>
 <body>
@@ -1204,21 +1231,41 @@ function openCands(tile, role){ closeCands(); const r=S.kit.find(x=>x.role===rol
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeCands(); });
 
 const KL_CHEV='<svg viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3"/></svg>', KL_PLAY='<svg viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z"/></svg>';
+function drawSpark(cv, pk){ const dpr=Math.min(2,window.devicePixelRatio||1); const W=cv.clientWidth||30, H=cv.clientHeight||12; if(cv.width!==W*dpr){ cv.width=W*dpr; cv.height=H*dpr; } const ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height); const n=14, gap=cv.width/n; ctx.fillStyle=`rgb(${ACC()})`;
+  for(let i=0;i<n;i++){ const v = pk ? Math.max(...pk.slice(Math.floor(i/n*pk.length), Math.max(Math.floor(i/n*pk.length)+1, Math.floor((i+1)/n*pk.length)))) : .12; const bh=Math.max(1.5*dpr, v*cv.height*.95); ctx.fillRect(i*gap+gap*.22, (cv.height-bh)/2, Math.max(1,gap*.5), bh); } }
+function klNow(){ const a=$('aud'); return !a.paused ? S.auditionPath : null; }
+function updateKlPlaying(){ const el=$('kitList'); if(!el) return; const now=klNow(); el.querySelectorAll('.kl-c').forEach(c=>{ const on=c.dataset.p===now; c.classList.toggle('play', on); if(!on) c.style.removeProperty('--p'); }); el.querySelectorAll('.kl-row').forEach(r=>r.classList.toggle('play', !!now && r.dataset.cur===now)); }
 function renderKitList(){ const el=$('kitList'); if(!el) return; const rows=S.kit||[]; const keep=el.querySelector('.kl-body'); const st=keep?keep.scrollTop:0;
   if(!S.pack){ el.innerHTML=''; return; }
   if(!rows.length){ el.innerHTML='<div class="kl-empty">Choosing sounds…</div>'; return; }
-  const ov=Object.keys(S.kitOverrides).length, n=rows.filter(r=>r.chosen).length, a=$('aud'), now=!a.paused ? S.auditionPath : null;
-  el.innerHTML = `<div class="kl-head"><span>Kit</span><span class="kl-n">${n}${ov?` · <button class="kl-reset" id="klReset">Reset ${ov}</button>`:''}</span></div><div class="kl-body">` + rows.map(r=>{ const c=r.chosen, open=S.kitOpen===r.role;
-    return `<div class="kl-row ${open?'open':''} ${c?'':'none'} ${S.kitOverrides[r.role]!==undefined?'ov':''} ${c&&c.path===now?'play':''}" data-role="${esc(r.role)}" role="option"><div class="kl-line"><span class="kl-role">${esc(r.label)}</span><span class="kl-name">${c?esc(stemOf(c.name)):'none in the pack'}</span>${KL_CHEV}</div>`
-      + (open ? `<div class="kl-cands"><div class="kl-any">Any file on this Mac…</div>${r.candidates.map(cd=>`<div class="kl-c ${c&&cd.path===c.path?'on':''} ${cd.path===now?'play':''}" data-p="${esc(cd.path)}"><button class="kl-pl" data-p="${esc(cd.path)}" aria-label="Play">${KL_PLAY}</button><span>${esc(stemOf(cd.name))}</span><span class="du">${cd.duration?cd.duration.toFixed(1)+'s':''}</span></div>`).join('')}</div>` : '') + `</div>`; }).join('') + '</div>';
-  const b=el.querySelector('.kl-body'); if(b) b.scrollTop=st; }
-(function kitList(){ const el=$('kitList');
-  el.addEventListener('click', async e=>{ e.stopPropagation(); const row=e.target.closest('.kl-row'); if(e.target.closest('#klReset')){ S.kitOverrides={}; S.kitOpen=null; markStale(); loadKit(); return; } if(!row) return; const role=row.dataset.role;
+  const ov=Object.keys(S.kitOverrides).length, n=rows.filter(r=>r.chosen).length;
+  el.innerHTML = `<div class="kl-head"><span>Kit</span><span class="kl-n">${n}${ov?` · <button class="kl-reset" id="klReset" tabindex="-1">Reset ${ov}</button>`:''}</span></div><div class="kl-body">` + rows.map(r=>{ const c=r.chosen, open=S.kitOpen===r.role;
+    return `<div class="kl-row ${open?'open':''} ${c?'':'none'} ${S.kitOverrides[r.role]!==undefined?'ov':''}" data-role="${esc(r.role)}" data-cur="${c?esc(c.path):''}" role="option"><div class="kl-line"><span class="kl-role">${esc(r.label)}</span><span class="kl-name" title="${c?esc(c.name):''}">${c?esc(stemOf(c.name)):'none in the pack'}</span>${c?`<canvas class="kl-sp" data-p="${esc(c.path)}"></canvas>`:''}${KL_CHEV}</div>`
+      + `<div class="kl-drawer"><div class="kl-cands"><div class="kl-any">Any file on this Mac…</div>${r.candidates.map(cd=>`<div class="kl-c ${c&&cd.path===c.path?'on':''}" data-p="${esc(cd.path)}"><button class="kl-pl" tabindex="-1" data-p="${esc(cd.path)}" aria-label="Play">${KL_PLAY}</button><span>${esc(stemOf(cd.name))}</span><span class="du">${cd.duration?cd.duration.toFixed(1)+'s':''}</span></div>`).join('')}</div></div></div>`; }).join('') + '</div>';
+  const b=el.querySelector('.kl-body'); if(b) b.scrollTop=st;
+  el.querySelectorAll('.kl-sp').forEach(cv=>{ const path=cv.dataset.p; drawSpark(cv, PEAKS.get(path)||null); peaksFor(path).then(pk=>{ if(cv.isConnected) drawSpark(cv, pk); }); });
+  updateKlPlaying(); }
+(function kitList(){ const el=$('kitList'); el.tabIndex=0; let cur=-1;
+  const items=()=>[...el.querySelectorAll('.kl-line, .kl-row.open .kl-any, .kl-row.open .kl-c')];
+  const mark=()=>{ el.querySelectorAll('.cur').forEach(x=>x.classList.remove('cur')); const it=items()[cur]; if(it){ it.classList.add('cur'); it.scrollIntoView({block:'nearest'}); } };
+  const toggle=(row, force)=>{ const role=row.dataset.role; const was=S.kitOpen===role; el.querySelectorAll('.kl-row.open').forEach(r=>r.classList.remove('open')); if(was && force!==true){ S.kitOpen=null; return; } S.kitOpen=role; row.classList.add('open'); setTimeout(()=>{ const b=el.querySelector('.kl-body'); if(b && row.isConnected) b.scrollTo({top:Math.max(0,row.offsetTop-6), behavior:'smooth'}); }, 260); };
+  const pick=(role,path)=>{ S.kitOpen=null; setKit(role,path); };
+  const anyFile=async role=>{ const p=await api().pick_sample(); S.kitOpen=null; if(p) setKit(role,p); else renderKitList(); };
+  el.addEventListener('click', e=>{ e.stopPropagation(); if(e.target.closest('#klReset')){ S.kitOverrides={}; S.kitOpen=null; markStale(); loadKit(); return; } const row=e.target.closest('.kl-row'); if(!row) return; const role=row.dataset.role;
     const pl=e.target.closest('.kl-pl'); if(pl){ audition(pl.dataset.p, null); return; }
-    if(e.target.closest('.kl-any')){ const p=await api().pick_sample(); S.kitOpen=null; if(p) setKit(role,p); else renderKitList(); return; }
-    const c=e.target.closest('.kl-c'); if(c){ S.kitOpen=null; setKit(role, c.dataset.p); return; }
-    if(e.target.closest('.kl-line')){ S.kitOpen = S.kitOpen===role ? null : role; renderKitList(); const open=el.querySelector('.kl-row.open'); if(open) open.scrollIntoView({block:'nearest'}); } });
-  ['play','pause','ended'].forEach(ev=>$('aud').addEventListener(ev, renderKitList)); })();
+    if(e.target.closest('.kl-any')){ anyFile(role); return; }
+    const c=e.target.closest('.kl-c'); if(c){ pick(role, c.dataset.p); return; }
+    if(e.target.closest('.kl-line')){ cur=items().indexOf(e.target.closest('.kl-line')); toggle(row); } });
+  el.addEventListener('keydown', e=>{ const its=items(); if(!its.length) return;
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); cur = cur<0 ? 0 : Math.max(0, Math.min(its.length-1, cur+(e.key==='ArrowDown'?1:-1))); mark(); return; }
+    const it=its[cur]; if(!it) return; const row=it.closest('.kl-row'); const role=row.dataset.role;
+    if(e.key==='Enter'){ e.preventDefault(); if(it.classList.contains('kl-line')){ toggle(row); setTimeout(()=>{ cur=items().indexOf(row.querySelector('.kl-line')); mark(); }, 0); } else if(it.classList.contains('kl-any')) anyFile(role); else pick(role, it.dataset.p); }
+    else if(e.key===' '){ e.preventDefault(); const path = it.classList.contains('kl-line') ? row.dataset.cur : it.dataset.p; if(path) audition(path, null); }
+    else if(e.key==='Escape'){ if(S.kitOpen){ e.preventDefault(); e.stopPropagation(); toggle(row.classList.contains('open')?row:el.querySelector('.kl-row.open'), false); cur=items().indexOf(el.querySelector('.kl-row .kl-line')) ; } } });
+  el.addEventListener('blur', ()=>{ el.querySelectorAll('.cur').forEach(x=>x.classList.remove('cur')); cur=-1; });
+  ['play','pause','ended'].forEach(ev=>$('aud').addEventListener(ev, updateKlPlaying));
+  $('aud').addEventListener('timeupdate', ()=>{ const a=$('aud'); const now=klNow(); if(!now||!a.duration) return; const c=el.querySelector(`.kl-c.play[data-p="${CSS.escape(now)}"]`); if(c) c.style.setProperty('--p', (a.currentTime/a.duration*100).toFixed(1)+'%'); });
+})();
 function cycleKit(role, d){ const r=S.kit.find(x=>x.role===role); if(!r || r.candidates.length<2) return; const idx=r.chosen ? r.candidates.findIndex(c=>c.path===r.chosen.path) : -1; const next=r.candidates[(idx+d+r.candidates.length)%r.candidates.length]; r.chosen=next; S.kitOverrides[role]=next.path; markStale(); renderKit(); const pl=$('kitView').querySelector(`.tile[data-role="${role}"] .pl`); audition(next.path, pl); }
 async function audition(path, btn){ const a=$('aud'); refAud.active=false; if(btn && btn.classList.contains('on')){ a.pause(); return; } const r = await api().audition_url(path); if(!r.ok) return; document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on')); a.src=r.url; a.currentTime=0; S.auditionPath=path; a.play().catch(()=>{}); if(btn){ btn.classList.add('on'); a.onended=()=>btn.classList.remove('on'); a.onpause=()=>btn.classList.remove('on'); } }
 function markStale(){ if(S.preview){ S.previewStale=true; stopPlayer(); $('tp').classList.add('hidden'); } listenLabel(); }
