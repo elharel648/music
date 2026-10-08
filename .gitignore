@@ -13,3 +13,4 @@ FLOW loops/
 FLOW export/
 build_*.log
 .claude/
+flow/ui/demo.html

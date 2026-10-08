@@ -27,6 +27,28 @@ SPACE = {"pad": ("reverb", 0.28, 4.0), "atmos": ("reverb", 0.30, 5.0), "clap": (
 GLUE_ROLES = {"clap", "perc", "perc_loop", "perc_loop2", "tom", "tom_b", "tom_c", "shaker_loop", "hat_loop"}
 NO_DUCK = {"kick", "impact", "uplifter", "downlifter", "snare_roll"}
 
+# Live's API exposes most device parameters normalized (0..1 or -1..1); these map real units onto that.
+# Verified against EQ Eight's default band frequencies (40/200/1000/5000/100/10000/5000/18000 Hz) and Utility's Bass Freq (120 Hz in 50..500).
+import math
+
+
+def eq8_freq(hz: float) -> float:
+    """EQ Eight frequency: 10 Hz..22 kHz, logarithmic, as 0..1."""
+    return min(1.0, max(0.0, math.log(hz / 10.0) / math.log(2200.0)))
+
+
+def utility_gain(db: float) -> float:
+    """Utility Gain: -35..+35 dB as -1..1 (0 = 0 dB)."""
+    return min(1.0, max(-1.0, db / 35.0))
+
+
+def reverb_decay(ms: float) -> float:
+    """Reverb Decay Time: 200 ms..60 s, logarithmic, as 0..1."""
+    return min(1.0, max(0.0, math.log(ms / 200.0) / math.log(300.0)))
+
+
+AUTOPAN_QUARTER = 7.0  # index into Live's beat-division list: 8,4,2,1,1/2,1/2T,1/2D,1/4,...
+
 URIS = {
     "utility": "query:AudioFx#Utility", "eq8": "query:AudioFx#EQ%20Eight", "autopan": "query:AudioFx#Auto%20Pan",
     "reverb": "query:AudioFx#Reverb", "delay": "query:AudioFx#Delay", "drumbuss": "query:AudioFx#Drum%20Buss",
@@ -50,28 +72,29 @@ def apply(live, plan: dict, base_index: int, options: set[str], sidechain: str |
         try:
             if "gain" in options and role in GAIN_DB and GAIN_DB[role] != 0:
                 d = live.add_device(ti, URIS["utility"])
-                live.set_param(ti, d, "Gain", float(GAIN_DB[role]))
+                live.set_param(ti, d, "Gain", utility_gain(GAIN_DB[role]))
             if "lowcut" in options and role in LOWCUT_HZ:
                 d = live.add_device(ti, URIS["eq8"])
                 live.set_param(ti, d, "1 Filter On A", 1.0)
                 live.set_param(ti, d, "1 Filter Type A", 1.0)      # 12 dB low cut (0 = 48 dB)
-                live.set_param(ti, d, "1 Frequency A", float(LOWCUT_HZ[role]))
+                live.set_param(ti, d, "1 Frequency A", eq8_freq(LOWCUT_HZ[role]))
             if "duck" in options and role not in NO_DUCK:
                 if sc_uri:
                     live.add_device(ti, sc_uri)
                 else:
                     d = live.add_device(ti, URIS["autopan"])
-                    live.set_param(ti, d, "Amount", 1.0)
-                    live.set_param(ti, d, "Phase", 180.0)
-                    live.set_param(ti, d, "Sync", 1.0)
-                    live.set_param(ti, d, "Sync Rate", 5.0)        # 1/4 note in Live's beat-division list
+                    live.set_param(ti, d, "Waveform", 2.0)        # saw down: dip on the beat, recover before the next
+                    live.set_param(ti, d, "Phase", 180.0)         # both channels together: volume, not panning
+                    live.set_param(ti, d, "Amount", 0.55)
+                    live.set_param(ti, d, "LFO Type", 1.0)        # sync to the beat
+                    live.set_param(ti, d, "Sync Rate", AUTOPAN_QUARTER)
                     live.set_param(ti, d, "Shape", 0.5)
             if "space" in options and role in SPACE:
                 kind, wet, decay = SPACE[role]
                 d = live.add_device(ti, URIS["reverb" if kind == "reverb" else "delay"])
                 live.set_param(ti, d, "Dry/Wet", float(wet))
                 if decay:
-                    live.set_param(ti, d, "Decay Time", float(decay) * 1000.0)
+                    live.set_param(ti, d, "Decay Time", reverb_decay(decay * 1000.0))
             if "glue" in options and role in GLUE_ROLES:
                 d = live.add_device(ti, URIS["drumbuss"])
                 live.set_param(ti, d, "Drive", 0.25)

@@ -139,3 +139,13 @@ def test_plan_view_shape():
     assert all(isinstance(a, int) and isinstance(b, int) for a, b in v["layers"][0]["spans"])
     import json
     json.dumps(v)  # must be serializable for the UI
+
+
+def test_finish_parameter_mappings():
+    from flow import finish
+    # EQ Eight defaults: band 2 = 200 Hz sits at 0.389, band 8 = 18 kHz at 0.974 (read back from Live 12)
+    assert abs(finish.eq8_freq(200) - 0.3892) < 0.002
+    assert abs(finish.eq8_freq(18000) - 0.9739) < 0.002
+    assert finish.eq8_freq(10) == 0.0 and finish.eq8_freq(22000) == 1.0
+    assert finish.utility_gain(0) == 0.0 and finish.utility_gain(-35) == -1.0 and abs(finish.utility_gain(-3) + 0.0857) < 0.001
+    assert finish.reverb_decay(200) == 0.0 and abs(finish.reverb_decay(4000) - 0.525) < 0.002
