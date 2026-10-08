@@ -4,6 +4,7 @@ A plan is DAW-agnostic: tracks with spans in bars, one-shot hits in bars, MIDI n
 """
 from __future__ import annotations
 import math
+import numpy as np
 from . import patterns, styles as stylelib
 
 STYLE_TEMPLATES = {k: st.template for k, st in stylelib.STYLES.items()}  # kept for the CLI and older callers
@@ -49,7 +50,7 @@ def target_bars(length_seconds: float | None, bpm: float, ref_bars: int) -> int:
     return max(floor, int(round(bars / 8.0)) * 8)
 
 
-CAPS = {"Build": 16, "Breakdown": 32}  # tension sections do not grow with the track; drops, intros and outros do
+CAPS = {"Build": 16, "Breakdown": 32, "Intro": 24, "Outro": 24}  # tension sections, intros and outros do not grow with the track; drops and grooves do
 
 
 def _phrase(bars: float) -> int:
@@ -86,6 +87,144 @@ def scale_sections(sections: list[dict], total: int) -> list[dict]:
     return out
 
 
+MIN_SECTION = 8
+
+
+def normalize_sections(secs: list[dict]) -> tuple[list[dict], list[str]]:
+    """A structure a DJ would recognise, whatever the reference did: no slivers, an intro that does not drag,
+    at least one breakdown + build before the biggest drop, an outro. Returns (sections, notes)."""
+    out = [dict(x) for x in secs]
+    notes: list[str] = []
+
+    def relabel(x, label, kr):
+        x["label"] = label
+        x["kick_ratio"] = kr
+
+    # slivers join their neighbour
+    merged: list[dict] = []
+    for x in out:
+        if merged and (x["end"] - x["start"]) < MIN_SECTION:
+            merged[-1]["end"] = x["end"]
+        else:
+            merged.append(x)
+    out = merged
+    # an intro longer than 24 bars is an intro and a groove
+    if out and out[0]["label"] == "Intro" and (out[0]["end"] - out[0]["start"]) > 24:
+        a = out[0]
+        cut = a["start"] + 16
+        out = [dict(a, end=cut), dict(a, label="Groove", start=cut)] + out[1:]
+    # a breakdown must exist before the last drop
+    drops = [i for i, x in enumerate(out) if x["label"].startswith("Drop")]
+    has_break = any(x["label"] in ("Breakdown", "Build") for x in out)
+    if drops and not has_break:
+        size = lambda x: x["end"] - x["start"]
+        # best host: the section right before the last drop, else the longest section before any drop, else the longest drop itself
+        cands = [i for i in range(drops[-1]) if size(out[i]) >= 24 and not out[i]["label"].startswith("Drop")]
+        host = (drops[-1] - 1) if (drops[-1] > 0 and size(out[drops[-1] - 1]) >= 24 and not out[drops[-1] - 1]["label"].startswith("Drop")) else (max(cands, key=lambda i: size(out[i])) if cands else None)
+        if host is not None:
+            prev = out[host]
+            b0 = prev["end"] - 16
+            out[host] = dict(prev, end=b0)
+            out[host + 1:host + 1] = [dict(prev, label="Breakdown", start=b0, end=b0 + 8, kick_ratio=0.0), dict(prev, label="Build", start=b0 + 8, end=b0 + 16, kick_ratio=0.0)]
+            notes.append("The reference never drops the kick; FLOW opened a breakdown and a build before the drop.")
+        else:
+            big = max(drops, key=lambda i: size(out[i]))
+            d = out[big]
+            if size(d) >= 32:
+                mid = d["start"] + ((size(d) // 2) // 8) * 8
+                out[big:big + 1] = [dict(d, end=mid), dict(d, label="Breakdown", start=mid, end=mid + 8, kick_ratio=0.0), dict(d, label="Build", start=mid + 8, end=mid + 16, kick_ratio=0.0), dict(d, label="Drop 2" if d["label"] == "Drop" else d["label"], start=mid + 16)]
+                notes.append("The reference never drops the kick; FLOW split the drop around a breakdown and a build.")
+    # the end is an outro
+    if out and out[-1]["label"].startswith("Drop") and (out[-1]["end"] - out[-1]["start"]) >= 24:
+        d = out[-1]
+        cut = d["end"] - 8
+        out[-1] = dict(d, end=cut)
+        out.append(dict(d, label="Outro", start=cut))
+    for x in out:
+        x["bars"] = x["end"] - x["start"]
+    return out, notes
+
+
+ENTRY_ORDER = ["atmos", "pad", "kick", "chat", "shaker_loop", "perc", "tom", "bass", "hat_loop", "perc_loop", "synth", "clap", "tom_b", "tom_c", "ohat", "perc_loop2", "snare_roll"]
+LATE_IN_DROP = {"ohat", "perc_loop2", "hat_loop", "tom_c"}
+BREATHERS = {"kick", "bass"}
+RESTERS = ["hat_loop", "perc_loop", "shaker_loop", "perc_loop2", "ohat", "chat"]
+DRUMS = {"kick", "clap", "chat", "ohat", "tom", "tom_b", "tom_c", "perc", "hat_loop", "perc_loop", "perc_loop2", "shaker_loop", "bass"}
+
+
+def shape_layers(wanted: dict[str, list[dict]], sections: list[dict], total: int) -> dict[str, list[tuple[int, int]]]:
+    """From 'which sections each role belongs to' to spans that breathe: staggered entries every phrase,
+    the kick and bass resting on the last bar of each 16-bar phrase, drums silent on the bar before a drop,
+    percussion loops taking turns to rest, outros thinning out."""
+    active = {r: np.zeros(total + 2, dtype=bool) for r in wanted}
+    for r, secs in wanted.items():
+        for sct in secs:
+            active[r][sct["start"]:sct["end"]] = True
+    rank = {r: i for i, r in enumerate(ENTRY_ORDER)}
+    prev_roles: set[str] = set()
+    for si, sct in enumerate(sections):
+        here = {r for r, secs in wanted.items() if sct in secs}
+        new = sorted(here - prev_roles, key=lambda r: rank.get(r, 99))
+        bars = sct["end"] - sct["start"]
+        label = sct["label"]
+        is_drop = label.startswith("Drop") or label == "Return"
+        if is_drop:
+            for r in new:
+                if r in LATE_IN_DROP and bars >= 24:
+                    active[r][sct["start"]:sct["start"] + 8] = False
+        elif label == "Outro":
+            leaving = sorted(here, key=lambda r: -rank.get(r, 99))
+            for i, r in enumerate(leaving[:-2]):
+                cut = sct["end"] - (i + 1) * 4
+                if cut > sct["start"] + 4:
+                    active[r][cut:sct["end"]] = False
+        elif label not in ("Breakdown", "Build"):
+            phrase = 8 if bars >= 32 else 4
+            for i, r in enumerate(new):
+                delay = min(i, 3) * phrase
+                if label == "Intro" and r == "kick" and bars >= 16:
+                    delay = max(delay, 8)
+                if delay and delay < bars:
+                    active[r][sct["start"]:sct["start"] + delay] = False
+        # phrase breaths inside grooves and drops
+        if is_drop or label in ("Groove",):
+            for k in range(1, bars // 16 + 1):
+                b = sct["start"] + 16 * k - 1
+                if b < sct["end"] - 1:
+                    for r in BREATHERS:
+                        if r in active:
+                            active[r][b] = False
+            for ri, r in enumerate(RESTERS):
+                if r not in active:
+                    continue
+                for k in range(1, bars // 8 + 1):
+                    b = sct["start"] + 8 * k - 1
+                    if (k + ri) % 2 == 0 and sct["start"] + 8 <= b < sct["end"] - 1:
+                        active[r][b] = False
+        # the bar before a drop is silent for kick and bass; the impact lands on the drop
+        nxt = sections[si + 1] if si + 1 < len(sections) else None
+        if nxt and (nxt["label"].startswith("Drop") or nxt["label"] in ("Breakdown", "Build")) and label not in ("Build",) and bars > 4:
+            for r in BREATHERS:
+                if r in active:
+                    active[r][nxt["start"] - 1] = False
+        prev_roles = here
+    spans: dict[str, list[tuple[int, int]]] = {}
+    for r, a in active.items():
+        out: list[tuple[int, int]] = []
+        b = 1
+        while b <= total:
+            if a[b]:
+                e = b
+                while e <= total and a[e]:
+                    e += 1
+                out.append((b, e))
+                b = e
+            else:
+                b += 1
+        spans[r] = out
+    return spans
+
+
 def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, length_seconds: float | None = None,
                style: str = "house", midi_roles: dict | None = None, sidechain: str | None = None, vocal: dict | None = None,
                structure: str = "reference") -> dict:
@@ -98,6 +237,7 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
     tmpl = st.template
     structure = structure if structure in ("reference", "typical") else "reference"
     ref_secs, note = reference_sections(ref, structure)
+    ref_secs, shape_notes = normalize_sections(ref_secs)
     total = target_bars(length_seconds, bpm, ref["bars"] if note is None else sum(s["bars"] for s in ref_secs))
     sections = scale_sections(ref_secs, total)
     tonic = ref["key"]["pc"]
@@ -118,31 +258,29 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
             if r not in roles and (r in loops or r in kit):
                 roles.append(r)
 
+    # which sections each role belongs to, then the shaping that makes it breathe
+    wanted: dict[str, list[dict]] = {}
+    for role in roles:
+        if not source(role):
+            continue
+        secs_for = []
+        for sct in sections:
+            label = sct["label"] if sct["label"] in tmpl else ("Drop 2" if sct["label"].startswith("Drop") else "Groove")
+            ok = role in tmpl[label]
+            if role == "kick" and sct["kick_ratio"] < 0.35:
+                ok = False
+            if role == "kick" and sct["label"] == "Intro" and sct["kick_ratio"] >= 0.35:
+                ok = True
+            if ok:
+                secs_for.append(sct)
+        if secs_for:
+            wanted[role] = secs_for
+    shaped = shape_layers(wanted, sections, total)
     tracks = []
     for role in roles:
         src = source(role)
-        if not src:
-            continue
-        spans = []
-        for s in sections:
-            label = s["label"] if s["label"] in tmpl else ("Drop 2" if s["label"].startswith("Drop") else "Groove")
-            wanted = role in tmpl[label]
-            if role == "kick" and s["kick_ratio"] < 0.35:
-                wanted = False
-            if role == "kick" and s["label"] in ("Intro",) and s["kick_ratio"] >= 0.35:
-                wanted = True
-            if not wanted:
-                continue
-            start, end = s["start"], s["end"]
-            # reference habit: the kick (and bass) drop out for the last bar before a breakdown/build
-            nxt = sections[sections.index(s) + 1] if sections.index(s) + 1 < len(sections) else None
-            if role in ("kick",) and nxt and nxt["label"] in ("Breakdown", "Build") and end - start > 4:
-                end -= 1
-            if spans and spans[-1][1] == start:
-                spans[-1] = (spans[-1][0], end)
-            else:
-                spans.append((start, end))
-        if not spans:
+        spans = shaped.get(role) or []
+        if not src or not spans:
             continue
         t = {"name": _track_name(role, src["name"]), "role": role, "spans": spans, "source": src}
         if role in midi_roles:
@@ -186,7 +324,7 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
         "tracks": tracks + fx_tracks, "locators": locators, "sidechain": sidechain,
         "reference": {"file": ref["file"], "bars": ref["bars"], "bpm": ref["bpm"]},
         "placeholders": [t["name"] for t in tracks if t["role"] in MELODIC],
-        "notes": [note] if note else [],
+        "notes": ([note] if note else []) + shape_notes,
         "structure": "reference" if (structure == "reference" and note is None) else "typical",
     }
 

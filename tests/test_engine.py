@@ -57,8 +57,12 @@ def test_build_plan_kick_drops_before_break(tmp_path):
     loops = {"kick": {"path": "k.wav", "bars": 4, "source": "Kick.wav"}}
     plan = arrange.build_plan(ref, kit, loops, length_seconds=None)
     kick = [t for t in plan["tracks"] if t["role"] == "kick"][0]
-    assert kick["spans"] == [(1, 32), (49, 73)]  # kick leaves one bar before the breakdown
-    assert plan["locators"][0] == ("Intro", 1) and plan["locators"][-1] == ("End", 73)
+    bars = {b for a, e in kick["spans"] for b in range(a, e)}
+    brk = next(s for s in plan["sections"] if s["label"] == "Breakdown")
+    drop = next(s for s in plan["sections"] if s["label"].startswith("Drop") or s["label"] == "Return")
+    assert brk["start"] - 1 not in bars and not any(b in bars for b in range(brk["start"], brk["end"]))   # the kick leaves before the breakdown and stays out
+    assert drop["start"] in bars                                                                        # and lands on the drop
+    assert plan["locators"][0] == ("Intro", 1) and plan["locators"][-1][0] == "End"
 
 
 def test_midi_notes_in_key():
@@ -303,3 +307,28 @@ def test_media_server_serves_only_registered_files_with_ranges(tmp_path):
             assert e.code == 404
     finally:
         srv.close()
+
+
+def test_normalize_sections_adds_breakdown_and_trims_intro():
+    from flow import arrange
+    secs = [{"label": "Intro", "start": 1, "end": 45, "bars": 44, "kick_ratio": .98}, {"label": "Drop", "start": 45, "end": 65, "bars": 20, "kick_ratio": .85},
+            {"label": "Drop 2", "start": 65, "end": 77, "bars": 12, "kick_ratio": 1.0}, {"label": "Drop 3", "start": 77, "end": 81, "bars": 4, "kick_ratio": .75}]
+    out, notes = arrange.normalize_sections(secs)
+    labels = [x["label"] for x in out]
+    assert labels[0] == "Intro" and out[0]["bars"] == 16 and labels[1] == "Groove"
+    assert "Breakdown" in labels and "Build" in labels and labels.index("Breakdown") < max(i for i, l in enumerate(labels) if l.startswith("Drop"))
+    assert all(x["bars"] >= 8 for x in out) and notes
+    assert sum(x["bars"] for x in out) == 80 and all(out[i]["end"] == out[i + 1]["start"] for i in range(len(out) - 1))
+
+
+def test_shape_layers_breathes():
+    from flow import arrange
+    secs = [{"label": "Intro", "start": 1, "end": 17, "bars": 16, "kick_ratio": 1}, {"label": "Groove", "start": 17, "end": 49, "bars": 32, "kick_ratio": 1},
+            {"label": "Drop", "start": 49, "end": 81, "bars": 32, "kick_ratio": 1}]
+    wanted = {"atmos": secs, "kick": secs, "shaker_loop": secs, "perc": secs[1:], "bass": secs[1:], "hat_loop": secs[2:], "ohat": secs[2:]}
+    sp = arrange.shape_layers(wanted, secs, 80)
+    assert sp["atmos"][0][0] == 1 and sp["kick"][0][0] == 9            # the kick waits 8 bars in the intro
+    assert sp["ohat"][0][0] == 57                                        # late layers join the drop 8 bars in
+    kick_bars = {b for a, e in sp["kick"] for b in range(a, e)}
+    assert 32 not in kick_bars and 48 not in kick_bars and 64 not in kick_bars   # phrase breaths and the bar before the drop
+    assert 33 in kick_bars and 49 in kick_bars
