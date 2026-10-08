@@ -309,7 +309,7 @@
   @keyframes captext { 0%,100% { text-shadow:0 0 0 transparent; } 18% { text-shadow:0 0 10px color-mix(in srgb, var(--acc) 80%, transparent); } }
   .big.next { animation:nextring var(--beat) ease-out infinite; }
   .bst { font-size:11.5px; font-weight:500; color:var(--ink); text-align:center; min-height:14px; line-height:1.5; max-width:236px; }
-  .bsub { font-size:10.5px; color:var(--mut); text-align:center; line-height:1.5; max-width:210px; }
+  .bsub { font-size:10.5px; color:var(--mut); text-align:center; line-height:1.5; max-width:214px; }
   .acts { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
   .foot { display:flex; align-items:center; gap:14px; padding:0 18px; font-size:11px; font-weight:500; color:var(--mut); }
   .foot .sp { flex:1; }
@@ -407,7 +407,7 @@
       <div class="mb">
         <div class="bigwrap">
           <div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div>
-          <div class="bst" id="bst">Waiting for a reference and your sounds</div><div class="bsub">Builds this arrangement from your sounds and your direction. Nothing is decided for you.</div>
+          <div class="bst" id="bst">Waiting for a reference and your sounds</div><div class="bsub" id="bsub">Builds this arrangement from your sounds and your direction. Nothing is decided for you.</div>
           <div class="acts" id="acts"><button class="sb hidden" id="openOut">Open folder</button><button class="sb hidden" id="again">Build another</button><button class="lk hidden" id="toggleLog">Details</button></div>
         </div>
       </div>
@@ -691,12 +691,12 @@ window.flowError = msg=>{ S.building=false; markNext(); $('buildTL').classList.r
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
   if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Stopped. Fix the cause, then retry.'; liveStatus(); };
 window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); bigState('done'); setProg(1); setPhase(5); setMod('bld','Done','on');
-  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; const nUsed = sum.kit ? Object.keys(sum.kit).length : null; const from = `Built from your sounds${nUsed?` (${nUsed} used)`:''}, your direction (${sum.style_name||curStyle().name} · ${fmt(S.len)}) and ${sum.structure==='typical'?'a typical structure':'the reference\u2019s structure'}.`; $('bst').textContent = (sum.ableton ? 'Done. Your track is in Live. Press Cmd+S. ' : 'Done. Stems, MIDI and the Blueprint are in the folder. ') + from;
+  $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; const nUsed = sum.kit ? Object.keys(sum.kit).length : null; const from = `Built from your sounds${nUsed?` (${nUsed} used)`:''}, your direction (${sum.style_name||curStyle().name} · ${fmt(S.len)}) and ${sum.structure==='typical'?'a typical structure':'the reference\u2019s structure'}.`; $('bst').textContent = sum.ableton ? 'Your track is in Live. Press Cmd+S.' : 'Your track is in the folder.'; $('bsub').textContent = from;
   if(!TL) window.flowPlan(sum); TL.revealAll();
-  if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bst').textContent += ` ${warns.length} note${warns.length===1?'':'s'} in Details.`; }
+  if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bsub').textContent += ` ${warns.length} note${warns.length===1?'':'s'} in Details.`; }
   if(sum.kit){ const n=Object.keys(sum.kit).length; $('roUsed').textContent = `${n} used`; } $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
   $('buildBtn').textContent='BUILD'; $('buildBtn').disabled=false; refreshStatus(); await sleep(900); if(TL) TL.sweep(); };
-$('again').onclick=()=>{ S.built=false; $('buildBtn').textContent='BUILD'; $('again').classList.add('hidden'); $('openOut').classList.add('hidden'); gateBuild(); setActive('ref'); };
+$('again').onclick=()=>{ S.built=false; $('bsub').textContent='Builds this arrangement from your sounds and your direction. Nothing is decided for you.'; $('buildBtn').textContent='BUILD'; $('again').classList.add('hidden'); $('openOut').classList.add('hidden'); gateBuild(); setActive('ref'); };
 gateBuild();
 window.flowUpdate = u=>{ if(!u || !u.available) return; $('updTxt').textContent = `Update ${u.version}`; $('updChip').title = u.notes||''; $('updChip').classList.remove('hidden'); $('updChip').onclick = ()=>api().open_path(u.url); };
 </script>
