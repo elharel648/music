@@ -962,6 +962,26 @@
 
   /* No Live status in the footer: a problem is said once, under Direction, where it can be fixed. */
   #liveSt { display:none !important; }
+
+  /* The display speaks the deck's language: sentence case, Satoshi, no tracked capitals. */
+  .disp .rl, .disp .dvhead .r, .disp .dvhead .t small, .disp .dgrid .h small, .disp .cap, .disp .tl .names small, .disp .tl .ticks span, .disp .tl .ln, .disp .tl .rn, .disp .tl .rs, .disp .tl .phl, .disp .kl, .disp .kc, .disp .hint {
+    font-family:"Satoshi",sans-serif; text-transform:none; letter-spacing:0; font-weight:500; }
+  .disp .rl { font-size:12px; color:var(--d-sec); } .disp .dvhead .t small { font-size:12px; color:var(--d-mut); margin-left:12px; } .disp .dvhead .r { font-size:12px; color:var(--d-sec); }
+  .disp .dgrid .h small { font-size:11px; } .disp .tl .names small { font-size:11px; } .disp .tl .ticks span { font-size:10.5px; }
+  #sess { display:none; }
+  /* the sound screen */
+  .ss { position:absolute; inset:0; display:flex; flex-direction:column; padding:26px 32px 24px; }
+  .ss-top { display:flex; align-items:baseline; gap:14px; }
+  .ss-top b { font-size:clamp(22px, 4vh, 34px); font-weight:500; letter-spacing:-.03em; color:#F4F1EA; } .ss-top span { font-size:13px; color:var(--d-sec); }
+  #ssWave { flex:1; min-height:0; width:100%; margin:6px 0; display:block; }
+  .ss-foot { font-size:12.5px; color:var(--d-sec); }
+  .sndidle { position:absolute; inset:0; display:grid; place-items:center; } .sndidle.hidden { display:none; }
+
+  .bar .brand { margin-right:auto; }
+
+  .disp #dirView .dvhead { align-items:flex-start; }
+  .disp #dirView .dvhead .t { display:flex; flex-direction:column; gap:5px; } .disp #dirView .dvhead .t small { margin:0; max-width:56ch; line-height:1.4; }
+  .disp #dirView .dvhead .r { white-space:nowrap; padding-top:3px; }
 </style>
 </head>
 <body>
@@ -980,7 +1000,7 @@
   <section class="disp" id="disp">
     <div class="dv" data-v="gate"><div class="gate lic" id="gateBox"></div></div>
     <div class="dv" data-v="ref"><canvas class="full" id="waveCv" title="Choose a reference track"></canvas><div class="splash" id="splash"><div class="sp-glow"></div><svg class="sp-mark" viewBox="0 0 1000 1000" aria-hidden="true"><defs><radialGradient id="spbg" cx="50%" cy="28%" r="85%"><stop offset="0" stop-color="#17181C"/><stop offset="1" stop-color="#0B0B0D"/></radialGradient><radialGradient id="spcap" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#F3F0E8"/><stop offset="1" stop-color="#D2CEC3"/></radialGradient><linearGradient id="sprim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".30"/><stop offset=".45" stop-color="#FFFFFF" stop-opacity=".05"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".10"/></linearGradient></defs><path id="spBody" fill="url(#spbg)" stroke="url(#sprim)" stroke-width="7"/><circle cx="500" cy="500" r="300" fill="url(#spcap)"/><circle cx="500" cy="500" r="300" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="2"/><g class="sp-pip"><line x1="500" y1="234" x2="500" y2="326" stroke="#0B0B0D" stroke-width="22" stroke-linecap="round"/></g></svg><div class="sp-word">alma</div><button class="sp-cta" id="spCta" type="button">Choose a reference</button></div><div class="tl hidden" id="refTL"></div><div class="cap" id="refCap"></div></div>
-    <div class="dv" data-v="snd"><div class="seq" id="seqEl" aria-hidden="true"></div><div id="kitView" class="hidden"></div><div class="cap" id="sndCap"></div></div>
+    <div class="dv" data-v="snd"><div class="sndidle" id="sndIdle"><button class="sp-cta" id="spCta2" type="button">Choose your sounds</button></div><div id="kitView" class="hidden"><div class="ss"><div class="ss-top"><b id="ssName">—</b><span id="ssRole"></span></div><canvas id="ssWave" aria-label="The selected sound"></canvas><div class="ss-foot" id="ssFacts"></div></div></div><div class="cap" id="sndCap"></div></div>
     <div class="dv" data-v="dir"><div id="dirView"></div><div class="cap" id="dirCap"></div></div>
     <div class="dv" data-v="fb"><div class="gate fb"><h2>What did you hear?</h2><p>Where it stopped feeling like a track: the bar, the layer, the section. Alma attaches what it built so Harel can see exactly what you heard.</p><textarea id="fbText" rows="5" placeholder="The break at bar 77 is too long. The bass should wait for the drop. The build needs a snare roll…"></textarea><div class="fbrow"><button class="dbtn" id="fbCancel">Back</button><span class="sp"></span><button class="dbtn" id="fbSend">Send</button></div><div class="dmsg" id="fbMsg"></div></div></div>
     <div class="dv" data-v="fin">
@@ -1104,10 +1124,6 @@ function startWave(cv){ const ctx=cv.getContext('2d'); const dpr=Math.min(2,wind
       const bh=Math.max(2*dpr,h*H*.62); const bw=gap*.42; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(i*gap+gap*.29, mid-bh/2, bw, bh, bw/2) : ctx.rect(i*gap+gap*.29, mid-bh/2, bw, bh); ctx.fill(); }
     t+=.016; if(!reduced) raf=requestAnimationFrame(frame); };
   frame(); return ()=>{ cancelAnimationFrame(raf); if(ro) ro.disconnect(); }; }
-function startSeq(el){ const pats=[['Kick',[0,4,8,12]],['Clap',[4,12]],['Hat',[2,6,10,14,15]],['Perc',[3,7,11,13]]]; el.innerHTML='';
-  const cols=[]; pats.forEach(([name,on])=>{ const rn=document.createElement('div'); rn.className='rn'; rn.textContent=name; el.appendChild(rn); const row=[]; for(let i=0;i<16;i++){ const c=document.createElement('div'); c.className='c'+(i%4===0?' g':'')+(on.includes(i)?' on':''); el.appendChild(c); row.push(c); } cols.push(row); });
-  let step=0; const tick=()=>{ cols.forEach(r=>r.forEach((c,i)=>c.classList.toggle('now', i===step))); step=(step+1)%16; }; tick();
-  const bpm = S.ref ? S.ref.bpm : 124; const iv = reduced ? null : setInterval(tick, 15000/bpm); return ()=>{ if(iv) clearInterval(iv); }; }
 /* the plates in 01 and 02 are alive: a scanning overview of the reference, a field of sounds that twinkles to the beat */
 function fitCanvas(cv){ const dpr=Math.min(2,window.devicePixelRatio||1); const r=cv.getBoundingClientRect(); if(r.width<2||r.height<2) return null; if(cv.width!==Math.round(r.width*dpr)||cv.height!==Math.round(r.height*dpr)){ cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr); } return dpr; }
 function beatPhase(){ const b=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--beat'))||2.6; return (performance.now()/1000 % b)/b; }
@@ -1137,11 +1153,10 @@ $('aud').addEventListener('timeupdate', ()=>{ const a=$('aud'); if(refAud.active
 function KIT_PATHS(){ return new Set(S.kit.filter(r=>r.chosen).map(r=>r.chosen.path)); }
 function kitRoleOf(path){ const r=S.kit.find(x=>x.chosen&&x.chosen.path===path); return r?r.label:null; }
 
-let stopWave=null, stopSeq=null;
-function syncIdle(){ const waveOn = S.view==='ref' && !S.ref, seqOn = S.view==='snd' && !S.pack;
+let stopWave=null;
+function syncIdle(){ const waveOn = S.view==='ref' && !S.ref;
   if(waveOn && !stopWave) stopWave=startWave($('waveCv')); if(!waveOn && stopWave){ stopWave(); stopWave=null; }
-  if(seqOn && !stopSeq) stopSeq=startSeq($('seqEl')); if(!seqOn && stopSeq){ stopSeq(); stopSeq=null; }
-  $('waveCv').classList.toggle('hidden', !waveOn); $('splash').classList.toggle('hidden', !waveOn); $('seqEl').classList.toggle('hidden', !seqOn); }
+  $('waveCv').classList.toggle('hidden', !waveOn); $('splash').classList.toggle('hidden', !waveOn); $('sndIdle').classList.toggle('hidden', !!S.pack); $('kitView').classList.toggle('hidden', !S.pack); }
 
 /* ---------- the arrangement view ---------- */
 const FAMS = [['Kick','k',r=>r==='kick'], ['Drums','',r=>/^(clap|snare_roll|tom|tom_b|tom_c|chat|ohat|hat_loop|shaker_loop)$/.test(r)], ['Percussion','',r=>/^(perc|perc_loop|perc_loop2)$/.test(r)],
@@ -1181,7 +1196,7 @@ function mountTimeline(el, cfg){
   const $q = s => el.querySelector(s), plot=$q('.plot'), ph=$q('.ph'), phl=$q('.phl'), dot=$q('.dot'), veil=$q('.veil'), rb=$q('.rb'), rs=$q('.rs'), rn=$q('.rn'), line=$q('.curve .line'), area=$q('.curve .area'), cw=$q('.curvewrap'), ov=$q('.ov');
   const laneEls=[...el.querySelectorAll('.lane')];
   let revealed=new Set(), cur=new Array(total).fill(0), curS=new Array(total).fill(0), raf=null, raf2=null, sweeping=false, destroyed=false;
-  let ovRO=null; if(cfg.overview){ const paintOv=()=>drawOverview(ov, cfg.overview, 'rgba(255,255,255,.13)'); requestAnimationFrame(paintOv); if(window.ResizeObserver){ ovRO=new ResizeObserver(paintOv); ovRO.observe(ov); } }
+  let ovRO=null;   /* one curve tells the story; the grey waveform behind it said the same thing twice */
   const covers=(l,bar)=>(l.spans||[]).some(([a,b])=>bar>=a&&bar<b)||(l.sweeps||[]).some(a=>bar>=a&&bar<a+(l.sweep_bars||8));
   const weights = set => { const c=new Array(total).fill(0); (layers||[]).forEach(l=>{ if(!set.has(l.i)) return; (l.spans||[]).forEach(([a,b])=>{ for(let k=Math.max(1,a);k<Math.min(total+1,b);k++) c[k-1]+=1; }); (l.sweeps||[]).forEach(a=>{ for(let k=Math.max(1,a);k<Math.min(total+1,a+(l.sweep_bars||8));k++) c[k-1]+=.6; }); }); return c; };
   const maxAll = layers ? (Math.max(...weights(new Set(layers.map(l=>l.i)))) || 1) : 1;
@@ -1266,7 +1281,7 @@ async function analyze(){ setMod('ref','Listening','work'); $('refMsg').classNam
   const lanes = el.kick ? [{name:'Kick', cls:'k', blocks:spansFromBools(el.kick).map(([a,b])=>({a,b,k:'span'}))}, {name:'Hats and top', cls:'', blocks:spansFromBools(el.hats).map(([a,b])=>({a,b,k:'span'}))}] : [];
   $('refTL').classList.remove('hidden'); $('refCap').textContent = ''; syncIdle();
   if(REFTL) REFTL.destroy(); REFTL = mountTimeline($('refTL'), {total:r.ref.bars, bpm:r.ref.bpm, sections:r.ref.sections, curve, lanes, overview:r.ref.overview, color:getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()||'#5C5BE0', rightInfo: bar=>`Kick ${el.kick&&el.kick[bar-1]?'on':'off'} · ${fmt((bar-1)*240/r.ref.bpm)}`});
-  $('bpmIn').placeholder = String(Math.round(r.ref.bpm)); drawBpm(); if(refUsable()) S.structure='reference'; renderStruct(); setLen(Math.max(150, Math.min(600, Math.ceil(r.ref.duration/30)*30))); renderStyle(); if(S.view==='dir') drawDir(); gateBuild(); if(S.pack) loadKit(); if(stopSeq){ stopSeq(); stopSeq=null; syncIdle(); } }
+  $('bpmIn').placeholder = String(Math.round(r.ref.bpm)); drawBpm(); if(refUsable()) S.structure='reference'; renderStruct(); setLen(Math.max(150, Math.min(600, Math.ceil(r.ref.duration/30)*30))); renderStyle(); if(S.view==='dir') drawDir(); gateBuild(); if(S.pack) loadKit(); }
 $('analyzeBtn').onclick = analyze;
 function tickNum(n, target){ if(reduced){ n.textContent=target; return; } const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
 
@@ -1292,49 +1307,53 @@ function kindSound(k){ for(const role of KIND_ROLES[k]||[]){ const r=S.kit.find(
 function drawKindWaves(){ $('roleLeds').querySelectorAll('span[data-kind]').forEach(el=>{ const snd=kindSound(el.dataset.kind); el.classList.toggle('has', !!snd); el.title = snd ? snd.name : ''; el.onclick = snd ? ()=>audition(snd.path, null) : null; }); }
 function kitRows(br){ return Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); }
 function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCount'), pack.count); const br=pack.by_role||{}; renderLeds(br); loadKit();
-  const rows = Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); const mx = rows.length ? rows[0][1] : 1;
-  $('kitView').innerHTML = `<div class="dvhead"><div class="t">${pack.count} sounds<small>${pack.bpm_hint?esc(pack.bpm_hint)+' BPM loops':''}</small></div><div class="r">${rows.length} kinds</div></div><div class="kit">${rows.map(([k,v],i)=>`<div class="kr"><span>${esc(k.replace('_',' '))}</span><div class="kb"><i style="width:${(v/mx*100).toFixed(1)}%;--d:${i*60}ms"></i></div><b>${v}</b></div>`).join('')}</div>`;
   $('kitView').classList.remove('hidden'); $('sndCap').textContent = ''; syncIdle(); gateBuild(); }
-const KIT_ICON = {prev:'<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>', next:'<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>', play:'<svg class="f" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z"/></svg>'};
 async function loadKit(){ if(!S.packPath) return; const r = await api().kit_options(S.packPath, S.ref ? userBpm() : null, S.kitOverrides); if(!r.ok){ msg($('packMsg'), r.error, 'err'); return; } S.kit = r.kit; renderKit(); }
 const PEAKS = new Map();
 async function peaksFor(path){ if(PEAKS.has(path)) return PEAKS.get(path); const r = await api().sample_peaks(path); const pk = (r && r.ok) ? r.peaks : null; PEAKS.set(path, pk); return pk; }
 function drawPeaks(cv, pk, empty){ const dpr=fitCanvas(cv); if(!dpr) return; const ctx=cv.getContext('2d'); const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); if(!pk){ ctx.fillStyle=empty||'rgba(255,255,255,.08)'; ctx.fillRect(0,H/2-dpr*.5,W,dpr); return; }
   const n=pk.length, gap=W/n; ctx.fillStyle=`rgba(${ACC()},.9)`; for(let i=0;i<n;i++){ const h=Math.max(dpr, pk[i]*H*.95); ctx.fillRect(i*gap+gap*.2, (H-h)/2, Math.max(dpr, gap*.6), h); } }
-function renderKit(){ const rows = S.kit; renderKitList(); if(!rows.length) return; drawKindWaves(); const sel = rows.filter(r=>r.chosen).length;  $('roUsed').textContent = S.usedCount ? `${sel} selected · ${S.usedCount} used` : `${sel} selected`;
-  const stem = n => esc(String(n).replace(/^TPS - Oasis - /,'').replace(/\.[^.]+$/,''));
-  $('kitView').innerHTML = `<div class="dvhead"><div class="t">Your sounds<small>${rows.length} roles · ${S.pack?S.pack.count:0} sounds</small></div><div class="r">${kitHeader()}</div></div>
-    <div class="tiles">${rows.map(r=>{ const n=r.candidates.length; const idx=r.chosen ? Math.max(0, r.candidates.findIndex(c=>c.path===r.chosen.path)) : -1;
-      return `<div class="tile ${S.kitOverrides[r.role]!==undefined?'ov':''}" data-role="${esc(r.role)}" title="${esc(r.chosen?(r.chosen.rel||r.chosen.path):'')}"><div class="tr"><span class="kl">${esc(r.label)}</span><span class="kc" title="Choose a sound">${r.chosen&&r.chosen.external?'yours':`${idx+1}/${n}`}</span></div><canvas class="tw"></canvas><div class="tn">${r.chosen?stem(r.chosen.name):'—'}</div><div class="tc"><button class="kb" data-d="-1" ${n<2?'disabled':''}>${KIT_ICON.prev}</button><button class="kb" data-d="1" ${n<2?'disabled':''}>${KIT_ICON.next}</button><button class="kb pl" ${r.chosen?'':'disabled'}>${KIT_ICON.play}</button></div></div>`; }).join('')}</div>`;
-  $('kitView').querySelectorAll('.tile').forEach(tile=>{ const role=tile.dataset.role; const r=rows.find(x=>x.role===role); tile.querySelectorAll('.kb[data-d]').forEach(b=>b.onclick=()=>cycleKit(role, +b.dataset.d)); tile.querySelector('.kc').onclick=e=>{ e.stopPropagation(); openCands(tile, role); }; tile.querySelector('.tn').onclick=e=>{ e.stopPropagation(); openCands(tile, role); }; const pl=tile.querySelector('.pl'); const go=()=>{ if(r&&r.chosen) audition(r.chosen.path, pl); }; if(pl) pl.onclick=go; const cv=tile.querySelector('canvas'); cv.onclick=go;
-    if(r&&r.chosen){ drawPeaks(cv, PEAKS.get(r.chosen.path)||null); peaksFor(r.chosen.path).then(pk=>{ if(tile.isConnected) drawPeaks(cv, pk); }); } else drawPeaks(cv, null); }); }
+function renderKit(){ const rows = S.kit; renderKitList(); if(!rows.length) return; drawKindWaves(); const sel = rows.filter(r=>r.chosen).length; $('roUsed').textContent = S.usedCount ? `${sel} selected · ${S.usedCount} used` : `${sel} selected`;
+  const have = S.ssPath && rows.some(r=>r.chosen && r.chosen.path===S.ssPath); if(!have){ const first = rows.find(r=>r.chosen); if(first) setSoundFocus(first.chosen.path, first.role); } else updateSoundScreen();
+  $('kitView').classList.remove('hidden'); syncIdle(); }
 function pendingSwaps(){ if(!S.builtKit || !S.builtInLive) return []; const a=S.kitOverrides, b=S.builtKit; return [...new Set([...Object.keys(a),...Object.keys(b)])].filter(k=>a[k]!==b[k]); }
 function kitHeader(){ const n=Object.keys(S.kitOverrides).length; if(S.swapping) return 'Replacing in Live\u2026'; const pend=pendingSwaps(); if(pend.length) return `<button class="dbtn sw" id="swapBtn">Replace ${pend.length} in Live</button>`; if(S.swapMsg) return S.swapMsg; if(S.builtKit && S.builtInLive) return 'In Live \u00b7 swap any sound to replace it there'; return n ? `<b>${n}</b> changed by you` : 'Alma\u2019s first pick \u00b7 swap any'; }
 async function applySwaps(){ if(S.swapping) return; S.swapping=true; S.swapMsg=''; renderKit(); const r = await api().apply_swaps(currentOpts()); if(!r.ok){ S.swapping=false; S.swapMsg=esc(r.error||'Could not replace.'); renderKit(); } }
 window.flowSwapped = res=>{ S.swapping=false; S.builtKit={...S.kitOverrides}; const names=(res.names||[]).map(n=>esc(n.split(' \u00b7 ')[0])); S.swapMsg = names.length ? `Replaced in Live: <b>${names.join(', ')}</b>` : esc((res.notes||[])[0]||'Nothing to replace.'); renderKit(); };
-$('kitView').addEventListener('click', e=>{ if(e.target.closest('#swapBtn')) applySwaps(); });
 function stemOf(n){ return String(n).replace(/^TPS - Oasis - /,'').replace(/\.[^.]+$/,''); }
-function closeCands(){ if(S.candsOpen){ S.candsOpen.remove(); S.candsOpen=null; } }
-function setKit(role, path){ S.kitOverrides[role]=path; markStale(); loadKit(); }
-function openCands(tile, role){ closeCands(); const r=S.kit.find(x=>x.role===role); if(!r) return; const cur=r.chosen?r.chosen.path:null; const box=document.createElement('div'); box.className='cands';
-  box.innerHTML = `<div class="ch"><span>${esc(r.label)}</span><span>${r.candidates.length} in your pack</span></div><div class="cr any" id="candAny"><span class="nm">Any file on this Mac…</span></div>` + r.candidates.map(c=>`<div class="cr ${c.path===cur?'on':''}" data-p="${esc(c.path)}"><button class="kb pl" data-p="${esc(c.path)}" aria-label="Play">${KIT_ICON.play}</button><span class="nm">${esc(stemOf(c.name))}</span><span class="du">${c.duration?c.duration.toFixed(1)+'s':''}</span></div>`).join('');
-  $('kitView').appendChild(box); const tr=tile.getBoundingClientRect(), kr=$('kitView').getBoundingClientRect(); box.style.left=Math.max(0, Math.min(kr.width-box.offsetWidth-6, tr.left-kr.left))+'px'; const below=tr.bottom-kr.top+6; box.style.top=(below+box.offsetHeight>kr.height ? Math.max(0, tr.top-kr.top-box.offsetHeight-6) : below)+'px';
-  box.querySelectorAll('.cr[data-p]').forEach(row=>{ row.onclick=e=>{ if(e.target.closest('.pl')) return; setKit(role, row.dataset.p); closeCands(); }; });
-  box.querySelectorAll('.pl').forEach(b=>b.onclick=e=>{ e.stopPropagation(); audition(b.dataset.p, b); });
-  $('candAny').onclick=async e=>{ e.stopPropagation(); const p=await api().pick_sample(); closeCands(); if(p) setKit(role, p); };
-  box.addEventListener('click', e=>e.stopPropagation()); S.candsOpen=box; setTimeout(()=>document.addEventListener('click', closeCands, {once:true}), 0); }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeCands(); });
+function setKit(role, path){ S.kitOverrides[role]=path; S.ssPath=path; markStale(); loadKit(); }
 
+
+/* The sound screen: the selected sample, large. It follows the cursor in the kit list and what you play. */
+const BIGPEAKS = new Map();
+async function bigPeaks(path){ if(BIGPEAKS.has(path)) return BIGPEAKS.get(path); const r = await api().sample_peaks(path, 140); const pk=(r&&r.ok)?r.peaks:null; BIGPEAKS.set(path, pk); return pk; }
+function sampleInfo(path){ for(const r of (S.kit||[])){ const c=(r.chosen&&r.chosen.path===path)?r.chosen:(r.candidates||[]).find(x=>x.path===path); if(c) return {c, role:r.label}; } return null; }
+function setSoundFocus(path, role){ if(!path) return; S.ssPath=path; updateSoundScreen(); }
+function updateSoundScreen(){ const path=S.ssPath; const el=$('ssName'); if(!el) return; const info=path?sampleInfo(path):null;
+  if(!info){ el.textContent='—'; $('ssRole').textContent=''; $('ssFacts').textContent=''; drawSoundScreen(); return; }
+  const c=info.c; el.textContent=stemOf(c.name); $('ssRole').textContent=info.role; const bits=[]; if(c.duration) bits.push(c.duration.toFixed(c.duration<10?2:1)+' s'); bits.push(c.is_loop?'loop':'one-shot'); if(c.bpm) bits.push(Math.round(c.bpm)+' BPM'); if(c.external) bits.push('from this Mac'); $('ssFacts').textContent=bits.join(' · ');
+  bigPeaks(path).then(()=>{ if(S.ssPath===path) drawSoundScreen(); }); drawSoundScreen(); }
+let ssRaf=null;
+function drawSoundScreen(){ const cv=$('ssWave'); if(!cv) return; const dpr=fitCanvas(cv); if(!dpr) return; const ctx=cv.getContext('2d'); const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const pk=S.ssPath?BIGPEAKS.get(S.ssPath):null; const mid=H/2;
+  ctx.fillStyle='rgba(244,241,234,.06)'; ctx.fillRect(0,mid,W,Math.max(1,dpr));
+  const n=pk?pk.length:60, gap=W/n; const a=$('aud'); const playing = S.ssPath && S.auditionPath===S.ssPath && !a.paused && a.duration; const prog = playing ? a.currentTime/Math.min(a.duration,6) : -1;
+  for(let i=0;i<n;i++){ const v=pk?pk[i]:.05; const lit = prog>=0 && i/n<=prog; const bh=Math.max(1.5*dpr, v*H*.8); const bw=Math.max(1.5*dpr, gap*.56); ctx.fillStyle = lit?`rgba(${ACC()},1)`:(pk?`rgba(${ACC()},.55)`:'rgba(244,241,234,.1)'); ctx.shadowBlur=lit?12*dpr:0; ctx.shadowColor=`rgba(${ACC()},.8)`;
+    ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(i*gap+(gap-bw)/2, mid-bh/2, bw, bh, bw/2); else ctx.rect(i*gap+(gap-bw)/2, mid-bh/2, bw, bh); ctx.fill(); }
+  ctx.shadowBlur=0; if(prog>=0){ ctx.fillStyle='#F4F1EA'; ctx.fillRect(Math.min(1,prog)*W-dpr*.5, H*.1, dpr, H*.8); } }
+function ssLoop(){ cancelAnimationFrame(ssRaf); const a=$('aud'); if(S.view==='snd') drawSoundScreen(); if(!a.paused && !reduced) ssRaf=requestAnimationFrame(ssLoop); }
+['play','pause','ended'].forEach(ev=>$('aud').addEventListener(ev, ssLoop)); window.addEventListener('resize', ()=>drawSoundScreen());
+$('spCta2').onclick=()=>pickPack();
 const KL_CHEV='<svg viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3"/></svg>', KL_PLAY='<svg viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z"/></svg>';
 function drawSpark(cv, pk){ const dpr=Math.min(2,window.devicePixelRatio||1); const W=cv.clientWidth||30, H=cv.clientHeight||12; if(cv.width!==W*dpr){ cv.width=W*dpr; cv.height=H*dpr; } const ctx=cv.getContext('2d'); ctx.clearRect(0,0,cv.width,cv.height); const n=14, gap=cv.width/n; ctx.fillStyle=`rgb(${ACC()})`;
   for(let i=0;i<n;i++){ const v = pk ? Math.max(...pk.slice(Math.floor(i/n*pk.length), Math.max(Math.floor(i/n*pk.length)+1, Math.floor((i+1)/n*pk.length)))) : .12; const bh=Math.max(1.5*dpr, v*cv.height*.95); ctx.fillRect(i*gap+gap*.22, (cv.height-bh)/2, Math.max(1,gap*.5), bh); } }
 function klNow(){ const a=$('aud'); return !a.paused ? S.auditionPath : null; }
 function updateKlPlaying(){ const el=$('kitList'); if(!el) return; const now=klNow(); el.querySelectorAll('.kl-c').forEach(c=>{ const on=c.dataset.p===now; c.classList.toggle('play', on); if(!on) c.style.removeProperty('--p'); }); el.querySelectorAll('.kl-row').forEach(r=>r.classList.toggle('play', !!now && r.dataset.cur===now)); }
+function klStatus(n, ov){ if(S.swapping) return 'Replacing in Live…'; const pend=pendingSwaps(); if(pend.length) return `<button class="kl-reset on" id="swapBtn" tabindex="-1">Replace ${pend.length} in Live</button>`; if(S.swapMsg) return S.swapMsg; return `${n}${ov?` · <button class="kl-reset" id="klReset" tabindex="-1">Reset ${ov}</button>`:''}`; }
 function renderKitList(){ const el=$('kitList'); if(!el) return; const rows=S.kit||[]; const keep=el.querySelector('.kl-body'); const st=keep?keep.scrollTop:0;
   if(!S.pack){ el.innerHTML=''; return; }
   if(!rows.length){ el.innerHTML='<div class="kl-empty">Choosing sounds…</div>'; return; }
   const ov=Object.keys(S.kitOverrides).length, n=rows.filter(r=>r.chosen).length;
-  el.innerHTML = `<div class="kl-head"><span>Kit</span><span class="kl-n">${n}${ov?` · <button class="kl-reset" id="klReset" tabindex="-1">Reset ${ov}</button>`:''}</span></div><div class="kl-body">` + rows.map(r=>{ const c=r.chosen, open=S.kitOpen===r.role;
+  el.innerHTML = `<div class="kl-head"><span>Kit</span><span class="kl-n">${klStatus(n, ov)}</span></div><div class="kl-body">` + rows.map(r=>{ const c=r.chosen, open=S.kitOpen===r.role;
     return `<div class="kl-row ${open?'open':''} ${c?'':'none'} ${S.kitOverrides[r.role]!==undefined?'ov':''}" data-role="${esc(r.role)}" data-cur="${c?esc(c.path):''}" role="option"><div class="kl-line"><span class="kl-role">${esc(r.label)}</span><span class="kl-name" title="${c?esc(c.name):''}">${c?esc(stemOf(c.name)):'none in the pack'}</span>${c?`<canvas class="kl-sp" data-p="${esc(c.path)}"></canvas>`:''}${KL_CHEV}</div>`
       + `<div class="kl-drawer"><div class="kl-cands"><div class="kl-any">Any file on this Mac…</div>${r.candidates.map(cd=>`<div class="kl-c ${c&&cd.path===c.path?'on':''}" data-p="${esc(cd.path)}"><button class="kl-pl" tabindex="-1" data-p="${esc(cd.path)}" aria-label="Play">${KL_PLAY}</button><span>${esc(stemOf(cd.name))}</span><span class="du">${cd.duration?cd.duration.toFixed(1)+'s':''}</span></div>`).join('')}</div></div></div>`; }).join('') + '</div>';
   const b=el.querySelector('.kl-body'); if(b) b.scrollTop=st;
@@ -1342,15 +1361,15 @@ function renderKitList(){ const el=$('kitList'); if(!el) return; const rows=S.ki
   updateKlPlaying(); }
 (function kitList(){ const el=$('kitList'); el.tabIndex=0; let cur=-1;
   const items=()=>[...el.querySelectorAll('.kl-line, .kl-row.open .kl-any, .kl-row.open .kl-c')];
-  const mark=()=>{ el.querySelectorAll('.cur').forEach(x=>x.classList.remove('cur')); const it=items()[cur]; if(it){ it.classList.add('cur'); it.scrollIntoView({block:'nearest'}); } };
+  const mark=()=>{ el.querySelectorAll('.cur').forEach(x=>x.classList.remove('cur')); const it=items()[cur]; if(it){ it.classList.add('cur'); it.scrollIntoView({block:'nearest'}); const pth = it.classList.contains('kl-line') ? it.closest('.kl-row').dataset.cur : it.dataset.p; if(pth) setSoundFocus(pth); } };
   const toggle=(row, force)=>{ const role=row.dataset.role; const was=S.kitOpen===role; el.querySelectorAll('.kl-row.open').forEach(r=>r.classList.remove('open')); if(was && force!==true){ S.kitOpen=null; return; } S.kitOpen=role; row.classList.add('open'); setTimeout(()=>{ const b=el.querySelector('.kl-body'); if(b && row.isConnected) b.scrollTo({top:Math.max(0,row.offsetTop-6), behavior:'smooth'}); }, 260); };
   const pick=(role,path)=>{ S.kitOpen=null; setKit(role,path); };
   const anyFile=async role=>{ const p=await api().pick_sample(); S.kitOpen=null; if(p) setKit(role,p); else renderKitList(); };
-  el.addEventListener('click', e=>{ e.stopPropagation(); if(e.target.closest('#klReset')){ S.kitOverrides={}; S.kitOpen=null; markStale(); loadKit(); return; } const row=e.target.closest('.kl-row'); if(!row) return; const role=row.dataset.role;
-    const pl=e.target.closest('.kl-pl'); if(pl){ audition(pl.dataset.p, null); return; }
+  el.addEventListener('click', e=>{ e.stopPropagation(); if(e.target.closest('#swapBtn')){ applySwaps(); return; } if(e.target.closest('#klReset')){ S.kitOverrides={}; S.kitOpen=null; markStale(); loadKit(); return; } const row=e.target.closest('.kl-row'); if(!row) return; const role=row.dataset.role;
+    const pl=e.target.closest('.kl-pl'); if(pl){ setSoundFocus(pl.dataset.p, role); audition(pl.dataset.p, null); return; }
     if(e.target.closest('.kl-any')){ anyFile(role); return; }
     const c=e.target.closest('.kl-c'); if(c){ pick(role, c.dataset.p); return; }
-    if(e.target.closest('.kl-line')){ cur=items().indexOf(e.target.closest('.kl-line')); toggle(row); } });
+    if(e.target.closest('.kl-line')){ cur=items().indexOf(e.target.closest('.kl-line')); if(row.dataset.cur) setSoundFocus(row.dataset.cur, role); toggle(row); } });
   el.addEventListener('keydown', e=>{ const its=items(); if(!its.length) return;
     if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); cur = cur<0 ? 0 : Math.max(0, Math.min(its.length-1, cur+(e.key==='ArrowDown'?1:-1))); mark(); return; }
     const it=its[cur]; if(!it) return; const row=it.closest('.kl-row'); const role=row.dataset.role;
@@ -1361,7 +1380,6 @@ function renderKitList(){ const el=$('kitList'); if(!el) return; const rows=S.ki
   ['play','pause','ended'].forEach(ev=>$('aud').addEventListener(ev, updateKlPlaying));
   $('aud').addEventListener('timeupdate', ()=>{ const a=$('aud'); const now=klNow(); if(!now||!a.duration) return; const c=el.querySelector(`.kl-c.play[data-p="${CSS.escape(now)}"]`); if(c) c.style.setProperty('--p', (a.currentTime/a.duration*100).toFixed(1)+'%'); });
 })();
-function cycleKit(role, d){ const r=S.kit.find(x=>x.role===role); if(!r || r.candidates.length<2) return; const idx=r.chosen ? r.candidates.findIndex(c=>c.path===r.chosen.path) : -1; const next=r.candidates[(idx+d+r.candidates.length)%r.candidates.length]; r.chosen=next; S.kitOverrides[role]=next.path; markStale(); renderKit(); const pl=$('kitView').querySelector(`.tile[data-role="${role}"] .pl`); audition(next.path, pl); }
 async function audition(path, btn){ const a=$('aud'); refAud.active=false; if(btn && btn.classList.contains('on')){ a.pause(); return; } const r = await api().audition_url(path); if(!r.ok) return; document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on')); a.src=r.url; a.currentTime=0; S.auditionPath=path; a.play().catch(()=>{}); if(btn){ btn.classList.add('on'); a.onended=()=>btn.classList.remove('on'); a.onpause=()=>btn.classList.remove('on'); } }
 function markStale(){ if(S.preview){ S.previewStale=true; stopPlayer(); $('tp').classList.add('hidden'); } listenLabel(); }
 async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; setActive('snd'); await scanPack(); }
@@ -1387,7 +1405,7 @@ $('styleSel').addEventListener('wheel', e=>{ e.preventDefault(); stepStyle(e.del
 function userBpm(){ return parseFloat($('bpmIn').value) || (S.ref ? S.ref.bpm : 124); }
 function drawDir(){ const st=curStyle(); if(!st) return; const shortRef = !refUsable() || S.structure==='typical'; const secs = shortRef ? DEFAULT_SECS : S.ref.sections; const tmpl=st.template; const lab = l => tmpl[l] ? l : (l.startsWith('Drop')?'Drop 2':'Groove');
   const roles = ROLE_ORDER.filter(([r])=>Object.values(tmpl).some(a=>a.includes(r))); const bpm = userBpm(); const bars = Math.max(64, Math.round(S.len*bpm/240/8)*8);
-  let html = `<div class="dvhead"><div class="t">${st.name}<small>${st.blurb}</small></div><div class="r">${S.ref?`Reference ${S.ref.bars} bars · ${fmt(S.ref.duration)} → `:''}<b>Your track ${bars} bars · ${fmt(S.len)}</b> · ${Math.round(bpm)} BPM · ${shortRef?'typical structure':'structure from the reference'}</div></div>`;
+  let html = `<div class="dvhead"><div class="t">${st.name}<small>${st.blurb}</small></div><div class="r"><b>${bars} bars · ${fmt(S.len)}</b> · ${Math.round(bpm)} BPM · ${shortRef?'typical structure':'following the reference'}</div></div>`;
   html += `<div class="dgrid" style="grid-template-columns:96px repeat(${secs.length},1fr)"><div></div>` + secs.map(s=>`<div class="h ${/^Drop|Return/.test(s.label)?'hi':''}">${s.label}<small>${s.bars||s.end-s.start} bars</small></div>`).join('');
   roles.forEach(([r,n],ri)=>{ html += `<div class="rl">${n}</div>` + secs.map((s,ci)=>`<i class="cell ${tmpl[lab(s.label)].includes(r)?'on':''}" style="--d:${ci*40+ri*12}ms"></i>`).join(''); });
   if(S.vocal){ html += `<div class="rl v">Vocal</div>` + secs.map((s,ci)=>`<i class="cell v ${st.vocal_sections.includes(lab(s.label))?'on':''}" style="--d:${ci*40+roles.length*12}ms"></i>`).join(''); }

@@ -255,7 +255,7 @@ class Api:
             return {"ok": False, "error": f"{e}"}
 
     def sample_peaks(self, path: str, n: int = 48):
-        """48 peak values of one of the user's sounds (first 6 s), for the tile in the Sounds view."""
+        """n peak values of one of the user's sounds (first 6 s): 48 for the list rows, more for the sound screen."""
         try:
             real = os.path.realpath(path)
             if not self._is_users_file(real) or not os.path.isfile(real):
@@ -263,15 +263,16 @@ class Api:
             cache = getattr(self, "_peaks", None)
             if cache is None:
                 cache = self._peaks = {}
-            if real not in cache:
+            key = (real, int(n))
+            if key not in cache:
                 import numpy as np
                 y, sr = audio.load(real, sr=22050, mono=True)
                 m = np.abs(y[0][: sr * 6])
                 edges = np.linspace(0, len(m), n + 1).astype(int)
                 pk = [float(m[a:b].max()) if b > a else 0.0 for a, b in zip(edges[:-1], edges[1:])]
                 top = max(pk) or 1.0
-                cache[real] = [round(v / top, 3) for v in pk]
-            return {"ok": True, "peaks": cache[real]}
+                cache[key] = [round(v / top, 3) for v in pk]
+            return {"ok": True, "peaks": cache[key]}
         except Exception as e:
             return {"ok": False, "error": f"{e}"}
 
