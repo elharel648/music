@@ -879,6 +879,24 @@
   .kl-line { gap:6px; padding:6px 7px; } .kl-role { width:62px; flex:0 0 62px; font-size:8.5px; letter-spacing:.05em; }
   .kl-sp { width:22px; flex:0 0 22px; height:11px; }
   .kl-name { font-size:12.5px; }
+
+  /* BUILD: never dimmed, never a word while it works. The ring is the knob's dots; progress lights them clockwise and the number sits in the dish. */
+  .big .ring, .big .prog, .big .sn { display:none !important; }
+  .big button, .big button:disabled, .big.wait button, .big.working button, .big.working button:disabled { opacity:1 !important; filter:none !important; animation:none !important; }
+  .big.working button:disabled, .big.working button { background:radial-gradient(circle at 35% 25%, #4A4B55 0%, #34353E 40%, #22232A 85%, #17181E 100%); box-shadow:0 8px 18px rgba(20,20,30,.24), 0 1px 3px rgba(20,20,30,.18), inset 0 1px 0 rgba(255,255,255,.12), inset 0 -2px 4px rgba(0,0,0,.4); transform:translateY(1px); }
+  .big.wait button:disabled { background:radial-gradient(circle at 35% 25%, #4A4B55 0%, #34353E 40%, #22232A 85%, #17181E 100%); color:rgba(244,241,234,.42); }
+  .big.ready button { color:#F4F1EA; }
+  .big svg .bd { fill:rgba(20,20,30,.16); transition:fill .25s, r .25s; }
+  :root[data-theme=dark] .big svg .bd { fill:rgba(255,255,255,.16); }
+  .big.ready svg .bd { fill:rgba(var(--acc-rgb),.42); }
+  .big.working svg .bd { fill:rgba(20,20,30,.14); } :root[data-theme=dark] .big.working svg .bd { fill:rgba(255,255,255,.14); }
+  .big.working svg .bd.on, .big.done svg .bd { fill:var(--acc); }
+  .big.working svg .bd.lead { r:1.9; filter:drop-shadow(0 0 2.5px rgba(var(--acc-rgb),.9)); }
+  .big.err svg .bd { fill:var(--err); }
+  .big button.num { display:grid; grid-auto-flow:column; place-content:center; align-items:baseline; column-gap:2px; letter-spacing:-.02em; text-indent:0; }
+  .big button.num .n { font-size:26px; font-weight:500; font-variant-numeric:tabular-nums; line-height:1; color:#F4F1EA; }
+  .big button.num .u { font-size:10px; font-weight:500; color:rgba(244,241,234,.55); letter-spacing:.04em; }
+  .big svg { transform:rotate(-90deg); }
 </style>
 </head>
 <body>
@@ -965,7 +983,7 @@
     <div class="mod" data-m="bld" style="--mc:var(--c-bld)">
       <div class="well bld">
         <div class="mh"><i class="led" id="ledBld"></i><span class="mn">Build</span><span class="ms" id="msBld">Waiting</span></div>
-        <div class="bigbox"><div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div></div>
+        <div class="bigbox"><div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106" aria-hidden="true"><g id="bigDots"></g></svg><button id="buildBtn" disabled>BUILD</button></div></div>
         <div class="pfoot pre"><div class="tg sm" id="targetSeg"><button data-v="ableton" class="on">Live</button><span class="pill"><i></i></span><button data-v="stems">Stems + MIDI</button></div><span class="sp"></span><button class="ta" id="finBtn" style="white-space:nowrap">Finish<span class="xw"> &amp; plug-ins</span> ›</button></div>
         <div class="pfoot post"><button class="ta hidden" id="listenBtn">Listen first</button><button class="ta hidden" id="openOut">Open folder</button><button class="ta hidden" id="again">Build another</button><button class="ta hidden" id="toggleLog">Details</button></div>
       </div>
@@ -1360,10 +1378,14 @@ let TL = null;
 function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'}; Object.entries(map).forEach(([k,id])=>{ $(id).classList.toggle('next', k===next); if(id==='bigWrap') document.querySelector('.well.bld').classList.toggle('next', k===next); }); }
 function gateBuild(){ document.querySelector('.mod[data-m=bld]').classList.toggle('req', !!S.updateRequired); const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building && !S.updateRequired; $('buildBtn').disabled = !ok; $('listenBtn').classList.toggle('hidden', !ok); listenLabel(); if(!S.building && !S.built){ $('bst').textContent = S.updateRequired ? 'Update Alma to keep building. Click the chip above.' : ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
-function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
-function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); document.querySelector('.mod[data-m=bld]').classList.toggle('built', st==='done'); }
+const BIG_N=72;
+(function bigDots(){ const g=$('bigDots'); let o=''; for(let i=0;i<BIG_N;i++){ const a=i/BIG_N*Math.PI*2; o+=`<circle class="bd" cx="${(53+49*Math.cos(a)).toFixed(2)}" cy="${(53+49*Math.sin(a)).toFixed(2)}" r="1.15"/>`; } g.innerHTML=o; })();
+function setProg(p){ p=Math.min(1,Math.max(0,p)); const k=Math.round(p*BIG_N); document.querySelectorAll('#bigDots .bd').forEach((d,i)=>{ d.classList.toggle('on', i<k); d.classList.toggle('lead', k>0 && k<BIG_N && i===k-1); });
+  const w=$('bigWrap'); if(w.classList.contains('working')) showBigNum(Math.round(p*100)); }
+function showBigNum(n){ const b=$('buildBtn'); b.classList.add('num'); b.innerHTML=`<span class="n">${n}</span><span class="u">%</span>`; }
+function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); if(st==='working') showBigNum(0); else { const b=$('buildBtn'); if(b.classList.contains('num')){ b.classList.remove('num'); b.textContent = st==='err' ? 'RETRY' : 'BUILD'; } } document.querySelector('.mod[data-m=bld]').classList.toggle('built', st==='done'); }
 function resetBuild(){ S.builtKit=null; S.builtInLive=false; S.swapMsg=''; stopPlayer(); $('tp').classList.add('hidden'); $('buildTL').classList.remove('stopped'); if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); bigState('working');
-  $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent='BUILDING'; $('buildBtn').disabled=true; $('bst').textContent='Building…'; setMod('bld','Working','work'); }
+  $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent=''; $('buildBtn').disabled=true; $('bst').textContent='Building…'; setMod('bld','Working','work'); }
 function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, structure:S.structure, kit:S.kitOverrides, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
 async function startPreview(){ S.building=true; resetBuild(); markNext(); setActive('bld'); $('buildBtn').textContent='BUILD'; $('bst').textContent='Preparing your track to listen to…'; setMod('bld','Preparing','work'); $('listenBtn').disabled=true;
   S.lastOpts = currentOpts(); const r = await api().preview(S.lastOpts); if(!r.ok){ window.flowError(r.error); } }
