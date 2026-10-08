@@ -676,9 +676,9 @@ function curvePaths(vals, H){ const W=1000, pad=5, n=vals.length; if(n<2) return
   const pts=[[0,vals[0]]].concat(vals.map((v,i)=>[(i+.5)/n*W, v]), [[W, vals[n-1]]]).map(([x,v])=>[x, H-pad-v*(H-2*pad)]);
   let d=`M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`; for(let i=1;i<pts.length;i++){ const [x0,y0]=pts[i-1],[x1,y1]=pts[i]; const cx=((x0+x1)/2).toFixed(1); d+=` C${cx} ${y0.toFixed(1)}, ${cx} ${y1.toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`; }
   return {d, a:`${d} L${W} ${H} L0 ${H} Z`}; }
-function drawOverview(cv, ov, color){ if(!cv || !ov || !ov.length) return; const dpr=Math.min(2,window.devicePixelRatio||1); const r=cv.getBoundingClientRect(); cv.width=Math.max(2,r.width*dpr); cv.height=Math.max(2,r.height*dpr);
+function drawOverview(cv, ov, color){ if(!cv || !ov || !ov.length) return false; const dpr=Math.min(2,window.devicePixelRatio||1); const r=cv.getBoundingClientRect(); if(r.width<8 || r.height<8) return false; cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.height*dpr);
   const ctx=cv.getContext('2d'), W=cv.width, H=cv.height, n=ov.length, w=W/n; ctx.fillStyle=color;
-  for(let i=0;i<n;i++){ const h=Math.max(1, ov[i]*H*.92); ctx.fillRect(i*w, (H-h)/2, Math.max(1, w*.7), h); } }
+  for(let i=0;i<n;i++){ const h=Math.max(1, ov[i]*H*.92); ctx.fillRect(i*w, (H-h)/2, Math.max(1, w*.7), h); } return true; }
 
 function mountTimeline(el, cfg){
   const total=cfg.total, bpm=cfg.bpm||120, secs=cfg.sections||[], layers=cfg.layers||null, lanes=cfg.lanes||[], H=100;
@@ -700,7 +700,7 @@ function mountTimeline(el, cfg){
   const $q = s => el.querySelector(s), plot=$q('.plot'), ph=$q('.ph'), phl=$q('.phl'), dot=$q('.dot'), veil=$q('.veil'), rb=$q('.rb'), rs=$q('.rs'), rn=$q('.rn'), line=$q('.curve .line'), area=$q('.curve .area'), cw=$q('.curvewrap'), ov=$q('.ov');
   const laneEls=[...el.querySelectorAll('.lane')];
   let revealed=new Set(), cur=new Array(total).fill(0), curS=new Array(total).fill(0), raf=null, raf2=null, sweeping=false, destroyed=false;
-  if(cfg.overview) requestAnimationFrame(()=>drawOverview(ov, cfg.overview, 'rgba(255,255,255,.13)'));
+  let ovRO=null; if(cfg.overview){ const paintOv=()=>drawOverview(ov, cfg.overview, 'rgba(255,255,255,.13)'); requestAnimationFrame(paintOv); if(window.ResizeObserver){ ovRO=new ResizeObserver(paintOv); ovRO.observe(ov); } }
   const covers=(l,bar)=>(l.spans||[]).some(([a,b])=>bar>=a&&bar<b)||(l.sweeps||[]).some(a=>bar>=a&&bar<a+(l.sweep_bars||8));
   const weights = set => { const c=new Array(total).fill(0); (layers||[]).forEach(l=>{ if(!set.has(l.i)) return; (l.spans||[]).forEach(([a,b])=>{ for(let k=Math.max(1,a);k<Math.min(total+1,b);k++) c[k-1]+=1; }); (l.sweeps||[]).forEach(a=>{ for(let k=Math.max(1,a);k<Math.min(total+1,a+(l.sweep_bars||8));k++) c[k-1]+=.6; }); }); return c; };
   const maxAll = layers ? (Math.max(...weights(new Set(layers.map(l=>l.i)))) || 1) : 1;
@@ -728,7 +728,7 @@ function mountTimeline(el, cfg){
       return new Promise(res=>{ const tick=now=>{ const p=Math.min(1,(now-t0)/T), e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2; place(e,true); veil.style.left=(e*100)+'%'; if(p<1 && !destroyed) raf=requestAnimationFrame(tick); else { sweeping=false; veil.style.opacity=0; veil.style.left='0'; rest(); res(); } }; raf=requestAnimationFrame(tick); }); },
     playhead(x){ if(destroyed||sweeping) return; external=true; place(x, true); },
     release(){ external=false; rest(); },
-    destroy(){ destroyed=true; cancelAnimationFrame(raf); cancelAnimationFrame(raf2); }
+    destroy(){ destroyed=true; cancelAnimationFrame(raf); cancelAnimationFrame(raf2); if(ovRO) ovRO.disconnect(); }
   };
   if(layers){ paint(new Array(total).fill(0)); if(cfg.all) ctl.revealAll(); }
   else { const v=(cfg.curve&&cfg.curve.length)?cfg.curve:new Array(total).fill(0); const target = (v.length===total) ? v : Array.from({length:total},(_,i)=>v[Math.min(v.length-1,Math.floor(i/total*v.length))]); paint(target); requestAnimationFrame(()=>requestAnimationFrame(()=>cw.classList.add('go'))); }
