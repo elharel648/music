@@ -600,6 +600,17 @@
   .snake rect { x:1.5px; y:1.5px; width:calc(100% - 3px); height:calc(100% - 3px); rx:11px; ry:11px; fill:none; stroke:#F4F1EA; stroke-linecap:round; }
   .snake .tail { stroke-width:1px; opacity:.16; }
   .snake .head { stroke-width:1.2px; opacity:.85; filter:drop-shadow(0 0 5px rgba(244,241,234,.55)); }
+
+  /* The next step is shown by a thread of light running its frame, not by a pulse. */
+  .next, .big.next, .big button.next { animation:none !important; }
+  .snake.pl { z-index:3; }
+  .snake.pl rect { x:.5px; y:.5px; width:calc(100% - 1px); height:calc(100% - 1px); rx:11.5px; ry:11.5px; stroke:var(--ink); filter:none; }
+  .snake.pl .tail { stroke-width:1px; opacity:.14; } .snake.pl .head { stroke-width:1.5px; opacity:.9; }
+  :root[data-theme=dark] .snake.pl rect { stroke:#F4F1EA; }
+  .big .sn { fill:none; stroke:var(--acc); stroke-linecap:round; display:none; }
+  .big .sn.tail { stroke-width:2; opacity:.2; } .big .sn.head { stroke-width:2.4; opacity:1; }
+  .big.next .sn { display:block; }
+  .big.next .prog { animation:none; opacity:.22; }
 </style>
 </head>
 <body>
@@ -647,7 +658,7 @@
     <div class="mod" data-m="ref" style="--mc:var(--c-ref)">
       <div class="mh"><i class="led" id="ledRef"></i><span class="mn">Reference</span><span class="ms" id="msRef">Empty</span></div>
       <div class="mb">
-        <div class="well pick" id="pickRef" role="button" tabindex="0" aria-label="Choose a reference track">
+        <div class="well pick" id="pickRef" role="button" tabindex="0" aria-label="Choose a reference track"><svg class="snake pl hidden" aria-hidden="true"><rect class="tail"/><rect class="head"/></svg>
           <div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h2M6 8v8M9 4v16M12 7v10M15 10v4M18 6v12M21 11v2"/></svg><span>Choose a track</span></div>
           <div class="meta"><div class="top"><button class="pp" id="refPlay" aria-label="Play the reference"><svg class="play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg><svg class="pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button><b id="refName">No track</b><button class="ta" id="refChange">Change</button></div><canvas class="mini" id="refMini" aria-hidden="true"></canvas><div class="facts" id="refFacts"><b id="roBpm">—</b> BPM · <b id="roKey">—</b> · <b id="roBars">—</b> bars · <b id="roLen">—</b><span id="roBpmL" hidden></span><b id="roSec" hidden></b></div></div>
         </div>
@@ -658,7 +669,7 @@
     <div class="mod" data-m="snd" style="--mc:var(--c-snd)">
       <div class="mh"><i class="led" id="ledSnd"></i><span class="mn">Sounds</span><span class="ms" id="msSnd">Empty</span></div>
       <div class="mb">
-        <div class="well pick" id="pickPack" role="button" tabindex="0" aria-label="Choose your sounds">
+        <div class="well pick" id="pickPack" role="button" tabindex="0" aria-label="Choose your sounds"><svg class="snake pl hidden" aria-hidden="true"><rect class="tail"/><rect class="head"/></svg>
           <div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Choose your sounds</span></div>
           <div class="meta"><div class="top"><b id="packName">No sounds</b><button class="ta" id="packChange">Change</button></div><div class="roles" id="roleLeds"></div><canvas class="mini" id="sndMini" aria-hidden="true" style="display:none"></canvas><div class="tip" id="sndTip"></div><div class="facts"><b id="roCount">—</b> sounds<span id="roUsed"></span></div></div>
         </div>
@@ -687,7 +698,7 @@
       <div class="mh"><i class="led" id="ledBld"></i><span class="mn">Build</span><span class="ms" id="msBld">Waiting</span></div>
       <div class="mb">
         <div class="frow2"><div class="fname wrap"><b id="bst">Waiting for a reference and your sounds</b></div></div>
-        <div class="well bld"><div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div></div>
+        <div class="well bld"><div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/><circle class="sn tail" cx="53" cy="53" r="49"/><circle class="sn head" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div></div>
         <div class="fname wrap hidden"><small class="clamp" id="bsub"></small></div>
         <div class="mrow" style="justify-content:flex-start;margin-top:0"><button class="ta hidden" id="listenBtn">Listen first</button><button class="ta hidden" id="openOut">Open folder</button><button class="ta hidden" id="again">Build another</button><button class="ta hidden" id="toggleLog">Details</button></div>
       </div>
@@ -730,11 +741,12 @@ function showView(v){ if(S.view===v) return; document.querySelectorAll('.dv').fo
 document.querySelectorAll('.mod').forEach(el=>el.addEventListener('pointerdown', ()=>{ if(el.dataset.m==='dir' && S.active==='dir') return; if(el.dataset.m==='dir') S.finOpen=false; setActive(el.dataset.m); }));
 
 /* ---------- idle visuals ---------- */
-function startWave(_cv){ const svg=$('snake'), tail=svg.querySelector('.tail'), head=svg.querySelector('.head'); svg.classList.remove('hidden'); let raf=null, L=0, s=0, last=performance.now();
-  const measure=()=>{ try { L=tail.getTotalLength(); } catch(e){ L=0; } if(L){ tail.setAttribute('stroke-dasharray', `${L*.22} ${L*.78}`); head.setAttribute('stroke-dasharray', `${L*.08} ${L*.92}`); } };
+function startSnake(svg, o){ o=Object.assign({period:16, head:.08, tail:.22, lead:.14}, o||{}); const tail=svg.querySelector('.tail'), head=svg.querySelector('.head'); svg.classList.remove('hidden'); let raf=null, L=0, s=0, last=performance.now();
+  const measure=()=>{ try { L=tail.getTotalLength(); } catch(e){ L=0; } if(L){ tail.setAttribute('stroke-dasharray', `${L*o.tail} ${L*(1-o.tail)}`); head.setAttribute('stroke-dasharray', `${L*o.head} ${L*(1-o.head)}`); } };
   measure(); const ro = window.ResizeObserver ? new ResizeObserver(measure) : null; if(ro) ro.observe(svg);
-  const frame=(now)=>{ const dt=Math.min(.05,(now-last)/1000); last=now; if(L){ s=(s+dt*L/16)%L; tail.setAttribute('stroke-dashoffset', -s); head.setAttribute('stroke-dashoffset', -(s+L*.14)); } if(!reduced) raf=requestAnimationFrame(frame); };
+  const frame=(now)=>{ const dt=Math.min(.05,(now-last)/1000); last=now; if(L){ s=(s+dt*L/o.period)%L; tail.setAttribute('stroke-dashoffset', -s); head.setAttribute('stroke-dashoffset', -(s+L*o.lead)); } if(!reduced) raf=requestAnimationFrame(frame); };
   raf=requestAnimationFrame(frame); return ()=>{ cancelAnimationFrame(raf); if(ro) ro.disconnect(); svg.classList.add('hidden'); }; }
+function startWave(_cv){ return startSnake($('snake'), {period:16}); }
 function startSeq(el){ const pats=[['Kick',[0,4,8,12]],['Clap',[4,12]],['Hat',[2,6,10,14,15]],['Perc',[3,7,11,13]]]; el.innerHTML='';
   const cols=[]; pats.forEach(([name,on])=>{ const rn=document.createElement('div'); rn.className='rn'; rn.textContent=name; el.appendChild(rn); const row=[]; for(let i=0;i<16;i++){ const c=document.createElement('div'); c.className='c'+(i%4===0?' g':'')+(on.includes(i)?' on':''); el.appendChild(c); row.push(c); } cols.push(row); });
   let step=0; const tick=()=>{ cols.forEach(r=>r.forEach((c,i)=>c.classList.toggle('now', i===step))); step=(step+1)%16; }; tick();
@@ -1025,7 +1037,11 @@ $('scanPlug').onclick = scanPlugins;
 /* ---------- build ---------- */
 let TL = null;
 (function meters(){ $('meter').innerHTML = Array.from({length:18},(_,i)=>`<i style="--m:${(.35+Math.abs(Math.sin(i*1.7))*.65).toFixed(2)};animation-delay:${(i*.07).toFixed(2)}s;animation-duration:${(.7+Math.abs(Math.cos(i))*.7).toFixed(2)}s"></i>`).join(''); })();
-function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
+const SNAKES = {};
+function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'};
+  Object.entries(map).forEach(([k,id])=>{ const el=$(id), on = k===next; el.classList.toggle('next', on);
+    if(on && !SNAKES[id]){ const svg = el.querySelector('svg.snake') || el.querySelector('svg'); if(svg) SNAKES[id]=startSnake(svg, {period: id==='bigWrap' ? 6 : 10, head: id==='bigWrap' ? .12 : .08, tail: id==='bigWrap' ? .3 : .22, lead: id==='bigWrap' ? .18 : .14}); }
+    if(!on && SNAKES[id]){ SNAKES[id](); delete SNAKES[id]; if(id==='bigWrap') el.querySelector('svg').classList.remove('hidden'); } }); }
 function gateBuild(){ document.querySelector('.mod[data-m=bld]').classList.toggle('req', !!S.updateRequired); const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building && !S.updateRequired; $('buildBtn').disabled = !ok; $('listenBtn').classList.toggle('hidden', !ok); listenLabel(); if(!S.building && !S.built){ $('bst').textContent = S.updateRequired ? 'Update Alma to keep building. Click the chip above.' : ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
 function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
