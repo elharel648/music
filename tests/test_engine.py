@@ -400,3 +400,23 @@ def test_rebuild_only_when_the_last_build_is_still_there():
     assert not cli.replaceable(prev, ["Kick · Kick 08"], fresh=False)                                 # user deleted one: do not guess
     assert not cli.replaceable(prev, ["1-MIDI", "2-Audio"], fresh=True)                                # empty set: a plain build
     assert not cli.replaceable([], ["Something"], fresh=False)
+
+
+def test_update_manifest_with_dmg_link_and_required(tmp_path):
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives import serialization
+    from flow import update
+    priv = Ed25519PrivateKey.generate()
+    pub = priv.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw).hex()
+    man = update.sign_manifest(priv, "0.9.0", "https://alma.example/#access", "notes", dmg="https://storage.example/Alma.dmg?sig=1", sha256="ab" * 32, size=10, min_version="0.8.5")
+    ev = update.evaluate(man, current="0.8.4", public_key_hex=pub)
+    assert ev["available"] and ev["dmg"].startswith("https://") and ev["sha256"] == "ab" * 32 and ev["required"] is True
+    assert update.evaluate(man, current="0.8.6", public_key_hex=pub)["required"] is False          # newer than min_version: optional
+    assert update.evaluate(dict(man, dmg="https://evil.example/x.dmg"), current="0.8.4", public_key_hex=pub)["available"] is False   # dmg is signed too
+    assert update.evaluate(dict(man, min_version="9.9"), current="0.8.4", public_key_hex=pub)["available"] is False          # so is min_version
+    legacy = update.sign_manifest(priv, "0.9.0", "https://alma.example/#access", "n")
+    assert update.evaluate(legacy, current="0.8.4", public_key_hex=pub)["dmg"] is None
+    assert update.bundle_of("/Applications/Alma.app/Contents/MacOS/Alma") == "/Applications/Alma.app"
+    assert update.bundle_of("/Users/x/projects/flow/.venv/bin/python") is None
+    f = tmp_path / "x.bin"; f.write_bytes(b"alma")
+    assert update.sha256_of(str(f)) == __import__("hashlib").sha256(b"alma").hexdigest()

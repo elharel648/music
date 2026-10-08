@@ -109,17 +109,36 @@ def cmd_release(args):
     name = os.path.basename(args.dmg)
     blob = bucket.blob(f"releases/{name}")
     blob.upload_from_filename(args.dmg, content_type="application/x-apple-diskimage")
-    db.collection("releases").document("mac").set({"version": args.version, "path": name, "published_at": dt.datetime.now(dt.timezone.utc)})
+    from flow import update
+    db.collection("releases").document("mac").set({"version": args.version, "path": name, "sha256": update.sha256_of(args.dmg), "size": os.path.getsize(args.dmg),
+                                                   "published_at": dt.datetime.now(dt.timezone.utc)})
     print(f"released {args.version}: gs://{bucket.name}/releases/{name}")
     cmd_refresh(args)
+    write_manifest(db, bucket, args.version, args.notes or "", getattr(args, "min_version", "") or "")
+    if not endpoints.SITE_URL:
+        print("WARNING: flow/endpoints.py SITE_URL is empty; the manifest points nowhere useful yet")
+
+
+def write_manifest(db, bucket, version: str, notes: str = "", min_version: str = ""):
+    """site/latest.json: version, page url, notes, a signed 30-day dmg link, its sha256 and size; Ed25519-signed."""
+    import json
+    from flow import update, endpoints
+    from keygen import load_private
+    rel = db.collection("releases").document("mac").get().to_dict()
+    blob = bucket.blob(f"releases/{rel['path']}"); blob.reload()
+    link = blob.generate_signed_url(expiration=dt.timedelta(days=LINK_DAYS), version="v2")
     site = endpoints.SITE_URL or "https://SITE-URL-NOT-SET"
-    man = update.sign_manifest(load_private(), args.version, f"{site}/#access", args.notes or "")
+    sha = rel.get("sha256") or ""
+    if not sha:
+        local = os.path.join(ROOT, "dist", rel["path"])
+        if os.path.exists(local):
+            sha = update.sha256_of(local)
+            db.collection("releases").document("mac").set({"sha256": sha}, merge=True)
+    man = update.sign_manifest(load_private(), rel["version"], f"{site}/#access", notes, dmg=link, sha256=sha, size=blob.size, min_version=min_version)
     for out in (os.path.join(ROOT, "site", "latest.json"), os.path.join(ROOT, "packaging", "latest.json")):
         with open(out, "w") as f:
             json.dump(man, f, indent=1)
-    print("update manifest written to site/latest.json — run `firebase deploy --only hosting` in site/ so it is served; running apps show 'Update' on next launch")
-    if not endpoints.SITE_URL:
-        print("WARNING: flow/endpoints.py SITE_URL is empty; the manifest points nowhere useful yet")
+    print(f"update manifest written (v{rel['version']}, dmg link {LINK_DAYS} days{', required from ' + min_version if min_version else ''}) — deploy the site so apps see it")
 
 
 def cmd_refresh(args):
@@ -131,6 +150,7 @@ def cmd_refresh(args):
         d.reference.set({"download_url": link[0], "download_version": link[1], "download_until": dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=LINK_DAYS)}, merge=True)
         n += 1
     print(f"download links refreshed for {n} approved producers ({link[1]}, {LINK_DAYS} days)")
+    write_manifest(db, bucket, link[1], getattr(args, "notes", "") or "", getattr(args, "min_version", "") or "")
 
 
 def cmd_feedback(args):
@@ -148,8 +168,9 @@ def main():
     a = sub.add_parser("approve"); a.add_argument("email"); a.add_argument("--days", type=int)
     r = sub.add_parser("revoke"); r.add_argument("email")
     rel = sub.add_parser("release"); rel.add_argument("version"); rel.add_argument("dmg"); rel.add_argument("--notes", default="")
+    rel.add_argument("--min-version", dest="min_version", default="", help="builds older than this must update before they build again")
     f = sub.add_parser("feedback"); f.add_argument("--limit", type=int, default=20)
-    sub.add_parser("refresh")
+    rf = sub.add_parser("refresh"); rf.add_argument("--notes", default=""); rf.add_argument("--min-version", dest="min_version", default="")
     args = ap.parse_args()
     {"list": cmd_list, "approve": cmd_approve, "revoke": cmd_revoke, "release": cmd_release, "feedback": cmd_feedback, "refresh": cmd_refresh}[args.cmd](args)
 

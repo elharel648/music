@@ -37,6 +37,9 @@
   .right { display:flex; align-items:center; gap:10px; }
   .chip.upd { border-color:color-mix(in srgb, var(--acc) 60%, transparent); }
   .chip.upd i { width:6px; height:6px; border-radius:50%; background:var(--acc); box-shadow:0 0 6px var(--acc); }
+  .chip.upd.busy { cursor:default; } .chip.upd.busy i { animation:pulse 1.2s ease-in-out infinite; }
+  .chip.upd.req { border-color:var(--warn); } .chip.upd.req i { background:var(--warn); box-shadow:0 0 6px var(--warn); }
+  @keyframes pulse { 50% { opacity:.3; } }
   .chip { height:28px; padding:0 10px 0 9px; border-radius:8px; border:1px solid var(--line); background:var(--mod); font-size:11.5px; font-weight:600; display:inline-flex; align-items:center; gap:7px; transition:border-color .2s, transform .2s var(--ease); }
   .chip:hover { border-color:var(--ink); transform:translateY(-1px); }
   .chip svg { stroke:var(--ink); }
@@ -993,7 +996,7 @@ $('scanPlug').onclick = scanPlugins;
 let TL = null;
 (function meters(){ $('meter').innerHTML = Array.from({length:18},(_,i)=>`<i style="--m:${(.35+Math.abs(Math.sin(i*1.7))*.65).toFixed(2)};animation-delay:${(i*.07).toFixed(2)}s;animation-duration:${(.7+Math.abs(Math.cos(i))*.7).toFixed(2)}s"></i>`).join(''); })();
 function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
-function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; $('listenBtn').classList.toggle('hidden', !ok); listenLabel(); if(!S.building && !S.built){ $('bst').textContent = ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
+function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building && !S.updateRequired; $('buildBtn').disabled = !ok; $('listenBtn').classList.toggle('hidden', !ok); listenLabel(); if(!S.building && !S.built){ $('bst').textContent = S.updateRequired ? 'Update Alma to keep building. Click the chip above.' : ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
 function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
 function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); }
@@ -1036,7 +1039,12 @@ window.flowDone = async sum=>{ S.building=false; S.built=true; S.builtKit={...S.
   $('buildBtn').textContent='BUILD'; $('buildBtn').disabled=false; $('listenBtn').disabled=false; listenLabel(); refreshStatus(); $('tp').classList.remove('hidden'); if(!(S.preview && !S.previewStale)){ $('playBtn').disabled=true; $('ptime').textContent='Preparing playback…'; } };
 $('again').onclick=()=>{ S.built=false; S.usedCount=null; renderKit(); $('bsub').textContent='Builds this arrangement from your sounds and your direction. Nothing is decided for you.'; $('buildBtn').textContent='BUILD'; $('again').classList.add('hidden'); $('openOut').classList.add('hidden'); gateBuild(); setActive('ref'); };
 gateBuild();
-window.flowUpdate = u=>{ if(!u || !u.available) return; $('updTxt').textContent = `Update ${u.version}`; $('updChip').title = u.notes||''; $('updChip').classList.remove('hidden'); $('updChip').onclick = ()=>api().open_path(u.url); };
+window.flowUpdate = u=>{ if(!u || !u.available) return; const c=$('updChip'), t=$('updTxt'); c.classList.remove('hidden'); c.classList.toggle('req', !!u.required); c.title = u.notes||''; S.updateRequired = !!u.required; S.update = u;
+  if(u.state==='downloading'){ t.textContent = `Update ${u.version} · ${u.pct||0}%`; c.onclick = null; c.classList.add('busy'); }
+  else if(u.state==='ready'){ t.textContent = u.required ? 'Restart to update (required)' : 'Restart to update'; c.classList.remove('busy'); c.onclick = async ()=>{ t.textContent='Installing…'; c.onclick=null; const r = await api().install_update(); if(r && r.ok===false){ t.textContent='Update'; c.title=r.error||''; c.onclick=()=>api().open_path(u.url); } }; }
+  else if(u.state==='installing'){ t.textContent='Installing…'; c.onclick=null; }
+  else { t.textContent = `Update ${u.version}`; c.classList.remove('busy'); c.onclick = ()=>api().open_path(u.url); }
+  if(u.required) gateBuild(); };
 </script>
 </body>
 </html>

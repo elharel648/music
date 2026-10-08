@@ -462,6 +462,21 @@ class Api:
 
         return self._run(go)
 
+    def install_update(self):
+        """Swap in the downloaded build and relaunch. The user pressed 'Restart to update'; the helper does the swap after we quit."""
+        from . import update
+        upd = getattr(self, "_update", None)
+        if not upd:
+            return {"ok": False, "error": "No update is ready."}
+        try:
+            r = update.install(upd["path"])
+        except Exception as e:  # noqa: BLE001
+            self._log.append(f"update install failed: {e}")
+            self.open_path(upd["path"])
+            return {"ok": False, "error": f"Could not replace the app automatically ({e}). The DMG is open; drag Alma to Applications."}
+        threading.Timer(0.6, lambda: os._exit(0)).start()
+        return {"ok": True, "staged": r.get("staged")}
+
     def send_feedback(self, note: str):
         """What the user heard, next to what was built. Posted when an endpoint is configured, else saved to the Desktop."""
         try:
@@ -483,12 +498,28 @@ class Api:
 
 
 def _update_check(api: "Api"):
-    """Once, shortly after launch, off the UI thread. A missing network or a bad manifest is silently nothing."""
+    """Once, shortly after launch, off the UI thread. A newer build is downloaded quietly in the background and offered as
+    'Restart to update'; without a dmg link (or when the app cannot replace itself) the chip opens the download page.
+    A missing network or a bad manifest is silently nothing."""
     from . import update
     try:
         res = update.check()
-        if res and res.get("available") and api.window:
-            api.window.evaluate_js(f"window.flowUpdate({json.dumps(res)})")
+        if not (res and res.get("available") and api.window):
+            return
+        emit = lambda **kw: api.window.evaluate_js(f"window.flowUpdate({json.dumps({**res, **kw})})")
+        ok, why = update.can_install()
+        if not res.get("dmg") or not ok:
+            emit(state="page", why=why)
+            return
+        emit(state="downloading", pct=0)
+        try:
+            path = update.download(res, progress=lambda pct: emit(state="downloading", pct=pct))
+        except Exception as e:  # noqa: BLE001
+            api._log.append(f"update download failed: {e}")
+            emit(state="page", why=str(e)[:120])
+            return
+        api._update = {"path": path, "info": res}
+        emit(state="ready", pct=100)
     except Exception:
         pass
 
