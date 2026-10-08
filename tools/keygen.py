@@ -50,6 +50,12 @@ def cmd_issue(args):
     print(key)
 
 
+def cmd_export_seed(args):
+    """The raw 32-byte private seed, hex: the secret the Supabase edge function signs keys with."""
+    priv = load_private()
+    print(priv.private_bytes(serialization.Encoding.Raw, serialization.PrivateFormat.Raw, serialization.NoEncryption()).hex())
+
+
 def cmd_verify(args):
     from flow import license as lic
     print(lic.verify_key(args.key))
@@ -74,9 +80,10 @@ def main():
     i = sub.add_parser("init"); i.add_argument("--force", action="store_true")
     s = sub.add_parser("issue"); s.add_argument("email"); s.add_argument("--days", type=int); s.add_argument("--seats", type=int, default=1)
     v = sub.add_parser("verify"); v.add_argument("key")
+    sub.add_parser("export-seed")
     u = sub.add_parser("sign-update"); u.add_argument("version"); u.add_argument("url"); u.add_argument("--notes", default="")
     args = ap.parse_args()
-    {"init": cmd_init, "issue": cmd_issue, "verify": cmd_verify, "sign-update": cmd_sign_update}[args.cmd](args)
+    {"init": cmd_init, "issue": cmd_issue, "verify": cmd_verify, "sign-update": cmd_sign_update, "export-seed": cmd_export_seed}[args.cmd](args)
 
 
 if __name__ == "__main__":

@@ -12,10 +12,10 @@ import os
 import platform
 import urllib.request
 
-from . import __version__, license as lic
+from . import __version__, endpoints, license as lic
 
-FEEDBACK_URL = os.environ.get("ALMA_FEEDBACK_URL", "")   # e.g. https://<project>.supabase.co/rest/v1/feedback
-FEEDBACK_KEY = os.environ.get("ALMA_FEEDBACK_KEY", "")   # the project's anon key; the table only allows inserts
+FEEDBACK_URL = f"{endpoints.SUPABASE_URL}/rest/v1/feedback" if endpoints.SUPABASE_URL else ""
+FEEDBACK_KEY = endpoints.SUPABASE_ANON
 TIMEOUT = 12.0
 
 
@@ -31,7 +31,7 @@ def report(note: str, plan: dict | None, log: list[str], extra: dict | None = No
 
 
 def post(rep: dict) -> None:
-    body = json.dumps(rep, default=str).encode()
+    body = json.dumps({"payload": rep}, default=str).encode()
     req = urllib.request.Request(FEEDBACK_URL, data=body, method="POST", headers={
         "Content-Type": "application/json", "apikey": FEEDBACK_KEY, "Authorization": f"Bearer {FEEDBACK_KEY}", "Prefer": "return=minimal"})
     with urllib.request.urlopen(req, timeout=TIMEOUT) as r:

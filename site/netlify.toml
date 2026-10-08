@@ -1,0 +1,9 @@
+# Netlify: New site from Git → base directory "site", publish directory "site" (this file sits in it).
+[build]
+  publish = "."
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
