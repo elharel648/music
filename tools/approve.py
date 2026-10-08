@@ -46,7 +46,7 @@ def _signed_link(bucket, db) -> tuple[str, str] | None:
     if not rel:
         return None
     blob = bucket.blob(f"releases/{rel['path']}")
-    url = blob.generate_signed_url(expiration=dt.timedelta(days=LINK_DAYS), version="v4", response_disposition=f'attachment; filename="{rel["path"]}"')
+    url = blob.generate_signed_url(expiration=dt.timedelta(days=LINK_DAYS), version="v2", response_disposition=f'attachment; filename="{rel["path"]}"')
     return url, rel["version"]
 
 
