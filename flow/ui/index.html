@@ -474,7 +474,7 @@
   .kr { display:grid; grid-template-columns:44px 1fr 24px; align-items:center; gap:10px; height:14px; }
   .kr .kl { font-size:10px; font-weight:500; color:var(--sec); font-family:"IBM Plex Sans",sans-serif; letter-spacing:0; text-transform:none; }
   .kr canvas { width:100%; height:14px; display:block; clip-path:inset(0 100% 0 0); transition:clip-path .55s var(--ease); transition-delay:var(--d,0ms); opacity:.85; }
-  .kr canvas.in { clip-path:inset(0 0 0 0); }
+  .kr canvas.shown { clip-path:inset(0 0 0 0); }
   .kr.has { cursor:pointer; } .kr.has:hover canvas { opacity:1; } .kr.has:hover .kl { color:var(--ink); }
   .kr b { font:500 10px var(--mono); color:var(--ink); text-align:right; font-variant-numeric:tabular-nums; }
   .kr.off .kl, .kr.off b { color:var(--mut); }
@@ -814,7 +814,7 @@ function kindSound(k){ for(const role of KIND_ROLES[k]||[]){ const r=S.kit.find(
 function drawKindWaves(){ const dark=document.documentElement.dataset.theme==='dark'; const empty = dark?'rgba(255,255,255,.1)':'rgba(20,20,30,.1)';
   $('roleLeds').querySelectorAll('.kr').forEach(row=>{ const k=row.dataset.kind, cv=row.querySelector('canvas'), snd=kindSound(k); row.classList.toggle('has', !!snd);
     if(snd){ drawPeaks(cv, PEAKS.get(snd.path)||null, empty); peaksFor(snd.path).then(pk=>{ if(row.isConnected) drawPeaks(cv, pk, empty); }); row.onclick=()=>audition(snd.path, null); row.title=snd.name; } else { drawPeaks(cv, null, empty); row.onclick=null; }
-    requestAnimationFrame(()=>requestAnimationFrame(()=>cv.classList.add('in'))); }); }
+    requestAnimationFrame(()=>requestAnimationFrame(()=>cv.classList.add('shown'))); }); }
 function kitRows(br){ return Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); }
 function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCount'), pack.count); const br=pack.by_role||{}; renderLeds(br); loadKit();
   const rows = Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); const mx = rows.length ? rows[0][1] : 1;
