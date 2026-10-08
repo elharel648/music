@@ -166,7 +166,7 @@ def test_styles_library_consistent():
             assert role in patterns.PATTERNS, (st.key, role)
             assert set(pat) <= {"beats", "gain", "accent", "every", "pitch_cycle"}, (st.key, role)
         assert st.bpm[0] < st.bpm[1] and 0 < st.duck <= 1 and set(st.vocal_sections) <= set(styles.SECTIONS)
-    assert styles.get("afro").key == "afro_house" and styles.get("nope").key == "house" and styles.get(None).key == "house"
+    assert styles.get("afro").key == "afro_house" and styles.get("nope").key == "melodic_techno" and styles.get(None).key == "melodic_techno"
     assert [s["key"] for s in styles.listing()] == list(styles.STYLES)
 
 
