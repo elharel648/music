@@ -120,11 +120,13 @@ def main(argv=None) -> int:
     if args.cmd == "analyze":
         r = analysis.analyze_reference(args.ref, bpm_hint=args.bpm)
         r.pop("bar_features", None)
+        r.pop("overview", None)
         print(json.dumps(r, indent=1))
         return 0
     if args.cmd == "build":
         fin = None if args.finish is None else (set() if args.finish == "none" else {x.strip() for x in args.finish.split(",") if x.strip()})
         r = run_build(args.ref, args.pack, parse_length(args.length), args.target, args.out, args.style, args.bpm, args.synth, args.sidechain, args.force, finish_opts=fin, vocal=args.vocal)
+        r.get("reference", {}).pop("overview", None)
         print(json.dumps({k: v for k, v in r.items() if k != "plan"}, indent=1, default=str))
         for line in arrange.describe(r["plan"]):
             print(" -", line)

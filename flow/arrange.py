@@ -14,6 +14,20 @@ MELODIC = {"bass", "synth"}
 
 
 MIN_SECONDS = 120.0  # a FLOW track is never shorter than two minutes
+SHORT_REF_BARS = 48  # below this (or fewer than 3 sections) the reference is a clip, not a track: use a typical structure
+TYPICAL_STRUCTURE = [("Intro", 16, 1.0), ("Groove", 24, 1.0), ("Drop", 32, 1.0), ("Breakdown", 16, 0.0), ("Build", 8, 0.0), ("Drop 2", 32, 1.0), ("Outro", 16, 1.0)]
+
+
+def reference_sections(ref: dict) -> tuple[list[dict], str | None]:
+    """The reference's own sections, or a typical club structure when the reference is too short to carry one."""
+    secs = ref.get("sections") or []
+    if int(ref.get("bars") or 0) >= SHORT_REF_BARS and len(secs) >= 3:
+        return secs, None
+    start, out = 1, []
+    for label, bars, kr in TYPICAL_STRUCTURE:
+        out.append({"label": label, "start": start, "end": start + bars, "bars": bars, "kick_ratio": kr})
+        start += bars
+    return out, f"The reference is {ref.get('bars', 0)} bars with {len(secs)} section{'s' if len(secs) != 1 else ''}: a clip, not a track. FLOW used a typical structure instead."
 
 
 def target_bars(length_seconds: float | None, bpm: float, ref_bars: int) -> int:
@@ -70,8 +84,9 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
     st = stylelib.get(style)
     style = st.key
     tmpl = st.template
-    total = target_bars(length_seconds, bpm, ref["bars"])
-    sections = scale_sections(ref["sections"], total)
+    ref_secs, note = reference_sections(ref)
+    total = target_bars(length_seconds, bpm, ref["bars"] if note is None else sum(s["bars"] for s in ref_secs))
+    sections = scale_sections(ref_secs, total)
     tonic = ref["key"]["pc"]
 
     def source(role):
@@ -158,12 +173,13 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
         "tracks": tracks + fx_tracks, "locators": locators, "sidechain": sidechain,
         "reference": {"file": ref["file"], "bars": ref["bars"], "bpm": ref["bpm"]},
         "placeholders": [t["name"] for t in tracks if t["role"] in MELODIC],
+        "notes": [note] if note else [],
     }
 
 
 def place_vocal(sections: list[dict], vocal: dict, style: str) -> list[dict]:
     """Phrases, in order, cycling, in the sections the style wants a vocal in. Drops get it after their first
-    8 bars and at most 60% of their length; breakdowns from bar one. Phrases sit on a 2-bar grid and never cross a section edge."""
+    8 bars and at most half their length; breakdowns from bar one. Phrases sit on a 2-bar grid and never cross a section edge."""
     st = stylelib.get(style)
     phrases = vocal.get("phrases") or []
     if not phrases:
@@ -175,7 +191,7 @@ def place_vocal(sections: list[dict], vocal: dict, style: str) -> list[dict]:
             continue
         is_drop = label.startswith("Drop") or label == "Return"
         lead = min(8, max(0, s["bars"] - 8)) if is_drop else 0
-        budget = s["bars"] if label == "Breakdown" else max(2, int(s["bars"] * 0.6))
+        budget = s["bars"] if label == "Breakdown" else max(2, int(s["bars"] * 0.5))
         bar, used = s["start"] + lead, 0
         while bar < s["end"]:
             ph = phrases[k % len(phrases)]
@@ -184,7 +200,7 @@ def place_vocal(sections: list[dict], vocal: dict, style: str) -> list[dict]:
             out.append({"bar": int(bar), "path": ph["path"], "bars": int(ph["bars"]), "phrase": k % len(phrases)})
             k += 1
             used += ph["bars"]
-            bar += ph["bars"] + (2 if k % 2 == 0 else 0)
+            bar += ph["bars"] + (4 if k % 2 == 0 else 0)   # a breath after every second phrase
             bar += (bar - s["start"]) % 2
     return out
 
@@ -212,7 +228,7 @@ def plan_view(plan: dict) -> dict:
                        "sweeps": [int(b) for b, _p in t.get("sweeps", [])], "sweep_bars": int(t.get("sweep_bars") or 8)})
     return {"bars": int(plan.get("bars") or 0), "bpm": float(plan.get("bpm") or 120),
             "sections": [{"label": s["label"], "start": s["start"], "end": s["end"], "bars": s["bars"]} for s in plan.get("sections", [])],
-            "layers": layers, "rows": describe_rows(plan), "steps": describe(plan), "placeholders": plan.get("placeholders", [])}
+            "layers": layers, "rows": describe_rows(plan), "steps": describe(plan), "placeholders": plan.get("placeholders", []), "notes": plan.get("notes", [])}
 
 
 def describe_rows(plan: dict) -> list[dict]:

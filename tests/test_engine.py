@@ -200,6 +200,34 @@ def test_place_vocal_respects_sections_and_style():
     for p in pl:
         assert any(s["start"] <= p["bar"] and p["bar"] + p["bars"] <= s["end"] and s["label"] in ("Drop", "Breakdown") for s in sections)
     assert not any(17 <= p["bar"] < 25 for p in pl)                       # the drop lands first
-    assert sum(p["bars"] for p in pl if 17 <= p["bar"] < 49) <= 32 * 0.6  # drops are not wall-to-wall vocal
+    assert sum(p["bars"] for p in pl if 17 <= p["bar"] < 49) <= 32 * 0.5  # drops are not wall-to-wall vocal
     peak = arrange.place_vocal(sections, voc, "peak_techno")
     assert peak and all(p["bar"] >= 49 for p in peak)                     # peak techno: breakdown only
+
+
+def test_update_manifest_signature_and_versions():
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives import serialization
+    from flow import update
+    priv = Ed25519PrivateKey.generate()
+    pub_hex = priv.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw).hex()
+    man = update.sign_manifest(priv, "0.7.0", "https://example.com/FLOW-0.7.0.dmg", "Styles and vocal")
+    assert update.evaluate(man, current="0.6.0", public_key_hex=pub_hex)["available"] is True
+    assert update.evaluate(man, current="0.7.0", public_key_hex=pub_hex)["available"] is False
+    assert update.evaluate(man, current="1.0", public_key_hex=pub_hex)["available"] is False
+    tampered = dict(man, url="https://evil.example/FLOW.dmg")
+    assert update.evaluate(tampered, current="0.6.0", public_key_hex=pub_hex)["available"] is False
+    other = Ed25519PrivateKey.generate().public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw).hex()
+    assert update.evaluate(man, current="0.6.0", public_key_hex=other)["available"] is False
+    plain = update.sign_manifest(priv, "0.7.0", "http://example.com/x.dmg", "")
+    assert update.evaluate(plain, current="0.6.0", public_key_hex=pub_hex)["available"] is False   # https only
+    assert update.check("http://127.0.0.1:9/nothing", timeout=0.5) is None                         # network failure is silent
+
+
+def test_short_reference_falls_back_to_typical_structure():
+    from flow import arrange
+    short = {"bars": 26, "sections": [{"label": "Intro", "start": 1, "end": 5, "bars": 4, "kick_ratio": 0}, {"label": "Drop", "start": 5, "end": 27, "bars": 22, "kick_ratio": 1}]}
+    secs, note = arrange.reference_sections(short)
+    assert note and len(secs) == 7 and secs[0]["label"] == "Intro" and secs[-1]["end"] == 145
+    full = {"bars": 144, "sections": [{"label": l, "start": 1, "end": 2, "bars": 1} for l in ("Intro", "Drop", "Outro")]}
+    assert arrange.reference_sections(full)[1] is None

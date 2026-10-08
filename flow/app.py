@@ -236,11 +236,23 @@ class Api:
             return {"ok": False, "error": str(e)}
 
 
+def _update_check(api: "Api"):
+    """Once, shortly after launch, off the UI thread. A missing network or a bad manifest is silently nothing."""
+    from . import update
+    try:
+        res = update.check()
+        if res and res.get("available") and api.window:
+            api.window.evaluate_js(f"window.flowUpdate({json.dumps(res)})")
+    except Exception:
+        pass
+
+
 def main():
     api = Api()
     window = webview.create_window(f"{PRODUCT}", _ui_path(), js_api=api, width=1180, height=860, min_size=(960, 680),
                                    background_color="#E6E5E1")
     api.window = window
+    threading.Timer(2.5, _update_check, args=(api,)).start()
     webview.start(debug=False)
 
 

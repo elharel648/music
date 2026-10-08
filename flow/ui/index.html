@@ -34,6 +34,8 @@
   .sess { flex:1; text-align:center; font:500 11.5px var(--mono); color:var(--sec); letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sess b { color:var(--ink); font-weight:600; }
   .right { display:flex; align-items:center; gap:10px; }
+  .chip.upd { border-color:color-mix(in srgb, var(--c-bld) 60%, transparent); }
+  .chip.upd i { width:6px; height:6px; border-radius:50%; background:var(--c-bld); box-shadow:0 0 6px var(--c-bld); }
   .chip { height:28px; padding:0 10px 0 9px; border-radius:8px; border:1px solid var(--line); background:var(--mod); font-size:11.5px; font-weight:600; display:inline-flex; align-items:center; gap:7px; transition:border-color .2s, transform .2s var(--ease); }
   .chip:hover { border-color:var(--ink); transform:translateY(-1px); }
   .chip svg { stroke:var(--ink); }
@@ -168,12 +170,12 @@
   @keyframes beat { 0%,100% { opacity:.55; box-shadow:0 0 3px var(--mc); } 18% { opacity:1; box-shadow:0 0 12px var(--mc); } }
   .num { font:500 10px var(--mono); color:rgba(255,255,255,.32); letter-spacing:.06em; }
   .mn { font-size:10.5px; font-weight:700; letter-spacing:.16em; color:var(--mc); text-shadow:0 0 12px color-mix(in srgb, var(--mc) 60%, transparent); }
-  .frow2 { display:flex; align-items:center; gap:10px; min-height:34px; }
+  .frow2 { display:flex; align-items:center; gap:10px; min-height:28px; }
   .fname { flex:1; min-width:0; }
-  .fname b { display:block; font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .fname b { display:block; font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-.01em; }
   .fname small { display:block; font:500 9.5px var(--mono); color:var(--mut); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.02em; }
   .fname.empty b { color:var(--sec); font-weight:500; }
-  .sb.pri { background:var(--btn); color:var(--btn-ink); border-color:transparent; padding:0 13px; }
+  .sb.pri { background:var(--btn); color:var(--btn-ink); border-color:transparent; padding:0 12px; }
   .sb.pri:hover { border-color:transparent; filter:brightness(1.12); }
   .next { animation:nextring var(--beat) ease-out infinite; }
   @keyframes nextring { 0% { box-shadow:0 0 0 0 color-mix(in srgb, var(--mc) 55%, transparent); } 100% { box-shadow:0 0 0 9px color-mix(in srgb, var(--mc) 0%, transparent); } }
@@ -186,6 +188,15 @@
   .pad:active { transform:scale(.985); }
   .pad svg { stroke:var(--mc); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 6px color-mix(in srgb, var(--mc) 70%, transparent)); margin-bottom:4px; }
   .pad .t { font-size:13px; font-weight:600; letter-spacing:-.01em; } .pad .s { font-size:10.5px; color:var(--sec); line-height:1.45; max-width:200px; }
+  .well { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:space-between; background:var(--ctrl); border:1px solid var(--line); border-radius:10px; padding:12px 12px 10px; box-shadow:inset 0 1px 3px rgba(20,20,30,.06); }
+  :root[data-theme=dark] .well { box-shadow:inset 0 2px 6px rgba(0,0,0,.5); }
+  .hero { display:flex; align-items:baseline; gap:9px; }
+  .hero .v { font:500 38px var(--mono); letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; }
+  .hero .u { font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.14em; text-transform:uppercase; }
+  .grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:10px; padding-top:9px; border-top:1px solid var(--line); }
+  .grid4 .v { font:500 13px var(--mono); letter-spacing:-.02em; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .grid4 .l { font:500 8.5px var(--mono); color:var(--mut); letter-spacing:.12em; text-transform:uppercase; margin-top:3px; }
+  .v.dim { color:var(--mut); }
   .ros { display:grid; grid-template-columns:1fr 1fr; gap:10px 8px; }
   .ro .v { font:500 30px var(--mono); letter-spacing:-.04em; line-height:1; font-variant-numeric:tabular-nums; }
   .ro.big .v { font-size:34px; }
@@ -193,25 +204,27 @@
   .ro.sm .v { font-size:17px; }
   .file { font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .file small { display:block; font:500 10px var(--mono); color:var(--mut); margin-top:2px; font-weight:500; overflow:hidden; text-overflow:ellipsis; }
-  .mrow { display:flex; align-items:center; gap:8px; margin-top:auto; }
+  .mrow { display:flex; align-items:center; justify-content:flex-end; gap:8px; margin-top:auto; }
   .lk { background:none; border:0; padding:0; font-size:11px; font-weight:600; color:var(--sec); text-decoration:underline; text-underline-offset:3px; }
   .lk:hover { color:var(--ink); }
-  .sb { height:28px; padding:0 10px; border-radius:7px; border:1px solid var(--line); background:var(--mod); font-size:11px; font-weight:600; transition:border-color .2s, transform .2s var(--ease); white-space:nowrap; }
+  .sb { height:26px; padding:0 10px; border-radius:6px; border:1px solid var(--line); background:var(--mod); font-size:11px; font-weight:600; transition:border-color .2s, transform .2s var(--ease); white-space:nowrap; }
   .sb:hover { border-color:var(--ink); } .sb:active { transform:scale(.97); }
-  .in { height:28px; width:64px; font:500 12px var(--mono); padding:0 8px; border-radius:7px; border:1px solid var(--line); background:var(--ctrl); color:var(--ink); outline:none; text-align:right; }
+  .in { height:26px; width:60px; font:500 12px var(--mono); padding:0 8px; border-radius:7px; border:1px solid var(--line); background:var(--ctrl); color:var(--ink); outline:none; text-align:right; }
   .in:focus { border-color:var(--mc); }
   .in::placeholder { color:var(--mut); }
-  .leds { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px 8px; }
-  .rl { display:flex; align-items:center; gap:7px; font-size:10.5px; color:var(--mut); transition:color .3s; }
-  .rl i { width:6px; height:6px; border-radius:50%; background:var(--led-off); flex:0 0 6px; opacity:.5; }
+  .leds { display:flex; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .rl { display:flex; flex-direction:column; align-items:center; gap:5px; font:500 8.5px var(--mono); letter-spacing:.08em; color:var(--mut); transition:color .3s; }
+  .rl i { width:6px; height:6px; border-radius:50%; background:var(--led-off); opacity:.45; }
   .rl.on { color:var(--ink); } .rl.on i { background:var(--mc); box-shadow:0 0 7px var(--mc); opacity:1; }
-  .msg { font:500 10.5px var(--mono); color:var(--sec); line-height:1.45; min-height:14px; }
+  .msg { font:500 10px var(--mono); color:var(--sec); line-height:1.45; min-height:0; }
+  .msg:empty { display:none; }
   .msg.ok { color:var(--ok); } .msg.warn { color:var(--warn); } .msg.err { color:var(--err); }
-  .vrow { display:flex; align-items:center; gap:9px; padding:6px 8px 6px 10px; border-radius:9px; border:1px solid var(--line); background:var(--mod2); margin-top:auto; }
+  .vrow { display:flex; align-items:center; gap:9px; padding:0 0 0 2px; margin-top:auto; min-height:26px; }
   .vrow svg { stroke:var(--sec); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:0 0 14px; }
   .vrow.has svg { stroke:var(--mc); }
-  .vrow .body { flex:1; min-width:0; font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .vrow .body small { display:block; font:500 9.5px var(--mono); color:var(--mut); font-weight:500; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vrow .body { flex:1; min-width:0; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vrow.has .body { font:600 11.5px "IBM Plex Sans",sans-serif; letter-spacing:-.01em; text-transform:none; color:var(--ink); }
+  .vrow .body small { font:500 9.5px var(--mono); color:var(--mut); font-weight:500; margin-left:8px; letter-spacing:.02em; }
   .vrow .x { background:none; border:0; padding:2px; color:var(--mut); display:flex; } .vrow .x:hover { color:var(--err); }
   .sel { border-radius:10px; background:var(--ctrl); border:1px solid var(--line); padding:6px 6px 7px; }
   .sel .row { display:flex; align-items:center; gap:4px; }
@@ -272,7 +285,7 @@
   .big.working button:disabled { color:var(--mc); animation:captext var(--beat) ease-in-out infinite; }
   @keyframes captext { 0%,100% { text-shadow:0 0 0 transparent; } 18% { text-shadow:0 0 10px color-mix(in srgb, var(--mc) 80%, transparent); } }
   .big.next { animation:nextring var(--beat) ease-out infinite; }
-  .bst { font:500 10.5px var(--mono); color:var(--sec); text-align:center; letter-spacing:.04em; min-height:14px; line-height:1.5; max-width:220px; }
+  .bst { font:500 9.5px var(--mono); color:var(--sec); text-align:center; letter-spacing:.1em; text-transform:uppercase; min-height:14px; line-height:1.6; max-width:230px; }
   .acts { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
   .foot { display:flex; align-items:center; gap:14px; padding:0 18px; font:500 10px var(--mono); color:var(--mut); letter-spacing:.1em; text-transform:uppercase; }
   .foot .sp { flex:1; }
@@ -286,6 +299,7 @@
     <div class="brand"><svg width="18" height="14" viewBox="0 0 22 18" aria-hidden="true"><rect style="--k:0" x="0" y="9" width="3" height="9" rx="1"/><rect style="--k:1" x="5" y="5" width="3" height="13" rx="1"/><rect style="--k:2" x="10" y="0" width="3" height="18" rx="1"/><rect style="--k:3" x="15" y="7" width="3" height="11" rx="1"/><rect style="--k:4" x="20" y="3" width="2" height="15" rx="1"/></svg>FLOW</div>
     <div class="sess" id="sess">No reference</div>
     <div class="right">
+      <button class="chip upd hidden" id="updChip" title=""><i></i><span id="updTxt">Update</span></button>
       <button class="chip hidden" id="resumeChip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9"/><path d="M3 3v6h6"/></svg><span id="resumeTxt">Resume</span></button>
       <button class="tsw" id="themeBtn" aria-label="Theme"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><i></i><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg></button>
       <span class="lic" id="statusText">Starting</span>
@@ -323,21 +337,25 @@
     <div class="mod" data-m="ref" style="--mc:var(--c-ref)">
       <div class="mh"><i class="led" id="ledRef"></i><span class="num">01</span><span class="mn">REFERENCE</span><span class="ms" id="msRef">Empty</span></div>
       <div class="mb">
-        <div class="frow2"><div class="fname empty" id="refName"><b>No track yet</b><small>WAV · AIFF · MP3 · FLAC</small></div><button class="sb pri" id="pickRef">Choose</button></div>
-        <div class="ro big"><div class="v dim" id="roBpm">—</div><div class="l" id="roBpmL">BPM</div></div>
-        <div class="ros"><div class="ro sm"><div class="v dim" id="roKey">—</div><div class="l">Key</div></div><div class="ro sm"><div class="v dim" id="roBars">—</div><div class="l">Bars</div></div><div class="ro sm"><div class="v dim" id="roLen">—</div><div class="l">Length</div></div><div class="ro sm"><div class="v dim" id="roSec">—</div><div class="l">Sections</div></div></div>
-        <div class="msg" id="refMsg">The track whose world your song should belong in.</div>
+        <div class="frow2"><div class="fname empty" id="refName"><b>No track</b></div><button class="sb pri" id="pickRef">Choose</button></div>
+        <div class="well">
+          <div class="hero"><span class="v dim" id="roBpm">—</span><span class="u" id="roBpmL">BPM</span></div>
+          <div class="grid4"><div><div class="v dim" id="roKey">—</div><div class="l">Key</div></div><div><div class="v dim" id="roBars">—</div><div class="l">Bars</div></div><div><div class="v dim" id="roLen">—</div><div class="l">Length</div></div><div><div class="v dim" id="roSec">—</div><div class="l">Sections</div></div></div>
+        </div>
+        <div class="msg" id="refMsg"></div>
         <div class="mrow hidden" id="refTools"><input class="in" type="text" id="bpmIn" placeholder="auto" title="Tempo override"><button class="sb" id="analyzeBtn">Re-analyze</button></div>
       </div>
     </div>
     <div class="mod" data-m="snd" style="--mc:var(--c-snd)">
       <div class="mh"><i class="led" id="ledSnd"></i><span class="num">02</span><span class="mn">SOUNDS</span><span class="ms" id="msSnd">Empty</span></div>
       <div class="mb">
-        <div class="frow2"><div class="fname empty" id="packName"><b>No sounds yet</b><small>The pack's top folder, or several at once</small></div><button class="sb pri" id="pickPack">Choose</button></div>
-        <div class="ro big"><div class="v dim" id="roCount">—</div><div class="l">Sounds</div></div>
-        <div class="leds" id="roleLeds"></div>
-        <div class="msg" id="packMsg">A messy folder is fine. FLOW reads every file.</div>
-        <div class="vrow" id="vocalRow"><svg width="14" height="14" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal · optional<small id="vocalMeta">An acapella or a chant, placed where the style wants a voice</small></div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="sb" id="pickVocal">Add</button></div>
+        <div class="frow2"><div class="fname empty" id="packName"><b>No sounds</b></div><button class="sb pri" id="pickPack">Choose</button></div>
+        <div class="well">
+          <div class="hero"><span class="v dim" id="roCount">—</span><span class="u">Sounds</span></div>
+          <div class="leds" id="roleLeds"></div>
+        </div>
+        <div class="msg" id="packMsg"></div>
+        <div class="vrow" id="vocalRow"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal · optional</div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="sb" id="pickVocal">Add</button></div>
       </div>
     </div>
     <div class="mod" data-m="dir" style="--mc:var(--c-dir)">
@@ -376,6 +394,7 @@
 const S = { active:'ref', view:null, ref:null, refPath:null, pack:null, packPath:null, style:'house', styles:[], vocalPath:null, vocal:null, target:'ableton', out:null, len:270,
             licensed:false, lastOpts:null, plan:null, finish:null, finishLoaded:false, phase:0, finOpen:false, built:false, building:false };
 const $ = id => document.getElementById(id);
+const esc = v => String(v==null?'':v).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api = () => window.pywebview.api;
 const fmt = sec => `${Math.floor(sec/60)}:${String(Math.round(sec%60)).padStart(2,'0')}`;
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
@@ -491,7 +510,7 @@ async function refreshStatus(){ const st = await api().status(); $('statusText')
   S.licensed = st.state!=='expired'; $('deck').classList.toggle('locked', !S.licensed);
   if(!S.licensed){ $('gateMeta').textContent=`FLOW ${st.version} · machine ${st.machine}`; showView('gate'); } return st; }
 window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle();
-  const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,''); $('resumeChip').classList.remove('hidden'); }
+  const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').slice(0,28); $('resumeChip').classList.remove('hidden'); }
   setActive('ref'); liveStatus(); });
 $('activateBtn').onclick = async ()=>{ const r = await api().activate($('keyInput').value.trim()); if(r.ok){ $('gateMsg').textContent=''; await refreshStatus(); setActive('ref'); } else $('gateMsg').textContent = r.error; };
 $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classList.add('hidden'); S.refPath=l.reference; setRefFile(); await analyze(); S.packPath=l.pack; await scanPack(); S.style=l.style||'house'; S.target=l.target||'ableton'; S.out=l.out||null; if(S.out) $('outPath').textContent=S.out;
@@ -503,14 +522,14 @@ $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classL
 
 /* ---------- reference ---------- */
 let REFTL = null;
-function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('refName').className='fname'; $('refName').innerHTML = `<b>${n}</b><small>${S.refPath}</small>`; $('pickRef').textContent='Change'; $('pickRef').classList.remove('pri'); $('refTools').classList.remove('hidden'); $('sess').innerHTML = `<b>${n}</b>`; }
+function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('refName').className='fname'; $('refName').title=S.refPath; $('refName').innerHTML = `<b>${esc(n)}</b>`; $('pickRef').textContent='Change'; $('pickRef').classList.remove('pri'); $('refTools').classList.remove('hidden'); $('sess').innerHTML = `<b>${esc(n)}</b>`; }
 async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; setRefFile(); setActive('ref'); analyze(); }
 $('pickRef').onclick = pickRef;
 async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=parseFloat($('bpmIn').value)||null;
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ setMod('ref','Error','err'); $('refMsg').className='msg err'; $('refMsg').textContent=r.error; return; }
-  S.ref=r.ref; const k=r.ref.key; setBeat(r.ref.bpm); setMod('ref','Measured','on'); $('refMsg').textContent = r.ref.tempo_info.source==='estimated' ? 'Tempo detected from the audio' : 'Tempo from the file name';
-  ['roBpm','roKey','roBars','roLen','roSec'].forEach(id=>$(id).classList.remove('dim')); tickNum($('roBpm'), Math.round(r.ref.bpm)); $('roBpmL').textContent = r.ref.tempo_info.source==='estimated' ? 'BPM · detected' : 'BPM'; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
-  $('sess').innerHTML = `<b>${r.ref.file || S.refPath.split(/[\\/]/).pop()}</b> · ${Math.round(r.ref.bpm)} BPM · ${k.tonic} ${k.mode==='minor'?'min':'maj'} · ${r.ref.bars} bars`;
+  S.ref=r.ref; const k=r.ref.key; setBeat(r.ref.bpm); setMod('ref','Measured','on'); const shortRef = r.ref.bars < 48 || r.ref.sections.length < 3; msg($('refMsg'), shortRef ? `Short reference: ${r.ref.bars} bars. A typical ${curStyle()?curStyle().name:''} structure will be used.` : '', shortRef ? 'warn' : '');
+  ['roBpm','roKey','roBars','roLen','roSec'].forEach(id=>$(id).classList.remove('dim')); tickNum($('roBpm'), Math.round(r.ref.bpm)); $('roBpmL').textContent = r.ref.tempo_info.source==='estimated' ? 'BPM · detected' : 'BPM · from name'; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
+  $('sess').innerHTML = `<b>${esc(r.ref.file || S.refPath.split(/[\\/]/).pop())}</b> · ${Math.round(r.ref.bpm)} BPM · ${esc(k.tonic)} ${k.mode==='minor'?'min':'maj'} · ${r.ref.bars} bars`;
   const el = r.ref.elements||{}; const en = el.energy||[]; const mn=Math.min(...en), mx=Math.max(...en); const curve = en.map(v=> mx>mn ? (v-mn)/(mx-mn) : 0.5);
   const lanes = el.kick ? [{name:'Kick', cls:'k', blocks:spansFromBools(el.kick).map(([a,b])=>({a,b,k:'span'}))}, {name:'Hats and top', cls:'', blocks:spansFromBools(el.hats).map(([a,b])=>({a,b,k:'span'}))}] : [];
   $('refTL').classList.remove('hidden'); $('refCap').textContent = ''; syncIdle();
@@ -520,7 +539,7 @@ $('analyzeBtn').onclick = analyze;
 function tickNum(n, target){ if(reduced){ n.textContent=target; return; } const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
 
 /* ---------- sounds ---------- */
-function setPackFile(){ const parts=S.packPath.split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('packName').className='fname'; $('packName').innerHTML = `<b>${parts.length>1 ? parts.length+' folders' : parts[0].split(/[\\/]/).pop()}</b><small>${parts.join('  +  ')}</small>`; $('pickPack').textContent='Change'; $('pickPack').classList.remove('pri'); }
+function setPackFile(){ const parts=S.packPath.split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('packName').className='fname'; $('packName').title=parts.join('\n'); $('packName').innerHTML = `<b>${esc(parts.length>1 ? parts.length+' folders' : parts[0].split(/[\\/]/).pop())}</b>`; $('pickPack').textContent='Change'; $('pickPack').classList.remove('pri'); }
 function msg(el, text, kind){ el.className = 'msg' + (kind?' '+kind:''); el.textContent = text||''; }
 async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Reading','work'); msg($('packMsg'),'Reading every file…'); $('roCount').textContent='—'; $('roCount').classList.add('dim'); renderLeds({});
   const r = await api().scan_pack(p); if(!r.ok){ setMod('snd','Error','err'); msg($('packMsg'), r.error, 'err'); return; } S.pack=r.pack;
@@ -530,22 +549,23 @@ async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Read
     const d = await api().download_icloud(p); window.flowProgress = origProgress; if(d.ok){ msg($('packMsg'), 'Downloaded. iCloud may evict them again; keep a copy outside iCloud to be safe.', 'ok'); $('packMsg').innerHTML += ` <button class="lk" id="keepLocal" style="margin-left:6px">Keep a local copy</button>`; $('keepLocal').onclick = async ()=>{ msg($('packMsg'), 'Copying to Music › FLOW Samples…', 'ok'); const c = await api().copy_pack_local(p); if(c.ok){ S.packPath=c.folder; await scanPack(); } else msg($('packMsg'), c.error, 'err'); };
       const r2 = await api().scan_pack(p); if(r2.ok){ S.pack=r2.pack; renderPack(r2.pack); } return; }
     msg($('packMsg'), d.error || `${d.remaining} files did not download. In Finder: right-click the folder › Download Now, then choose it again.`, 'err'); setMod('snd','Error','err'); return; }
-  if(warn.length){ msg($('packMsg'), warn.join(' '), 'err'); setMod('snd','Check','err'); } else { msg($('packMsg'), 'Kick found · ready to build', 'ok'); setMod('snd','Ready','on'); }
+  if(warn.length){ msg($('packMsg'), warn.join(' '), 'err'); setMod('snd','Check','err'); } else { msg($('packMsg'), ''); setMod('snd','Ready','on'); }
   renderPack(r.pack); }
-const ROLE_LEDS = [['kick','Kick'],['clap','Clap'],['chat','Hats'],['perc','Perc'],['bass','Bass'],['synth','Synth'],['pad','Pad'],['atmos','Atmos'],['fx','FX']];
+const ROLE_LEDS = [['kick','KCK'],['clap','CLP'],['chat','HAT'],['perc','PRC'],['bass','BAS'],['synth','SYN'],['pad','PAD'],['atmos','ATM'],['fx','FX']];
 function renderLeds(br){ const has = k => k==='chat' ? (br.chat||br.ohat||br.shaker) : (k==='fx' ? (br.fx||br.impact||br.uplifter||br.downlifter) : br[k]); $('roleLeds').innerHTML = ROLE_LEDS.map(([k,n])=>`<div class="rl ${has(k)?'on':''}"><i></i>${n}</div>`).join(''); }
+function kitRows(br){ return Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); }
 function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCount'), pack.count); const br=pack.by_role||{}; renderLeds(br);
   const rows = Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); const mx = rows.length ? rows[0][1] : 1;
-  $('kitView').innerHTML = `<div class="dvhead"><div class="t">${pack.count} sounds<small>${pack.bpm_hint?pack.bpm_hint+' BPM loops':''}</small></div><div class="r">${rows.length} kinds</div></div><div class="kit">${rows.map(([k,v],i)=>`<div class="kr"><span>${k.replace('_',' ')}</span><div class="kb"><i style="width:${(v/mx*100).toFixed(1)}%;--d:${i*60}ms"></i></div><b>${v}</b></div>`).join('')}</div>`;
+  $('kitView').innerHTML = `<div class="dvhead"><div class="t">${pack.count} sounds<small>${pack.bpm_hint?esc(pack.bpm_hint)+' BPM loops':''}</small></div><div class="r">${rows.length} kinds</div></div><div class="kit">${rows.map(([k,v],i)=>`<div class="kr"><span>${esc(k.replace('_',' '))}</span><div class="kb"><i style="width:${(v/mx*100).toFixed(1)}%;--d:${i*60}ms"></i></div><b>${v}</b></div>`).join('')}</div>`;
   $('kitView').classList.remove('hidden'); $('sndCap').textContent = ''; syncIdle(); gateBuild(); }
 async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; setActive('snd'); await scanPack(); }
 $('pickPack').onclick = pickPack; renderLeds({});
-async function describeVocal(){ const p=S.vocalPath; const n=p.split(/[\\/]/).pop(); $('vocalRow').classList.add('has'); $('vocalName').innerHTML = `${n}<small id="vocalMeta">Listening…</small>`; $('vocalClear').classList.remove('hidden'); $('pickVocal').textContent='Change';
+async function describeVocal(){ const p=S.vocalPath; const n=p.split(/[\\/]/).pop().replace(/\.[^.]+$/,''); $('vocalRow').classList.add('has'); $('vocalRow').title=p; $('vocalName').innerHTML = `${esc(n)}<small id="vocalMeta">Listening…</small>`; $('vocalClear').classList.remove('hidden'); $('pickVocal').textContent='Change';
   const r = await api().analyze_vocal(p); if(!r.ok){ $('vocalMeta').textContent = r.error; return; } const v=r.vocal; S.vocal=v;
   const key = v.key ? `${NOTES[v.key.pc]} ${v.key.mode==='minor'?'min':'maj'}` : 'key unknown'; const bpm = v.bpm ? `${v.bpm} BPM` : 'tempo taken as the project’s';
-  $('vocalMeta').textContent = `${v.count} phrase${v.count===1?'':'s'} · ${fmt(v.duration)} · ${bpm} · ${key}`; if(S.view==='dir') drawDir(); }
+  $('vocalMeta').textContent = `${v.count} phrase${v.count===1?'':'s'} · ${bpm} · ${key}`; if(S.view==='dir') drawDir(); }
 $('pickVocal').onclick = async ()=>{ const p = await api().pick_vocal(); if(!p) return; S.vocalPath=p; await describeVocal(); };
-$('vocalClear').onclick = ()=>{ S.vocalPath=null; S.vocal=null; $('vocalRow').classList.remove('has'); $('vocalName').innerHTML='Vocal · optional<small id="vocalMeta">An acapella or a chant, placed where the style wants a voice</small>'; $('vocalClear').classList.add('hidden'); $('pickVocal').textContent='Add'; if(S.view==='dir') drawDir(); };
+$('vocalClear').onclick = ()=>{ S.vocalPath=null; S.vocal=null; $('vocalRow').classList.remove('has'); $('vocalName').textContent='Vocal · optional'; $('vocalRow').title=''; $('vocalClear').classList.add('hidden'); $('pickVocal').textContent='Add'; if(S.view==='dir') drawDir(); };
 
 /* ---------- direction ---------- */
 const STYLE_ALIAS = {afro:'afro_house', techno:'peak_techno'};
@@ -556,9 +576,9 @@ function renderStyle(){ const st=curStyle(); if(!st) return; const bpm=S.ref?S.r
 function stepStyle(d){ if(!S.styles.length) return; const i=S.styles.findIndex(s=>s.key===S.style); S.style = S.styles[(i+d+S.styles.length)%S.styles.length].key; renderStyle(); }
 $('stPrev').onclick=()=>stepStyle(-1); $('stNext').onclick=()=>stepStyle(1);
 $('styleSel').addEventListener('wheel', e=>{ e.preventDefault(); stepStyle(e.deltaY>0?1:-1); }, {passive:false});
-function drawDir(){ const st=curStyle(); if(!st) return; const secs = S.ref ? S.ref.sections : DEFAULT_SECS; const tmpl=st.template; const lab = l => tmpl[l] ? l : (l.startsWith('Drop')?'Drop 2':'Groove');
+function drawDir(){ const st=curStyle(); if(!st) return; const shortRef = !S.ref || S.ref.bars < 48 || S.ref.sections.length < 3; const secs = shortRef ? DEFAULT_SECS : S.ref.sections; const tmpl=st.template; const lab = l => tmpl[l] ? l : (l.startsWith('Drop')?'Drop 2':'Groove');
   const roles = ROLE_ORDER.filter(([r])=>Object.values(tmpl).some(a=>a.includes(r))); const bpm = S.ref?S.ref.bpm:124; const bars = Math.max(64, Math.round(S.len*bpm/240/8)*8);
-  let html = `<div class="dvhead"><div class="t">${st.name}<small>${st.blurb}</small></div><div class="r"><b>${bars}</b> bars at ${fmt(S.len)} · ${S.ref?'reference structure':'typical structure'}</div></div>`;
+  let html = `<div class="dvhead"><div class="t">${st.name}<small>${st.blurb}</small></div><div class="r"><b>${bars}</b> bars at ${fmt(S.len)} · ${shortRef?'typical structure':'reference structure'}</div></div>`;
   html += `<div class="dgrid" style="grid-template-columns:96px repeat(${secs.length},1fr)"><div></div>` + secs.map(s=>`<div class="h ${/^Drop|Return/.test(s.label)?'hi':''}">${s.label}<small>${s.bars||s.end-s.start} bars</small></div>`).join('');
   roles.forEach(([r,n],ri)=>{ html += `<div class="rl">${n}</div>` + secs.map((s,ci)=>`<i class="cell ${tmpl[lab(s.label)].includes(r)?'on':''}" style="--d:${ci*40+ri*12}ms"></i>`).join(''); });
   if(S.vocal){ html += `<div class="rl v">Vocal</div>` + secs.map((s,ci)=>`<i class="cell v ${st.vocal_sections.includes(lab(s.label))?'on':''}" style="--d:${ci*40+roles.length*12}ms"></i>`).join(''); }
@@ -592,15 +612,15 @@ async function loadFinish(){ S.finishLoaded = true; const opts = await api().fin
 $('pickOut').onclick = async ()=>{ const p = await api().pick_folder(); if(p){ S.out=p; $('outPath').textContent=p; } };
 async function scanPlugins(){ $('plugMsg').textContent='Scanning this computer…'; const r = await api().scan_plugins(); if(!r.ok){ $('plugMsg').textContent=r.error; return; }
   $('plugMsg').textContent = `${r.plugins.count} plug-ins · synths: ${r.plugins.synths.join(', ')||'none recognized'} · sidechain: ${r.plugins.sidechain.join(', ')||'none'}`;
-  $('synthSel').innerHTML = '<option value="">Sample shots (default)</option>' + r.plugins.synths.map(n=>`<option>${n}</option>`).join('');
-  $('scSel').innerHTML = '<option value="">None</option>' + r.plugins.sidechain.map(n=>`<option>${n}</option>`).join(''); }
+  $('synthSel').innerHTML = '<option value="">Sample shots (default)</option>' + r.plugins.synths.map(n=>`<option>${esc(n)}</option>`).join('');
+  $('scSel').innerHTML = '<option value="">None</option>' + r.plugins.sidechain.map(n=>`<option>${esc(n)}</option>`).join(''); }
 $('scanPlug').onclick = scanPlugins;
 
 /* ---------- build ---------- */
 let TL = null;
 (function meters(){ $('meter').innerHTML = Array.from({length:18},(_,i)=>`<i style="--m:${(.35+Math.abs(Math.sin(i*1.7))*.65).toFixed(2)};animation-delay:${(i*.07).toFixed(2)}s;animation-duration:${(.7+Math.abs(Math.cos(i))*.7).toFixed(2)}s"></i>`).join(''); })();
 function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
-function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; if(!S.building && !S.built){ $('bst').textContent = ok ? 'Ready · writes into the Live Set in front' : (S.ref ? 'Waiting for 02 · Sounds' : (S.pack ? 'Waiting for 01 · Reference' : 'Waiting for 01 and 02')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
+function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; if(!S.building && !S.built){ $('bst').textContent = ok ? (S.target==='ableton' ? 'Ready · into the Live Set in front' : 'Ready · stems + MIDI') : (S.ref ? 'Waiting for 02 · Sounds' : (S.pack ? 'Waiting for 01 · Reference' : 'Waiting for 01 · 02')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
 function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
 function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); }
@@ -616,17 +636,18 @@ window.flowPlan = v=>{ S.plan=v; if(TL) TL.destroy(); TL = mountTimeline($('tlCa
 window.flowProgress = (msg,pct)=>{ if(msg.startsWith('@track:')){ if(TL) TL.reveal(+msg.slice(7)); return; }
   setProg(pct); $('log').textContent += msg+'\n'; $('log').scrollTop=1e9; $('statusLine').textContent = msg; $('bst').textContent = msg;
   setPhase(pct<0.15?0 : pct<0.3?1 : pct<0.4?2 : (S.target==='ableton' && pct>=0.85 ? 4 : 3)); };
-window.flowError = msg=>{ S.building=false; markNext(); $('buildTL').classList.remove('building'); bigState('err'); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
+window.flowError = msg=>{ S.building=false; markNext(); $('buildTL').classList.remove('building'); bigState('err'); setProg(1); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
   if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Fix the cause, then retry'; liveStatus(); };
 window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); bigState('done'); setProg(1); setPhase(5); setMod('bld','Done','on');
   $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; $('bst').textContent = sum.ableton ? 'Your track is in the Live Set in front of you. Press Cmd+S now.' : 'Open the folder: stems, a MIDI file with markers, and your Blueprint.';
   if(!TL) window.flowPlan(sum); TL.revealAll();
-  const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bst').textContent += ` · ${warns.length} note${warns.length===1?'':'s'} in Details`; }
+  if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bst').textContent += ` · ${warns.length} note${warns.length===1?'':'s'} in Details`; }
   $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
   $('buildBtn').textContent='BUILD'; $('buildBtn').disabled=false; refreshStatus(); await sleep(900); if(TL) TL.sweep(); };
 $('again').onclick=()=>{ S.built=false; $('buildBtn').textContent='BUILD'; $('again').classList.add('hidden'); $('openOut').classList.add('hidden'); gateBuild(); setActive('ref'); };
 gateBuild();
+window.flowUpdate = u=>{ if(!u || !u.available) return; $('updTxt').textContent = `Update ${u.version}`; $('updChip').title = u.notes||''; $('updChip').classList.remove('hidden'); $('updChip').onclick = ()=>api().open_path(u.url); };
 </script>
 </body>
 </html>

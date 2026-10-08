@@ -3,6 +3,7 @@
   python tools/keygen.py init                 -> creates keys/private.pem (KEEP SECRET, BACK UP) and patches flow/license.py with the public key
   python tools/keygen.py issue EMAIL [--days N] -> prints a key for a customer (perpetual unless --days)
   python tools/keygen.py verify KEY           -> checks a key against the embedded public key
+  python tools/keygen.py sign-update VERSION URL [--notes TEXT] -> writes packaging/latest.json (signed) for the in-app update check
 """
 from __future__ import annotations
 import argparse
@@ -54,14 +55,28 @@ def cmd_verify(args):
     print(lic.verify_key(args.key))
 
 
+def cmd_sign_update(args):
+    import json
+    from flow import update
+    man = update.sign_manifest(load_private(), args.version, args.url, args.notes or "")
+    out = os.path.join(ROOT, "packaging", "latest.json")
+    with open(out, "w") as f:
+        json.dump(man, f, indent=1)
+    from flow import license as lic
+    assert update.verify(man, lic.PUBLIC_KEY_HEX), "signature does not verify against the embedded public key"
+    print("wrote", out)
+    print("publish it at:", update.UPDATE_URL)
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     i = sub.add_parser("init"); i.add_argument("--force", action="store_true")
     s = sub.add_parser("issue"); s.add_argument("email"); s.add_argument("--days", type=int); s.add_argument("--seats", type=int, default=1)
     v = sub.add_parser("verify"); v.add_argument("key")
+    u = sub.add_parser("sign-update"); u.add_argument("version"); u.add_argument("url"); u.add_argument("--notes", default="")
     args = ap.parse_args()
-    {"init": cmd_init, "issue": cmd_issue, "verify": cmd_verify}[args.cmd](args)
+    {"init": cmd_init, "issue": cmd_issue, "verify": cmd_verify, "sign-update": cmd_sign_update}[args.cmd](args)
 
 
 if __name__ == "__main__":

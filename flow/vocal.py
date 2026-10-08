@@ -12,6 +12,7 @@ import numpy as np
 from . import audio, analysis
 
 MAX_PHRASES = 6        # Live session slots are finite; phrases cycle beyond this
+MAX_PHRASE_BARS = 8    # longer sung passages are cut at the quietest point so a phrase never swallows a section
 MAX_SHIFT = 3          # semitones
 MIN_PHRASE_S = 0.45
 GAP_S = 0.32
@@ -66,6 +67,19 @@ def analyze(path: str) -> dict:
             "phrases": [{"start": round(s, 3), "end": round(e, 3)} for s, e in phrases], "count": len(phrases)}
 
 
+def _split_long(y: np.ndarray, sr: int, start: float, end: float, max_s: float) -> list[tuple[float, float]]:
+    """Cut a phrase longer than max_s at its quietest moment (searched in the middle half), recursively."""
+    if end - start <= max_s:
+        return [(start, end)]
+    a, b = int(start * sr), int(end * sr)
+    seg = np.abs(y[:, a:b]).max(axis=0)
+    hop = max(1, sr // 50)
+    frames = seg[: (len(seg) // hop) * hop].reshape(-1, hop).mean(axis=1)
+    lo, hi = len(frames) // 4, (len(frames) * 3) // 4
+    cut = start + (lo + int(np.argmin(frames[lo:hi]))) * hop / sr
+    return _split_long(y, sr, start, cut, max_s) + _split_long(y, sr, cut, end, max_s)
+
+
 def prepare(info: dict, bpm: float, key_pc: int | None, work_dir: str, sr: int = 48000, progress=None) -> dict:
     """Render the phrases as files at the project tempo and key. Returns {name, phrases:[{path, seconds, bars}], notes:[...]}."""
     prog = progress or (lambda m, p: None)
@@ -99,8 +113,11 @@ def prepare(info: dict, bpm: float, key_pc: int | None, work_dir: str, sr: int =
     bar_len = 240.0 / bpm
     phrases = []
     base = os.path.splitext(info["name"])[0]
-    for i, ph in enumerate(info["phrases"][:MAX_PHRASES]):
-        a, b = int(ph["start"] * sr * scale), int(ph["end"] * sr * scale)
+    pieces: list[tuple[float, float]] = []
+    for ph in info["phrases"]:
+        pieces.extend(_split_long(y, sr, ph["start"] * scale, ph["end"] * scale, bar_len * MAX_PHRASE_BARS))
+    for i, (st, en) in enumerate(pieces[:MAX_PHRASES]):
+        a, b = int(st * sr), int(en * sr)
         seg = y[:, a:b].copy()
         if seg.shape[1] < sr * 0.2:
             continue

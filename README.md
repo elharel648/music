@@ -88,3 +88,12 @@ flow/ableton_bridge.py  Live writer (TCP 9877)   flow/export.py     stems + MIDI
 flow/plugins.py    installed plug-in scan        flow/license.py    trial + Ed25519 keys
 flow/app.py + flow/ui/index.html  desktop app    flow/cli.py        command line
 ```
+
+
+## Styles, vocal, update channel (0.6)
+
+- **Styles** live in `flow/styles.py`: eight styles, each a layer template per section, pattern overrides, duck depth, reverb scale and where a vocal goes. Add a style by adding one `Style(...)` block.
+- **Vocal** (`flow/vocal.py`): an optional acapella is cut into phrases (RMS), fitted to the project tempo (phase vocoder, tempo from the file name) and key (up to 3 semitones), and placed per style. `flow build --vocal FILE`.
+- **Update channel** (`flow/update.py`): at launch the app fetches `packaging/latest.json` from `UPDATE_URL`, verifies its Ed25519 signature with the same public key as the license keys, and shows an "Update x.y" chip that opens the download page. Nothing is downloaded or executed automatically, and the request carries no identifying data. Publish a new version with
+  `python tools/keygen.py sign-update 0.7.0 https://.../FLOW-0.7.0.dmg --notes "..."` and commit the file where `UPDATE_URL` points (a public URL).
+- **UI**: a fixed device frame (`flow/ui/index.html`), light and dark. `python tools/make_demo.py` writes `flow/ui/demo.html` with a fake backend for design work; `?expired`, `?fail`, `?update` simulate those states.
