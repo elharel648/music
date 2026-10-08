@@ -355,13 +355,20 @@ class Api:
 
         def go():
             ctx = self._prepare(opts)
-            res = flowcli.render_preview(ctx, progress=lambda m, p: self._emit(m, 0.4 + 0.6 * p))
+            self._emit_preview(ctx, lambda m, p: self._emit(m, 0.4 + 0.6 * p))
+
+        return self._run(go)
+
+    def _emit_preview(self, ctx: dict, progress):
+        """Render the mix once per prepared arrangement; later calls reuse the file."""
+        res = ctx.get("preview")
+        if not res:
+            res = flowcli.render_preview(ctx, progress=progress)
             res["url"] = self.media.register(res["path"])
             res["structure"] = ctx["plan"].get("structure")
             res["used"] = len(ctx["kit"])
-            self.window.evaluate_js(f"window.flowPreview({json.dumps(res, default=str)})")
-
-        return self._run(go)
+            ctx["preview"] = res
+        self.window.evaluate_js(f"window.flowPreview({json.dumps(res, default=str)})")
 
     def build(self, opts: dict):
         self.save_session(opts)
@@ -374,6 +381,11 @@ class Api:
             from . import arrange
             summary = {**arrange.plan_view(res.get("plan", {})), "export": res.get("export"), "ableton": res.get("ableton"), "kit": res.get("kit")}
             self.window.evaluate_js(f"window.flowDone({json.dumps(summary, default=str)})")
+            # the track is written; now, quietly, the mix of exactly that, so it can be played from the map
+            try:
+                self._emit_preview(ctx, lambda m, p: None)
+            except Exception:
+                pass
 
         return self._run(go)
 

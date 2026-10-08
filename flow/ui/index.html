@@ -631,7 +631,7 @@ function renderKit(){ const rows = S.kit; if(!rows.length) return; const sel = r
   $('kitView').querySelectorAll('.krow').forEach(row=>{ const role=row.dataset.role; row.querySelectorAll('.kb[data-d]').forEach(b=>b.onclick=()=>cycleKit(role, +b.dataset.d)); const pl=row.querySelector('.pl'); if(pl) pl.onclick=()=>{ const r=S.kit.find(x=>x.role===role); if(r&&r.chosen) audition(r.chosen.path, pl); }; }); }
 function cycleKit(role, d){ const r=S.kit.find(x=>x.role===role); if(!r || r.candidates.length<2) return; const idx=r.chosen ? r.candidates.findIndex(c=>c.path===r.chosen.path) : -1; const next=r.candidates[(idx+d+r.candidates.length)%r.candidates.length]; r.chosen=next; S.kitOverrides[role]=next.path; markStale(); renderKit(); const pl=$('kitView').querySelector(`.krow[data-role="${role}"] .pl`); audition(next.path, pl); }
 async function audition(path, btn){ const a=$('aud'); if(btn && btn.classList.contains('on')){ a.pause(); return; } const r = await api().audition_url(path); if(!r.ok) return; document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on')); a.src=r.url; a.currentTime=0; a.play().catch(()=>{}); if(btn){ btn.classList.add('on'); a.onended=()=>btn.classList.remove('on'); a.onpause=()=>btn.classList.remove('on'); } }
-function markStale(){ if(S.preview){ S.previewStale=true; stopPlayer(); $('tp').classList.add('hidden'); } $('listenBtn').textContent = S.preview ? 'Listen again' : 'Listen first'; }
+function markStale(){ if(S.preview){ S.previewStale=true; stopPlayer(); $('tp').classList.add('hidden'); } listenLabel(); }
 async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; setActive('snd'); await scanPack(); }
 $('pickPack').onclick = pickPack; renderLeds({});
 async function describeVocal(){ const p=S.vocalPath; const n=p.split(/[\\/]/).pop().replace(/\.[^.]+$/,''); $('vocalRow').classList.add('has'); $('vocalRow').title=p; $('vocalName').innerHTML = `${esc(n)}<small id="vocalMeta">Listening…</small>`; $('vocalClear').classList.remove('hidden'); $('pickVocal').textContent='Change';
@@ -702,7 +702,7 @@ $('scanPlug').onclick = scanPlugins;
 let TL = null;
 (function meters(){ $('meter').innerHTML = Array.from({length:18},(_,i)=>`<i style="--m:${(.35+Math.abs(Math.sin(i*1.7))*.65).toFixed(2)};animation-delay:${(i*.07).toFixed(2)}s;animation-duration:${(.7+Math.abs(Math.cos(i))*.7).toFixed(2)}s"></i>`).join(''); })();
 function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
-function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; $('listenBtn').classList.toggle('hidden', !ok); if(!S.building && !S.built){ $('bst').textContent = ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
+function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; $('listenBtn').classList.toggle('hidden', !ok); listenLabel(); if(!S.building && !S.built){ $('bst').textContent = ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
 function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
 function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); }
@@ -711,18 +711,20 @@ function resetBuild(){ stopPlayer(); $('tp').classList.add('hidden'); if(TL){ TL
 function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, structure:S.structure, kit:S.kitOverrides, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
 async function startPreview(){ S.building=true; resetBuild(); markNext(); setActive('bld'); $('buildBtn').textContent='BUILD'; $('bst').textContent='Preparing your track to listen to…'; setMod('bld','Preparing','work'); $('listenBtn').disabled=true;
   S.lastOpts = currentOpts(); const r = await api().preview(S.lastOpts); if(!r.ok){ window.flowError(r.error); } }
-$('listenBtn').onclick = startPreview;
+$('listenBtn').onclick = ()=>{ if(S.preview && !S.previewStale){ $('playBtn').click(); return; } startPreview(); };
+function listenLabel(){ $('listenBtn').textContent = (S.preview && !S.previewStale) ? (player.paused ? 'Play' : 'Pause') : (S.preview ? 'Listen again' : 'Listen first'); }
 const player = $('player'); let rafP = null;
 function stopPlayer(){ if(!player.paused) player.pause(); cancelAnimationFrame(rafP); if(TL) TL.release(); }
 function tickPlay(){ if(!TL || !S.preview) return; const x = Math.min(1, player.currentTime / S.preview.seconds); TL.playhead(x); $('ptime').textContent = `${fmt(player.currentTime)} / ${fmt(S.preview.seconds)}`; if(!player.paused) rafP = requestAnimationFrame(tickPlay); }
-player.addEventListener('play', ()=>{ $('playBtn').classList.add('on'); tickPlay(); });
-player.addEventListener('pause', ()=>{ $('playBtn').classList.remove('on'); cancelAnimationFrame(rafP); if(TL) TL.release(); if(S.preview) $('ptime').textContent = `${fmt(player.currentTime)} / ${fmt(S.preview.seconds)}`; });
+player.addEventListener('play', ()=>{ $('playBtn').classList.add('on'); listenLabel(); tickPlay(); });
+player.addEventListener('pause', ()=>{ $('playBtn').classList.remove('on'); listenLabel(); cancelAnimationFrame(rafP); if(TL) TL.release(); if(S.preview) $('ptime').textContent = `${fmt(player.currentTime)} / ${fmt(S.preview.seconds)}`; });
 player.addEventListener('ended', ()=>{ player.currentTime = 0; });
 $('playBtn').onclick = ()=>{ if(!S.preview) return; if(player.paused) player.play().catch(()=>{}); else player.pause(); };
 document.addEventListener('keydown', e=>{ if(e.code!=='Space' || !S.preview || S.previewStale) return; const t=e.target; if(t && (t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA')) return; e.preventDefault(); $('playBtn').click(); });
-window.flowPreview = p=>{ S.building=false; S.preview=p; S.previewStale=false; player.src=p.url; player.load(); $('ptime').textContent = `0:00 / ${fmt(p.seconds)}`; $('tp').classList.remove('hidden'); $('listenBtn').disabled=false; $('listenBtn').textContent='Listen again';
+window.flowPreview = p=>{ S.building=false; S.preview=p; S.previewStale=false; player.src=p.url; player.load(); $('ptime').textContent = `0:00 / ${fmt(p.seconds)}`; $('tp').classList.remove('hidden'); $('listenBtn').disabled=false; if(p.used){ S.usedCount=p.used; renderKit(); }
+  if(S.built){ listenLabel(); if(TL && !S.plan) {} $('statusLine').textContent = 'Done · play it from the map, or press Cmd+S in Live'; return; }   // the mix of what was just written: ready, not forced on you
   $('buildTL').classList.remove('building'); bigState('ready'); setProg(0); setPhase(5); if(TL){ TL.revealAll(); } $('statusLine').textContent='Press play, or click anywhere on the map'; $('bst').textContent='Listen. When it is right, build.'; $('bsub').textContent='Builds exactly what you heard: your sounds, your direction.'; setMod('bld','Preview','on'); $('buildBtn').disabled=false; markNext();
-  if(p.used){ S.usedCount=p.used; renderKit(); } setActive('bld'); player.play().catch(()=>{}); };
+  setActive('bld'); listenLabel(); player.play().catch(()=>{}); };
 async function startBuild(){ S.building=true; resetBuild(); markNext(); setActive('bld');
   if(S.target==='ableton'){ const st = await liveStatus(); if(!st.ok || !st.fresh){ await sleep(350); window.flowError(st.ok ? `The Live Set in front has ${st.tracks} tracks. In Ableton: File › New Live Set, then press Retry.` : st.reason); return; } }
   S.lastOpts = currentOpts(); const r = await api().build(S.lastOpts); if(!r.ok){ window.flowError(r.error); } }
@@ -740,7 +742,7 @@ window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('bu
   if(!TL) window.flowPlan(sum); TL.revealAll();
   if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bsub').textContent += ` ${warns.length} note${warns.length===1?'':'s'} in Details.`; }
   if(sum.kit){ S.usedCount=Object.keys(sum.kit).length; renderKit(); } $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
-  $('buildBtn').textContent='BUILD'; $('buildBtn').disabled=false; $('listenBtn').disabled=false; refreshStatus(); if(S.preview && !S.previewStale){ $('tp').classList.remove('hidden'); } await sleep(900); if(TL && player.paused) TL.sweep(); };
+  $('buildBtn').textContent='BUILD'; $('buildBtn').disabled=false; $('listenBtn').disabled=false; listenLabel(); refreshStatus(); if(S.preview && !S.previewStale){ $('tp').classList.remove('hidden'); } await sleep(900); if(TL && player.paused) TL.sweep(); };
 $('again').onclick=()=>{ S.built=false; S.usedCount=null; renderKit(); $('bsub').textContent='Builds this arrangement from your sounds and your direction. Nothing is decided for you.'; $('buildBtn').textContent='BUILD'; $('again').classList.add('hidden'); $('openOut').classList.add('hidden'); gateBuild(); setActive('ref'); };
 gateBuild();
 window.flowUpdate = u=>{ if(!u || !u.available) return; $('updTxt').textContent = `Update ${u.version}`; $('updChip').title = u.notes||''; $('updChip').classList.remove('hidden'); $('updChip').onclick = ()=>api().open_path(u.url); };
