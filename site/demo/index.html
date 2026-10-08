@@ -941,6 +941,16 @@
   .sp-mark { filter:drop-shadow(0 0 16px rgba(var(--acc-rgb),.28)) drop-shadow(0 8px 18px rgba(0,0,0,.6)); }
   .dv[data-v=ref] canvas.full { opacity:.5; }
   .sp-word { background:linear-gradient(180deg,#F4F1EA 0%, #C9C7E8 72%, #8F8EDB 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+
+  /* The tempo follows the hand: no easing while dragging, an easy settle when you let go, a generous grab area, a cap that stays inside the track. */
+  .hs .track { touch-action:none; }
+  .hs .track::before { content:""; position:absolute; left:-6px; right:-6px; top:-11px; bottom:-11px; }
+  .hs .track .cap { margin-left:-11px; transition:left .16s var(--ease), box-shadow .15s; }
+  .hs.drag .track .cap { transition:none; box-shadow:0 3px 7px rgba(20,20,30,.22), 0 0 0 1px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -1px 2px rgba(20,20,30,.06); }
+  .hs.drag .v { color:var(--ink); }
+  .hs .track .tick { margin-left:-.5px; }
+  /* A switch that cannot be used says so, and does not pretend to move. */
+  .tg.sm.off { opacity:.5; } .tg.sm.off button, .tg.sm.off .pill { cursor:default; } .tg.sm.off button:disabled { opacity:1; }
 </style>
 </head>
 <body>
@@ -1209,7 +1219,7 @@ $('statusText').onclick = async ()=>{ const st = await api().status(); S.gateFro
 async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed`:(st.state==='trial'?`Trial · ${st.days_left} days`:'Trial ended'); $('ver').textContent = st.version||'';
   S.licensed = st.state!=='expired'; $('deck').classList.toggle('locked', !S.licensed);
   if(!S.licensed){ renderGate(st, 'expired'); showView('gate'); } return st; }
-window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle(); checkTarget(); requestAnimationFrame(syncSwitches); setTimeout(syncSwitches, 400);
+window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle(); checkTarget(); renderStruct(); setTimeout(syncSwitches, 400);
   const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').slice(0,28); $('resumeChip').classList.remove('hidden'); }
   setActive('ref'); liveStatus(); });
 $('stopSend').onclick = async ()=>{ $('stopSend').disabled=true; $('stopSent').textContent='Sending…'; const r = await api().send_feedback('Build stopped: ' + $('stopMsg').textContent); $('stopSend').disabled=false; $('stopSent').textContent = r.ok ? (r.sent ? 'Sent. Thank you.' : `Saved to your Desktop as ${esc(r.path.split('/').pop())} — send it to Harel.`) : (r.error||'Could not send.'); };
@@ -1388,23 +1398,27 @@ setLen(270);
 document.querySelectorAll('#targetSeg button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#targetSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.target=b.dataset.v; checkTarget(); gateBuild(); });
 function refUsable(){ return !!(S.ref && S.ref.bars >= 48 && S.ref.sections.length >= 3); }
 function syncSwitches(){ document.querySelectorAll('.tg.sm').forEach(sw=>{ const bs=sw.querySelectorAll('button'); sw.classList.toggle('r', !!(bs[1] && bs[1].classList.contains('on'))); }); }
-document.querySelectorAll('.tg.sm .pill').forEach(pl=>pl.onclick=()=>{ const sw=pl.closest('.tg.sm'); const bs=sw.querySelectorAll('button'); const other = bs[0].classList.contains('on') ? bs[1] : bs[0]; if(!other.disabled) other.click(); });
+document.querySelectorAll('.tg.sm .pill').forEach(pl=>pl.onclick=()=>{ const sw=pl.closest('.tg.sm'); if(sw.classList.contains('off')) return; const bs=sw.querySelectorAll('button'); const other = bs[0].classList.contains('on') ? bs[1] : bs[0]; if(!other.disabled) other.click(); });
 function bpmNow(){ const i=$('bpmIn'); return parseFloat(i.value) || parseFloat(i.placeholder) || (S.ref && S.ref.bpm) || 124; }
 function nudgeBpm(d){ const i=$('bpmIn'); i.value=String(Math.max(80, Math.min(180, Math.round(bpmNow()+d)))); i.dispatchEvent(new Event('change')); }
 const BPM_MIN=80, BPM_MAX=180; const bpmPct=v=>(Math.max(BPM_MIN,Math.min(BPM_MAX,v))-BPM_MIN)/(BPM_MAX-BPM_MIN)*100;
-function drawBpm(temp){ const i=$('bpmIn'); const v = temp!=null ? temp : bpmNow(); const det=parseFloat(i.placeholder)||null; $('bpmCap').style.left=bpmPct(v)+'%'; $('bpmVal').textContent=Math.round(v); $('bpmVal').classList.toggle('own', !!i.value || temp!=null); $('bpmSlider').setAttribute('aria-valuenow', Math.round(v));
-  const t=$('bpmTick'); if(det){ t.style.left=bpmPct(det)+'%'; t.style.display='block'; } else t.style.display='none'; }
-(function bpmSlider(){ const tr=$('bpmTrack'), sl=$('bpmSlider'); let drag=null;
-  const at=e=>{ const r=tr.getBoundingClientRect(); return Math.round(BPM_MIN + Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*(BPM_MAX-BPM_MIN)); };
-  tr.addEventListener('pointerdown', e=>{ e.preventDefault(); tr.setPointerCapture(e.pointerId); drag=at(e); drawBpm(drag); sl.focus(); });
-  tr.addEventListener('pointermove', e=>{ if(drag==null) return; drag=at(e); drawBpm(drag); });
-  const end=e=>{ if(drag==null) return; const v=drag; drag=null; $('bpmIn').value=String(v); $('bpmIn').dispatchEvent(new Event('change')); };
+const bpmX=pc=>`calc(${pc}% + ${(11-pc*.22).toFixed(2)}px)`;
+function drawBpm(temp){ const i=$('bpmIn'); const v = temp!=null ? temp : bpmNow(); const det=parseFloat(i.placeholder)||null; $('bpmCap').style.left=bpmX(bpmPct(v)); $('bpmVal').textContent=Math.round(v); $('bpmVal').classList.toggle('own', !!i.value || temp!=null); $('bpmSlider').setAttribute('aria-valuenow', Math.round(v));
+  const t=$('bpmTick'); if(det){ t.style.left=bpmX(bpmPct(det)); t.style.display='block'; } else t.style.display='none'; }
+(function bpmSlider(){ const tr=$('bpmTrack'), sl=$('bpmSlider'); let drag=false; const CAP=22;
+  const at=e=>{ const r=tr.getBoundingClientRect(); const f=Math.max(0,Math.min(1,(e.clientX-r.left-CAP/2)/Math.max(1,r.width-CAP))); return BPM_MIN + f*(BPM_MAX-BPM_MIN); };
+  const apply=e=>{ const v=at(e); $('bpmIn').value=String(Math.round(v)); drawBpm(v); setLen(S.len); };
+  tr.addEventListener('pointerdown', e=>{ e.preventDefault(); tr.setPointerCapture(e.pointerId); drag=true; sl.classList.add('drag'); sl.focus(); apply(e); });
+  tr.addEventListener('pointermove', e=>{ if(drag) apply(e); });
+  const end=e=>{ if(!drag) return; drag=false; sl.classList.remove('drag'); const v=Math.round(at(e)); $('bpmIn').value=String(v); drawBpm(v); $('bpmIn').dispatchEvent(new Event('change')); };
   tr.addEventListener('pointerup', end); tr.addEventListener('pointercancel', end);
   sl.addEventListener('dblclick', ()=>{ $('bpmIn').value=''; $('bpmIn').dispatchEvent(new Event('change')); });
   sl.addEventListener('keydown', e=>{ if(e.key==='ArrowRight'||e.key==='ArrowUp'){ e.preventDefault(); nudgeBpm(e.shiftKey?5:1); } if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ e.preventDefault(); nudgeBpm(e.shiftKey?-5:-1); } });
   $('bpmIn').addEventListener('change', ()=>drawBpm()); drawBpm(); })();
 window.addEventListener('resize', syncSwitches); document.addEventListener('click', e=>{ if(e.target.closest('.tg.sm')) requestAnimationFrame(syncSwitches); });
-function renderStruct(){ requestAnimationFrame(syncSwitches); const ok=refUsable(); if(!ok && S.structure==='reference') S.structure='typical'; const rb=document.querySelector('#structSeg button[data-v="reference"]'); rb.disabled=!ok; rb.title = ok ? '' : 'The reference is too short to carry a structure'; document.querySelectorAll('#structSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===S.structure)); if(S.view==='dir') drawDir(); }
+function renderStruct(){ requestAnimationFrame(syncSwitches); const ok=refUsable(); if(!ok && S.structure==='reference') S.structure='typical'; const sw=$('structSeg'); const rb=document.querySelector('#structSeg button[data-v="reference"]'); rb.disabled=!ok; sw.classList.toggle('off', !ok);
+  sw.title = ok ? "Follow the reference's sections, or a typical club structure" : (S.ref ? 'The reference is too short to carry a structure: a typical one is used' : 'Choose a reference to follow its sections');
+  document.querySelectorAll('#structSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===S.structure)); if(S.view==='dir') drawDir(); }
 document.querySelectorAll('#structSeg button').forEach(b=>b.onclick=()=>{ if(b.disabled) return; S.structure=b.dataset.v; renderStruct(); markStale(); });
 $('bpmIn').addEventListener('change', ()=>{ if(S.view==='dir') drawDir(); setLen(S.len); markStale(); if(S.pack) loadKit(); });
 $('finBtn').onclick = ()=>{ S.finOpen = !S.finOpen; $('finBtn').classList.toggle('on', S.finOpen); setActive('dir'); if(!S.finishLoaded) loadFinish(); };

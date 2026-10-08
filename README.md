@@ -97,3 +97,12 @@ flow/app.py + flow/ui/index.html  desktop app    flow/cli.py        command line
 - **Update channel** (`flow/update.py`): at launch the app fetches `packaging/latest.json` from `UPDATE_URL`, verifies its Ed25519 signature with the same public key as the license keys, and shows an "Update x.y" chip that opens the download page. Nothing is downloaded or executed automatically, and the request carries no identifying data. Publish a new version with
   `python tools/keygen.py sign-update 0.7.0 https://.../Alma-0.7.0.dmg --notes "..."` and commit the file where `UPDATE_URL` points (a public URL).
 - **UI**: a fixed device frame (`flow/ui/index.html`), light and dark. `python tools/make_demo.py` writes `flow/ui/demo.html` with a fake backend for design work; `?expired`, `?fail`, `?update` simulate those states.
+
+## Checking the UI
+
+`tools/ui_check.py` drives the real interface (the demo build with a fake backend) in a headless browser and asserts how it
+behaves: the switches in every state, the tempo slider while it is dragged, the four circles' alignment at two window sizes,
+a full build and a rebuild in place, the licence view, the self-update chip, the kit list. Run it before every release.
+
+    uv pip install --python .venv/bin/python playwright && .venv/bin/python -m playwright install chromium   # once
+    .venv/bin/python tools/ui_check.py
