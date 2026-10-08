@@ -246,15 +246,32 @@
   .fbtn:hover { border-color:var(--ink); } .fbtn.on { border-color:var(--mc); }
   .fbtn svg { width:12px; height:12px; stroke:currentColor; fill:none; stroke-width:2; }
   .bigwrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
-  .big { position:relative; width:118px; height:118px; }
-  .big svg { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
-  .big .ring { fill:none; stroke:var(--tick); stroke-width:3; }
-  .big .prog { fill:none; stroke:var(--mc); stroke-width:3; stroke-linecap:round; stroke-dasharray:345; stroke-dashoffset:345; transition:stroke-dashoffset .5s var(--ease); filter:drop-shadow(0 0 6px color-mix(in srgb, var(--mc) 70%, transparent)); }
-  .big button { position:absolute; inset:12px; border-radius:50%; border:0; background:var(--btn); color:var(--btn-ink); font-size:11px; font-weight:700; letter-spacing:.22em; box-shadow:0 14px 30px rgba(0,0,0,.28), 0 1px 0 rgba(255,255,255,.25) inset; transition:transform .25s var(--spring), box-shadow .25s, opacity .25s; }
-  .big button:hover { transform:scale(1.04); } .big button:active { transform:scale(.96); }
-  .big button:disabled { opacity:.35; box-shadow:none; transform:none; }
-  .big.working button:disabled { opacity:1; box-shadow:0 14px 30px rgba(0,0,0,.28); animation:beat2 var(--beat) ease-in-out infinite; }
-  @keyframes beat2 { 0%,100% { box-shadow:0 14px 30px rgba(0,0,0,.28); } 18% { box-shadow:0 14px 30px rgba(0,0,0,.28), 0 0 0 6px color-mix(in srgb, var(--mc) 25%, transparent); } }
+  .big { position:relative; width:124px; height:124px; border-radius:50%; }
+  .big .bezel { position:absolute; inset:0; border-radius:50%; background:conic-gradient(from 20deg, #F6F6F4, #CBCBC6 14%, #F8F8F6 30%, #D2D2CD 48%, #F4F4F2 62%, #C6C6C1 78%, #F2F2F0 90%, #F6F6F4); box-shadow:0 12px 26px rgba(20,20,30,.22), 0 1px 2px rgba(20,20,30,.12), inset 0 1px 0 rgba(255,255,255,.9); transition:box-shadow .3s; }
+  .big .bezel::after { content:""; position:absolute; inset:8px; border-radius:50%; background:var(--mod); box-shadow:inset 0 2px 5px rgba(20,20,30,.38), inset 0 -1px 0 rgba(255,255,255,.7); }
+  :root[data-theme=dark] .big .bezel { background:conic-gradient(from 20deg, #3A3B44, #1C1D23 14%, #40414B 30%, #202127 48%, #3C3D46 62%, #1B1C22 78%, #383941 90%, #3A3B44); box-shadow:0 12px 26px rgba(0,0,0,.6), 0 1px 2px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+  :root[data-theme=dark] .big .bezel::after { background:#0F1014; box-shadow:inset 0 2px 6px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,255,255,.06); }
+  .big svg { position:absolute; inset:9px; width:106px; height:106px; transform:rotate(-90deg); }
+  .big .ring { fill:none; stroke:rgba(20,20,30,.1); stroke-width:3; }
+  :root[data-theme=dark] .big .ring { stroke:rgba(255,255,255,.08); }
+  .big .prog { fill:none; stroke:var(--mc); stroke-width:3; stroke-linecap:round; stroke-dasharray:308; stroke-dashoffset:308; opacity:0; transition:stroke-dashoffset .5s var(--ease), opacity .4s; filter:drop-shadow(0 0 5px color-mix(in srgb, var(--mc) 80%, transparent)); }
+  .big.ready .prog, .big.done .prog { stroke-dashoffset:0; opacity:1; }
+  .big.ready .prog { animation:ringbeat var(--beat) ease-in-out infinite; }
+  .big.working .prog { opacity:1; }
+  .big.err .prog { stroke:var(--err); stroke-dashoffset:0; opacity:1; filter:none; }
+  @keyframes ringbeat { 0%,100% { opacity:.5; } 18% { opacity:1; } }
+  .big button { position:absolute; inset:19px; border-radius:50%; border:0; overflow:hidden; background:radial-gradient(circle at 50% 24%, #4B4C56 0%, #2A2B32 42%, #15161B 100%); color:#F2F2F5; font-size:11px; font-weight:700; letter-spacing:.2em; text-indent:.2em; box-shadow:0 10px 20px rgba(0,0,0,.35), 0 2px 3px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.2), inset 0 -4px 8px rgba(0,0,0,.55); transition:transform .18s var(--spring), box-shadow .18s, color .3s; }
+  .big button::before { content:""; position:absolute; left:16%; right:16%; top:6%; height:36%; border-radius:50%; background:linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,0)); pointer-events:none; }
+  :root[data-theme=dark] .big button { background:radial-gradient(circle at 50% 24%, #FFFFFF 0%, #E9E9E6 42%, #C9C9C4 100%); color:#101014; box-shadow:0 10px 20px rgba(0,0,0,.55), 0 2px 3px rgba(0,0,0,.4), inset 0 1px 0 #fff, inset 0 -4px 8px rgba(0,0,0,.14); }
+  :root[data-theme=dark] .big button::before { background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,0)); }
+  .big button:hover { transform:translateY(-1px); }
+  .big button:active { transform:scale(.96) translateY(1px); box-shadow:0 3px 8px rgba(0,0,0,.35), inset 0 3px 8px rgba(0,0,0,.6); }
+  .big button:disabled { transform:none; }
+  .big.wait button { color:rgba(242,242,245,.4); }
+  :root[data-theme=dark] .big.wait button { color:rgba(16,16,20,.4); }
+  .big.working button:disabled { color:var(--mc); animation:captext var(--beat) ease-in-out infinite; }
+  @keyframes captext { 0%,100% { text-shadow:0 0 0 transparent; } 18% { text-shadow:0 0 10px color-mix(in srgb, var(--mc) 80%, transparent); } }
+  .big.next { animation:nextring var(--beat) ease-out infinite; }
   .bst { font:500 10.5px var(--mono); color:var(--sec); text-align:center; letter-spacing:.04em; min-height:14px; line-height:1.5; max-width:220px; }
   .acts { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
   .foot { display:flex; align-items:center; gap:14px; padding:0 18px; font:500 10px var(--mono); color:var(--mut); letter-spacing:.1em; text-transform:uppercase; }
@@ -344,7 +361,7 @@
       <div class="mh"><i class="led" id="ledBld"></i><span class="num">04</span><span class="mn">BUILD</span><span class="ms" id="msBld">Waiting</span></div>
       <div class="mb">
         <div class="bigwrap">
-          <div class="big" id="bigWrap"><svg viewBox="0 0 118 118"><circle class="ring" cx="59" cy="59" r="55"/><circle class="prog" id="prog" cx="59" cy="59" r="55"/></svg><button id="buildBtn" disabled>BUILD</button></div>
+          <div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div>
           <div class="bst" id="bst">Needs a reference and your sounds</div>
           <div class="acts" id="acts"><button class="sb hidden" id="openOut">Open folder</button><button class="sb hidden" id="again">Build another</button><button class="lk hidden" id="toggleLog">Details</button></div>
         </div>
@@ -582,11 +599,12 @@ $('scanPlug').onclick = scanPlugins;
 /* ---------- build ---------- */
 let TL = null;
 (function meters(){ $('meter').innerHTML = Array.from({length:18},(_,i)=>`<i style="--m:${(.35+Math.abs(Math.sin(i*1.7))*.65).toFixed(2)};animation-delay:${(i*.07).toFixed(2)}s;animation-duration:${(.7+Math.abs(Math.cos(i))*.7).toFixed(2)}s"></i>`).join(''); })();
-function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'buildBtn'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
-function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; if(!S.building && !S.built){ $('bst').textContent = ok ? 'Ready · writes into the Live Set in front' : (S.ref ? 'Waiting for 02 · Sounds' : (S.pack ? 'Waiting for 01 · Reference' : 'Waiting for 01 and 02')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); } markNext(); }
+function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
+function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building; $('buildBtn').disabled = !ok; if(!S.building && !S.built){ $('bst').textContent = ok ? 'Ready · writes into the Live Set in front' : (S.ref ? 'Waiting for 02 · Sounds' : (S.pack ? 'Waiting for 01 · Reference' : 'Waiting for 01 and 02')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
-function setProg(p){ $('prog').style.strokeDashoffset = (345*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
-function resetBuild(){ if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); $('bigWrap').classList.add('working');
+function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
+function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); }
+function resetBuild(){ if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); bigState('working');
   $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent='BUILDING'; $('buildBtn').disabled=true; $('bst').textContent='Measuring, choosing, rendering, placing.'; setMod('bld','Working','work'); }
 function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
 async function startBuild(){ S.building=true; resetBuild(); markNext(); setActive('bld');
@@ -598,10 +616,10 @@ window.flowPlan = v=>{ S.plan=v; if(TL) TL.destroy(); TL = mountTimeline($('tlCa
 window.flowProgress = (msg,pct)=>{ if(msg.startsWith('@track:')){ if(TL) TL.reveal(+msg.slice(7)); return; }
   setProg(pct); $('log').textContent += msg+'\n'; $('log').scrollTop=1e9; $('statusLine').textContent = msg; $('bst').textContent = msg;
   setPhase(pct<0.15?0 : pct<0.3?1 : pct<0.4?2 : (S.target==='ableton' && pct>=0.85 ? 4 : 3)); };
-window.flowError = msg=>{ S.building=false; markNext(); $('buildTL').classList.remove('building'); $('bigWrap').classList.remove('working'); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
+window.flowError = msg=>{ S.building=false; markNext(); $('buildTL').classList.remove('building'); bigState('err'); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
   if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Fix the cause, then retry'; liveStatus(); };
-window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); $('bigWrap').classList.remove('working'); setProg(1); setPhase(5); setMod('bld','Done','on');
+window.flowDone = async sum=>{ S.building=false; S.built=true; markNext(); $('buildTL').classList.remove('building'); bigState('done'); setProg(1); setPhase(5); setMod('bld','Done','on');
   $('statusLine').textContent = sum.ableton ? 'Done · press Cmd+S in Live' : 'Done'; $('bst').textContent = sum.ableton ? 'Your track is in the Live Set in front of you. Press Cmd+S now.' : 'Open the folder: stems, a MIDI file with markers, and your Blueprint.';
   if(!TL) window.flowPlan(sum); TL.revealAll();
   const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bst').textContent += ` · ${warns.length} note${warns.length===1?'':'s'} in Details`; }
