@@ -335,19 +335,19 @@ def test_shape_layers_breathes():
 
 
 def test_techno_profile_measured_rules():
-    """Techno (25 pro sets): kick halfway through a 32-bar intro, hats 16 bars after it, kick back for the second half
-    of a break, no silent bar before the drop."""
+    """Techno (158 tracks he plays + 25 pro sets): kick, hats and percussion from bar 1, bass/synth 16 bars later,
+    the kick leaves for the whole break, no silent bar before the drop, intros capped like house."""
     from flow import arrange, profiles
-    secs = [{"label": "Intro", "start": 1, "end": 33, "bars": 32, "kick_ratio": 1}, {"label": "Drop", "start": 33, "end": 65, "bars": 32, "kick_ratio": 1},
-            {"label": "Breakdown", "start": 65, "end": 81, "bars": 16, "kick_ratio": 0.5}, {"label": "Drop 2", "start": 81, "end": 113, "bars": 32, "kick_ratio": 1}]
-    wanted = {"atmos": secs, "kick": secs, "bass": secs, "chat": secs[1:], "synth": secs[1:], "ohat": secs[1:2] + secs[3:]}
-    sp = arrange.shape_layers(wanted, secs, 112, profiles.TECHNO)
+    secs = [{"label": "Intro", "start": 1, "end": 17, "bars": 16, "kick_ratio": 1}, {"label": "Groove", "start": 17, "end": 49, "bars": 32, "kick_ratio": 1},
+            {"label": "Drop", "start": 49, "end": 81, "bars": 32, "kick_ratio": 1},
+            {"label": "Breakdown", "start": 81, "end": 97, "bars": 16, "kick_ratio": 0}, {"label": "Drop 2", "start": 97, "end": 129, "bars": 32, "kick_ratio": 1}]
+    wanted = {"atmos": secs, "kick": secs[:3] + secs[4:], "chat": secs, "bass": secs[1:], "synth": secs[1:], "ohat": secs[2:3] + secs[4:]}
+    sp = arrange.shape_layers(wanted, secs, 128, profiles.TECHNO)
     kick = {b for a, e in sp["kick"] for b in range(a, e)}
-    assert sp["atmos"][0][0] == 1 and sp["kick"][0][0] == 17            # kick at bar 17 of a 32-bar intro
-    assert sp["chat"][0][0] == 33 and sp["synth"][0][0] == 33           # hats and synth land on the drop (kick +16), ohat 8 bars later
-    assert sp["ohat"][0][0] == 41
-    assert not any(b in kick for b in range(65, 73)) and all(b in kick for b in range(73, 81))   # break: kick out, then back halfway
-    assert 64 in kick and 80 in kick                                     # no silent bar before a drop or a break
+    assert sp["kick"][0][0] == 1 and sp["chat"][0][0] == 1              # DJ intro: kick and hats from bar 1
+    assert sp["bass"][0][0] == 33 and sp["synth"][0][0] == 33           # the second group waits a 16-bar phrase into the groove
+    assert sp["ohat"][0][0] == 57                                        # late layers 8 bars into the drop
+    assert not any(b in kick for b in range(81, 97)) and 80 in kick and 97 in kick   # the kick leaves for the break, no silent bar before it
     out, _ = arrange.normalize_sections([{"label": "Intro", "start": 1, "end": 41, "bars": 40, "kick_ratio": 1}, {"label": "Drop", "start": 41, "end": 73, "bars": 32, "kick_ratio": 1},
                                          {"label": "Breakdown", "start": 73, "end": 89, "bars": 16, "kick_ratio": 0}, {"label": "Drop 2", "start": 89, "end": 121, "bars": 32, "kick_ratio": 1}], profiles.TECHNO)
-    assert out[0]["bars"] == 32 and out[1]["label"] == "Groove"          # a long techno intro keeps 32 bars (house would cut it to 16)
+    assert out[0]["bars"] == 16 and out[1]["label"] == "Groove"          # a 40-bar intro becomes 16 + groove

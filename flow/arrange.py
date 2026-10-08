@@ -282,7 +282,8 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
         for sct in sections:
             label = sct["label"] if sct["label"] in tmpl else ("Drop 2" if sct["label"].startswith("Drop") else "Groove")
             ok = role in tmpl[label]
-            if role == "kick" and sct["kick_ratio"] < 0.35 and not (prof.break_kick == "half" and sct["label"] in ("Breakdown", "Build")):
+            keeps_kick = (prof.build_kick and sct["label"] == "Build") or (prof.break_kick == "half" and sct["label"] == "Breakdown")
+            if role == "kick" and sct["kick_ratio"] < 0.35 and not keeps_kick:
                 ok = False
             if role == "kick" and sct["label"] == "Intro" and sct["kick_ratio"] >= 0.35:
                 ok = True
