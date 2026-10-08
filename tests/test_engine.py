@@ -233,3 +233,73 @@ def test_short_reference_falls_back_to_typical_structure():
     assert arrange.reference_sections(full)[1] is None
     typ, note2 = arrange.reference_sections(full, "typical")
     assert note2 is None and len(typ) == 7
+
+
+def _fake_pack(tmp_path):
+    import numpy as np
+    from flow import audio
+    sr = 22050
+    samples = []
+    by_role = {}
+    rng = np.random.default_rng(1)
+    for role, n, dur in (("kick", 3, 0.4), ("clap", 2, 0.3), ("bass", 2, 0.6)):
+        for i in range(n):
+            p = str(tmp_path / f"{role}{i}.wav")
+            y = (rng.standard_normal((1, int(sr * dur))) * 0.3).astype("float32")
+            audio.write(p, y, sr)
+            s = {"path": p, "name": f"{role}{i}.wav", "rel": f"{role}{i}.wav", "role": role, "duration": dur, "bpm": None, "key": None, "is_loop": False}
+            samples.append(s)
+            by_role.setdefault(role, []).append(s)
+    return {"samples": samples, "_by_role": by_role, "count": len(samples)}
+
+
+def test_candidates_overrides_and_kit_view(tmp_path):
+    from flow import pack
+    pk = _fake_pack(tmp_path)
+    cands = pack.candidates(pk, 124)
+    assert set(cands) == {"kick", "clap", "bass"} and len(cands["kick"]) == 3
+    kit = pack.choose_kit(pk, 124, cands=cands)
+    assert kit["kick"]["path"] == cands["kick"][0]["path"]
+    other = cands["kick"][2]["path"]
+    assert pack.choose_kit(pk, 124, {"kick": other}, cands)["kick"]["path"] == other
+    assert "clap" not in pack.choose_kit(pk, 124, {"clap": ""}, cands)            # the user took the role out
+    rows = pack.kit_view(pk, 124, {"kick": other}, cands)
+    assert [r["role"] for r in rows] == ["kick", "clap", "bass"] and rows[0]["chosen"]["path"] == other and rows[0]["label"] == "Kick"
+
+
+def test_render_mix_length_and_level(tmp_path):
+    import numpy as np, soundfile as sf
+    from flow import export, audio
+    p = str(tmp_path / "k.wav")
+    audio.write(p, (np.ones((1, 2205)) * 0.5).astype("float32"), 22050)
+    plan = {"bpm": 120, "bars": 4, "tracks": [{"name": "Kick", "role": "kick", "kind": "audio", "spans": [[1, 5]], "clip_bars": 1, "source": {"path": p, "kind": "oneshot", "bars": None}}]}
+    out = str(tmp_path / "mix.wav")
+    r = export.render_mix(plan, out, sr=22050, tail_s=1.0)
+    info = sf.info(out)
+    assert abs(info.frames / info.samplerate - (4 * 2 + 1)) < 0.01 and info.subtype == "PCM_16" and r["bars"] == 4
+    y, _ = audio.load(out)
+    assert 0.85 < float(np.abs(y).max()) <= 0.9
+
+
+def test_media_server_serves_only_registered_files_with_ranges(tmp_path):
+    import urllib.request, urllib.error
+    from flow.app import MediaServer
+    f = tmp_path / "a.wav"
+    f.write_bytes(bytes(range(256)) * 4)
+    srv = MediaServer()
+    try:
+        url = srv.register(str(f))
+        assert url.startswith("http://127.0.0.1:") and url == srv.register(str(f))
+        with urllib.request.urlopen(url, timeout=3) as r:
+            assert r.status == 200 and len(r.read()) == 1024 and r.headers["Accept-Ranges"] == "bytes"
+        req = urllib.request.Request(url, headers={"Range": "bytes=100-199"})
+        with urllib.request.urlopen(req, timeout=3) as r:
+            body = r.read()
+            assert r.status == 206 and len(body) == 100 and body[0] == 100 and r.headers["Content-Range"] == "bytes 100-199/1024"
+        try:
+            urllib.request.urlopen(url.rsplit("/", 1)[0] + "/deadbeef", timeout=3)
+            assert False, "unregistered token must 404"
+        except urllib.error.HTTPError as e:
+            assert e.code == 404
+    finally:
+        srv.close()

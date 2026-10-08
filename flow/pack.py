@@ -179,45 +179,102 @@ def _features(path: str) -> dict:
     return {"low": low, "high": high, "centroid": centroid, "peak": float(np.abs(m).max())}
 
 
-def choose_kit(pack: dict, bpm: float) -> dict:
-    """Pick one sample per role. Loops only when their BPM matches the target (no time-stretching here)."""
-    by_role = pack["_by_role"]
-    kit: dict[str, dict] = {}
+ROLE_LABELS = {"kick": "Kick", "clap": "Clap", "chat": "Closed hat", "ohat": "Open hat", "tom": "Tom", "perc": "Perc", "shaker_loop": "Shaker loop",
+               "hat_loop": "Hat loop", "perc_loop": "Perc loop", "perc_loop2": "Perc loop 2", "bass": "Bass", "synth": "Synth", "pad": "Pad",
+               "atmos": "Atmosphere", "impact": "Impact", "uplifter": "Uplifter", "downlifter": "Downlifter"}
+KIT_ROLES = list(ROLE_LABELS)
+MAX_CANDIDATES = 24
 
-    def pick(role, score_fn=None, want_loop=None):
-        cands = by_role.get(role, [])
+
+def candidates(pack: dict, bpm: float) -> dict[str, list[dict]]:
+    """Every sample in the pack that could play each role, best first. Loops only when their BPM matches (no stretching)."""
+    by_role = pack["_by_role"]
+
+    def pool(role, want_loop=None):
+        c = list(by_role.get(role, []))
         if want_loop is not None:
-            cands = [c for c in cands if c["is_loop"] == want_loop]
+            c = [x for x in c if x["is_loop"] == want_loop]
         if want_loop:
-            cands = [c for c in cands if c["bpm"] is None or abs(c["bpm"] - bpm) / bpm < 0.02]
+            c = [x for x in c if x["bpm"] is None or abs(x["bpm"] - bpm) / bpm < 0.02]
+        return c
+
+    def ranked(cands, score_fn):
         if not cands:
-            return None
+            return []
         if score_fn is None or len(cands) == 1:
-            return cands[0]
+            return cands[:MAX_CANDIDATES]
         scored = []
         for c in cands[:12]:
             try:
                 scored.append((score_fn(_features(c["path"])), c))
             except Exception:
-                continue
-        return max(scored, key=lambda x: x[0])[1] if scored else cands[0]
+                scored.append((float("-inf"), c))
+        scored.sort(key=lambda x: -x[0])
+        return ([c for _, c in scored] + cands[12:])[:MAX_CANDIDATES]
 
-    kit["kick"] = pick("kick", lambda f: f["low"] - 0.3 * f["high"], want_loop=False)
-    kit["clap"] = pick("clap", lambda f: f["peak"], want_loop=False)
-    kit["ohat"] = pick("ohat", lambda f: f["high"], want_loop=False)
-    kit["chat"] = pick("chat", lambda f: f["high"], want_loop=False)
-    kit["tom"] = pick("tom", lambda f: f["low"], want_loop=False)
-    kit["perc"] = pick("perc", None, want_loop=False)
-    kit["shaker_loop"] = pick("shaker", None, want_loop=True)
-    kit["hat_loop"] = pick("chat", None, want_loop=True) or pick("ohat", None, want_loop=True)
-    kit["perc_loop"] = pick("perc", None, want_loop=True) or pick("top", None, want_loop=True)
-    perc_loops = [c for c in by_role.get("perc", []) + by_role.get("top", []) if c["is_loop"]]
-    kit["perc_loop2"] = perc_loops[1] if len(perc_loops) > 1 else None
-    kit["bass"] = pick("bass", lambda f: f["low"], want_loop=False) or pick("bass", None, want_loop=True)
-    kit["synth"] = pick("synth", lambda f: -abs(f["centroid"] - 1500), want_loop=False) or pick("synth", None, want_loop=True)
-    kit["pad"] = pick("pad", None, want_loop=True) or pick("pad", None)
-    kit["atmos"] = pick("atmos", None) or (by_role.get("pad", [None])[1] if len(by_role.get("pad", [])) > 1 else None)
-    kit["impact"] = pick("impact", None)
-    kit["uplifter"] = pick("uplifter", None)
-    kit["downlifter"] = pick("downlifter", None)
-    return {k: v for k, v in kit.items() if v}
+    def first(*lists):
+        for lst in lists:
+            if lst:
+                return lst
+        return []
+
+    out = {}
+    out["kick"] = ranked(pool("kick", False), lambda f: f["low"] - 0.3 * f["high"])
+    out["clap"] = ranked(pool("clap", False), lambda f: f["peak"])
+    out["ohat"] = ranked(pool("ohat", False), lambda f: f["high"])
+    out["chat"] = ranked(pool("chat", False), lambda f: f["high"])
+    out["tom"] = ranked(pool("tom", False), lambda f: f["low"])
+    out["perc"] = ranked(pool("perc", False), None)
+    out["shaker_loop"] = ranked(pool("shaker", True), None)
+    out["hat_loop"] = ranked(pool("chat", True) + pool("ohat", True), None)
+    perc_loops = pool("perc", True) + pool("top", True)
+    out["perc_loop"] = ranked(perc_loops, None)
+    out["perc_loop2"] = ranked(perc_loops[1:] + perc_loops[:1], None) if len(perc_loops) > 1 else []
+    out["bass"] = ranked(first(pool("bass", False), pool("bass", True)), lambda f: f["low"])
+    out["synth"] = ranked(first(pool("synth", False), pool("synth", True)), lambda f: -abs(f["centroid"] - 1500))
+    out["pad"] = ranked(first(pool("pad", True), pool("pad")), None)
+    out["atmos"] = ranked(first(pool("atmos"), pool("pad")[1:]), None)
+    out["impact"] = ranked(pool("impact"), None)
+    out["uplifter"] = ranked(pool("uplifter"), None)
+    out["downlifter"] = ranked(pool("downlifter"), None)
+    return {k: v for k, v in out.items() if v}
+
+
+def choose_kit(pack: dict, bpm: float, overrides: dict | None = None, cands: dict | None = None) -> dict:
+    """One sample per role: the user's pick where there is one, otherwise the best candidate."""
+    cands = cands if cands is not None else candidates(pack, bpm)
+    by_path = {s["path"]: s for s in pack.get("samples", [])}
+    overrides = overrides or {}
+    kit: dict[str, dict] = {}
+    for role, lst in cands.items():
+        ov = overrides.get(role)
+        if ov == "":
+            continue                      # the user took this role out
+        if ov and ov in by_path:
+            kit[role] = by_path[ov]
+        else:
+            kit[role] = lst[0]
+    if kit.get("perc_loop2") and kit.get("perc_loop") and kit["perc_loop2"]["path"] == kit["perc_loop"]["path"]:
+        alt = next((c for c in cands["perc_loop2"] if c["path"] != kit["perc_loop"]["path"]), None)
+        if alt:
+            kit["perc_loop2"] = alt
+        else:
+            kit.pop("perc_loop2")
+    return kit
+
+
+def kit_view(pack: dict, bpm: float, overrides: dict | None = None, cands: dict | None = None) -> list[dict]:
+    """Rows for the UI: role, label, the chosen sample and every candidate, in kit order."""
+    cands = cands if cands is not None else candidates(pack, bpm)
+    kit = choose_kit(pack, bpm, overrides, cands)
+
+    def summ(x):
+        return {"name": x["name"], "path": x["path"], "rel": x.get("rel"), "duration": x["duration"], "bpm": x["bpm"], "is_loop": x["is_loop"]}
+
+    rows = []
+    for role in KIT_ROLES:
+        if role not in cands:
+            continue
+        ch = kit.get(role)
+        rows.append({"role": role, "label": ROLE_LABELS[role], "chosen": summ(ch) if ch else None, "candidates": [summ(c) for c in cands[role]]})
+    return rows

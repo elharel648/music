@@ -13,6 +13,46 @@ from . import audio, arrange, patterns as patmod
 GM = {"kick": 36, "clap": 39, "snare_roll": 38, "chat": 42, "ohat": 46, "tom": 45, "tom_b": 47, "tom_c": 43, "perc": 63, "shaker_loop": 70}
 
 
+def _load_stereo(path: str, sr: int, cache: dict) -> np.ndarray:
+    if path not in cache:
+        y, _ = audio.load(path, sr=sr)
+        cache[path] = np.vstack([y, y]) if y.shape[0] == 1 else y
+    return cache[path]
+
+
+def _place_track(buf: np.ndarray, t: dict, bar_len: float, sr: int, cache: dict, gain: float = 1.0) -> None:
+    """Add one track's clips (spans, hits, sweeps, placements) into buf at bar positions."""
+    n = buf.shape[1]
+    y = _load_stereo(t["source"]["path"], sr, cache)
+    clip_bars = t.get("clip_bars") or max(1, int(round(y.shape[1] / sr / bar_len)))
+    for s, e in t.get("spans", []):
+        b = s
+        while b < e:
+            i0 = int((b - 1) * bar_len * sr)
+            take = min(y.shape[1], int(min(clip_bars, e - b) * bar_len * sr) if t["source"]["kind"] != "oneshot" else y.shape[1])
+            i1 = min(n, i0 + take)
+            if i1 > i0:
+                buf[:, i0:i1] += y[:, : i1 - i0] * gain
+            b += clip_bars
+    for hb in t.get("hits", []):
+        i0 = int((hb - 1) * bar_len * sr)
+        i1 = min(n, i0 + y.shape[1])
+        if i1 > i0:
+            buf[:, i0:i1] += y[:, : i1 - i0] * gain
+    for sb, sp in t.get("sweeps", []):
+        sw = _load_stereo(sp, sr, cache)
+        i0 = int((sb - 1) * bar_len * sr)
+        i1 = min(n, i0 + sw.shape[1])
+        if i1 > i0:
+            buf[:, i0:i1] += sw[:, : i1 - i0] * gain
+    for pl in t.get("placements", []):
+        yp = _load_stereo(pl["path"], sr, cache)
+        i0 = int((pl["bar"] - 1) * bar_len * sr)
+        i1 = min(n, i0 + yp.shape[1])
+        if i1 > i0:
+            buf[:, i0:i1] += yp[:, : i1 - i0] * gain
+
+
 def render_stems(plan: dict, out_dir: str, sr: int = 48000, progress=None, tail_s: float = 8.0) -> list[str]:
     bpm = plan["bpm"]
     bar_len = 240.0 / bpm
@@ -22,42 +62,8 @@ def render_stems(plan: dict, out_dir: str, sr: int = 48000, progress=None, tail_
     cache: dict[str, np.ndarray] = {}
     tracks = plan["tracks"]
     for i, t in enumerate(tracks):
-        src = t["source"]["path"]
-        if src not in cache:
-            y, _ = audio.load(src, sr=sr)
-            if y.shape[0] == 1:
-                y = np.vstack([y, y])
-            cache[src] = y
-        y = cache[src]
         buf = np.zeros((2, n), dtype=np.float32)
-        clip_bars = t.get("clip_bars") or max(1, int(round(y.shape[1] / sr / bar_len)))
-        for s, e in t.get("spans", []):
-            b = s
-            while b < e:
-                i0 = int((b - 1) * bar_len * sr)
-                take = min(y.shape[1], int(min(clip_bars, e - b) * bar_len * sr) if t["source"]["kind"] != "oneshot" else y.shape[1])
-                i1 = min(n, i0 + take)
-                buf[:, i0:i1] += y[:, : i1 - i0]
-                b += clip_bars
-        for hb in t.get("hits", []):
-            i0 = int((hb - 1) * bar_len * sr)
-            i1 = min(n, i0 + y.shape[1])
-            buf[:, i0:i1] += y[:, : i1 - i0]
-        for sb, sp in t.get("sweeps", []):
-            sw, _ = audio.load(sp, sr=sr)
-            if sw.shape[0] == 1:
-                sw = np.vstack([sw, sw])
-            i0 = int((sb - 1) * bar_len * sr)
-            i1 = min(n, i0 + sw.shape[1])
-            buf[:, i0:i1] += sw[:, : i1 - i0]
-        for pl in t.get("placements", []):
-            if pl["path"] not in cache:
-                yp, _ = audio.load(pl["path"], sr=sr)
-                cache[pl["path"]] = np.vstack([yp, yp]) if yp.shape[0] == 1 else yp
-            yp = cache[pl["path"]]
-            i0 = int((pl["bar"] - 1) * bar_len * sr)
-            i1 = min(n, i0 + yp.shape[1])
-            buf[:, i0:i1] += yp[:, : i1 - i0]
+        _place_track(buf, t, bar_len, sr, cache)
         peak = float(np.abs(buf).max())
         if peak > 0.98:
             buf *= 0.98 / peak
@@ -69,6 +75,31 @@ def render_stems(plan: dict, out_dir: str, sr: int = 48000, progress=None, tail_
             progress(f"Stem {i + 1}/{len(tracks)}: {t['name']}", (i + 1) / len(tracks))
             progress(f"@track:{i}", (i + 1) / len(tracks))
     return written
+
+
+def render_mix(plan: dict, path: str, sr: int = 44100, progress=None, tail_s: float = 4.0) -> dict:
+    """A quick stereo mix of the whole arrangement to listen to before anything is written to a DAW.
+    Balance follows the Finish gain staging; no effects. 16-bit so every browser engine plays it."""
+    import soundfile as sf
+    from . import finish as finishmod
+    bpm = plan["bpm"]
+    bar_len = 240.0 / bpm
+    n = int((plan["bars"] * bar_len + tail_s) * sr)
+    mix = np.zeros((2, n), dtype=np.float32)
+    cache: dict[str, np.ndarray] = {}
+    tracks = plan["tracks"]
+    for i, t in enumerate(tracks):
+        gain = 10 ** (finishmod.GAIN_DB.get(t["role"], -6) / 20.0)
+        _place_track(mix, t, bar_len, sr, cache, gain=gain)
+        if progress:
+            progress(f"Mixing {t['name']}", (i + 1) / len(tracks))
+            progress(f"@track:{i}", (i + 1) / len(tracks))
+    peak = float(np.abs(mix).max())
+    if peak > 0:
+        mix *= 0.89 / peak
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    sf.write(path, mix.T, sr, subtype="PCM_16")
+    return {"path": path, "seconds": round(n / sr, 3), "bars": int(plan["bars"]), "bpm": float(bpm)}
 
 
 # ---- minimal Standard MIDI File writer (format 1)

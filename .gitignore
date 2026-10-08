@@ -14,3 +14,4 @@ FLOW export/
 build_*.log
 .claude/
 flow/ui/demo.html
+flow/ui/demo-preview.wav

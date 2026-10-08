@@ -48,5 +48,6 @@ if sys.platform == "darwin":
             "NSHumanReadableCopyright": "© 2026 Harel Eliyahu. All rights reserved.",
             "LSMinimumSystemVersion": "12.0",
             "NSRequiresAquaSystemAppearance": False,
+            "NSAppTransportSecurity": {"NSAllowsLocalNetworking": True},
         },
     )
