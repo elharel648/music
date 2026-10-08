@@ -912,6 +912,22 @@
 
   /* No status words in the plate headers (Measured, Ready, Melodic Techno · 5:00). Only a failure speaks there. */
   .well > .mh .ms { display:none; } .well > .mh .ms.err { display:inline; color:var(--err); }
+
+  /* The opening screen: the mark, the name, deep blue behind them, the wave as texture. */
+  .disp { background:radial-gradient(120% 90% at 50% 38%, #0E1030 0%, #08091A 46%, #050509 100%); }
+  .dv[data-v=ref] canvas.full { opacity:.72; -webkit-mask-image:radial-gradient(ellipse 30% 46% at 50% 50%, transparent 0, transparent 62%, #000 100%); mask-image:radial-gradient(ellipse 30% 46% at 50% 50%, transparent 0, transparent 62%, #000 100%); }
+  .splash { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; pointer-events:none; z-index:3; }
+  .splash.hidden { display:none; }
+  .sp-glow { position:absolute; left:50%; top:46%; width:56%; height:78%; transform:translate(-50%,-50%); background:radial-gradient(closest-side, rgba(var(--acc-rgb),.34), rgba(var(--acc-rgb),.10) 55%, rgba(var(--acc-rgb),0) 100%); filter:blur(8px); animation:spIn 1.6s var(--ease) both; }
+  .sp-mark { position:relative; width:clamp(54px, 10vh, 84px); height:auto; filter:drop-shadow(0 0 22px rgba(var(--acc-rgb),.55)) drop-shadow(0 8px 18px rgba(0,0,0,.5)); animation:spMark 1.2s var(--ease) .1s both; }
+  .sp-word { position:relative; font-family:"Satoshi",sans-serif; font-weight:500; font-size:clamp(44px, 10.5vh, 92px); letter-spacing:-.045em; line-height:1; color:#F4F1EA; background:linear-gradient(180deg,#FFFFFF 0%, #D9D7F6 72%, #A6A4E8 100%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:spWord 1.3s var(--ease) .35s both; }
+  .sp-cta { position:relative; pointer-events:auto; margin-top:10px; height:34px; padding:0 18px; border-radius:17px; border:1px solid rgba(244,241,234,.22); background:rgba(244,241,234,.04); color:#F4F1EA; font:500 12px "Satoshi",sans-serif; letter-spacing:.01em; cursor:pointer; backdrop-filter:blur(6px); transition:background .2s, border-color .2s, transform .15s var(--ease); animation:spWord 1.2s var(--ease) 1s both; }
+  .sp-cta:hover { background:rgba(244,241,234,.10); border-color:rgba(244,241,234,.5); } .sp-cta:active { transform:translateY(1px); }
+  @keyframes spIn { from { opacity:0; transform:translate(-50%,-50%) scale(.82); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
+  @keyframes spMark { from { opacity:0; transform:scale(.86); } to { opacity:1; transform:scale(1); } }
+  @keyframes spWord { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .sp-glow, .sp-mark, .sp-word, .sp-cta { animation:none; } }
+  @media (max-height:760px) { .splash { gap:10px; } .sp-cta { margin-top:6px; height:30px; } }
 </style>
 </head>
 <body>
@@ -929,7 +945,7 @@
 
   <section class="disp" id="disp">
     <div class="dv" data-v="gate"><div class="gate lic" id="gateBox"></div></div>
-    <div class="dv" data-v="ref"><canvas class="full" id="waveCv" title="Choose a reference track"></canvas><div class="tl hidden" id="refTL"></div><div class="cap" id="refCap"></div></div>
+    <div class="dv" data-v="ref"><canvas class="full" id="waveCv" title="Choose a reference track"></canvas><div class="splash" id="splash"><div class="sp-glow"></div><svg class="sp-mark" viewBox="0 0 1000 1000" aria-hidden="true"><defs><radialGradient id="spcap" cx="38%" cy="28%" r="75%"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#F1EEE6"/><stop offset="1" stop-color="#CFCBC0"/></radialGradient></defs><circle cx="500" cy="500" r="330" fill="url(#spcap)"/><line x1="500" y1="226" x2="500" y2="330" stroke="#0B0B0D" stroke-width="44" stroke-linecap="round" transform="rotate(32 500 500)"/></svg><div class="sp-word">alma</div><button class="sp-cta" id="spCta" type="button">Choose a reference</button></div><div class="tl hidden" id="refTL"></div><div class="cap" id="refCap"></div></div>
     <div class="dv" data-v="snd"><div class="seq" id="seqEl" aria-hidden="true"></div><div id="kitView" class="hidden"></div><div class="cap" id="sndCap"></div></div>
     <div class="dv" data-v="dir"><div id="dirView"></div><div class="cap" id="dirCap"></div></div>
     <div class="dv" data-v="fb"><div class="gate fb"><h2>What did you hear?</h2><p>Where it stopped feeling like a track: the bar, the layer, the section. Alma attaches what it built so Harel can see exactly what you heard.</p><textarea id="fbText" rows="5" placeholder="The break at bar 77 is too long. The bass should wait for the drop. The build needs a snare roll…"></textarea><div class="fbrow"><button class="dbtn" id="fbCancel">Back</button><span class="sp"></span><button class="dbtn" id="fbSend">Send</button></div><div class="dmsg" id="fbMsg"></div></div></div>
@@ -1090,7 +1106,7 @@ let stopWave=null, stopSeq=null;
 function syncIdle(){ const waveOn = S.view==='ref' && !S.ref, seqOn = S.view==='snd' && !S.pack;
   if(waveOn && !stopWave) stopWave=startWave($('waveCv')); if(!waveOn && stopWave){ stopWave(); stopWave=null; }
   if(seqOn && !stopSeq) stopSeq=startSeq($('seqEl')); if(!seqOn && stopSeq){ stopSeq(); stopSeq=null; }
-  $('waveCv').classList.toggle('hidden', !waveOn); $('seqEl').classList.toggle('hidden', !seqOn); }
+  $('waveCv').classList.toggle('hidden', !waveOn); $('splash').classList.toggle('hidden', !waveOn); $('seqEl').classList.toggle('hidden', !seqOn); }
 
 /* ---------- the arrangement view ---------- */
 const FAMS = [['Kick','k',r=>r==='kick'], ['Drums','',r=>/^(clap|snare_roll|tom|tom_b|tom_c|chat|ohat|hat_loop|shaker_loop)$/.test(r)], ['Percussion','',r=>/^(perc|perc_loop|perc_loop2)$/.test(r)],
@@ -1203,7 +1219,7 @@ $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classL
 let REFTL = null;
 function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('pickRef').classList.add('filled'); $('refName').textContent=n; $('refName').title=S.refPath; $('sess').innerHTML = `<b>${esc(n)}</b>`; }
 async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; refAud.url=null; refAud.active=false; setRefFile(); setActive('ref'); analyze(); }
-$('waveCv').addEventListener('click', ()=>{ if(!S.ref) pickRef(); }); $('waveCv').style.cursor='pointer';
+$('waveCv').addEventListener('click', ()=>{ if(!S.ref) pickRef(); }); $('waveCv').style.cursor='pointer'; $('spCta').onclick=()=>{ if(!S.ref) pickRef(); };
 $('pickRef').onclick = ()=>{ if(!$('pickRef').classList.contains('filled')) pickRef(); }; $('refChange').onclick = e=>{ e.stopPropagation(); pickRef(); }; $('pickRef').onkeydown = e=>{ if((e.key==='Enter'||e.key===' ') && !$('pickRef').classList.contains('filled')){ e.preventDefault(); pickRef(); } };
 async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=null;   /* the reference is always measured on its own grid */
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ setMod('ref','Error','err'); $('refMsg').className='msg err'; $('refMsg').textContent=r.error; return; }
