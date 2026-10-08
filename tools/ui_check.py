@@ -94,6 +94,7 @@ async def toggles(browser, base):
         t2 = await pg.evaluate("(()=>{ const p=document.querySelector('#themeBtn .pill'), i=p.querySelector('i'); return {theme: document.documentElement.dataset.theme, knobRight: (i.getBoundingClientRect().left-p.getBoundingClientRect().left)>8, aria: document.getElementById('themeBtn').getAttribute('aria-checked')}; })()")
         check(t2["theme"] == want and t2["knobRight"] == (want == "dark") and t2["aria"] == ("true" if want == "dark" else "false"), f"the theme switch goes {want}: knob and state agree", str(t2))
     check(await pg.evaluate("getComputedStyle(document.getElementById('liveSt')).display") == "none", "the footer shows no Live status (a problem is said once, under Direction)")
+    check(await pg.evaluate("document.getElementById('sess').textContent.trim()===''"), "the top bar says nothing until a reference is loaded")
     check(not errs, "no script errors", str(errs))
     await pg.close()
 
