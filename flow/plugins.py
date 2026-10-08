@@ -1,4 +1,4 @@
-"""Scan the plug-ins installed on this computer and suggest which ones FLOW can use."""
+"""Scan the plug-ins installed on this computer and suggest which ones Alma can use."""
 from __future__ import annotations
 import os
 import platform

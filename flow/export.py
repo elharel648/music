@@ -131,7 +131,7 @@ def write_midi(plan: dict, path: str, tpq: int = 480) -> str:
     bar = tpq * 4
     tracks = []
     meta = [(0, b"\xff\x51\x03" + struct.pack(">I", int(60_000_000 / bpm))[1:]), (0, b"\xff\x58\x04\x04\x02\x18\x08"),
-            (0, b"\xff\x03" + _vlq(4) + b"FLOW")]
+            (0, b"\xff\x03" + _vlq(4) + b"Alma")]
     for name, b in plan["locators"]:
         nm = _ascii(name)
         meta.append(((b - 1) * bar, b"\xff\x06" + _vlq(len(nm)) + nm))
@@ -193,12 +193,12 @@ def write_report(plan: dict, ref: dict, path: str) -> str:
         for s in secs)
     rows = "".join(f"<tr><td>{t['name']}</td><td>{t.get('kind', 'audio')}</td><td>{', '.join(f'{a}–{b - 1}' for a, b in t.get('spans', [])) or ', '.join(str(h) for h in t.get('hits', []))}</td></tr>" for t in plan["tracks"])
     steps = "".join(f"<li>{line}</li>" for line in arrange.describe(plan))
-    html = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>FLOW blueprint · {ref['file']}</title>
+    html = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Alma blueprint · {ref['file']}</title>
 <style>body{{margin:0;background:#F7F6F3;color:#17171C;font-family:Manrope,system-ui,sans-serif}} .wrap{{max-width:1100px;margin:0 auto;padding:40px 24px}}
 h1{{font-size:28px;margin:0 0 6px}} .meta{{color:#6B6B75;margin-bottom:28px}} .card{{background:#fff;border:1px solid rgba(20,20,30,.06);border-radius:20px;padding:24px;margin-bottom:20px}}
 table{{width:100%;border-collapse:collapse;font-size:13px}} td{{padding:8px 6px;border-top:1px solid rgba(20,20,30,.06)}} .eyebrow{{font-size:11px;letter-spacing:.18em;color:#6B6B75;font-weight:700;margin-bottom:12px}}
 ol li{{margin:6px 0}}</style></head><body><div class="wrap">
-<h1>Blueprint · {ref['file']}</h1><div class="meta">{plan['bpm']:.0f} BPM · {ref['key']['tonic']} {ref['key']['mode']} · {plan['bars']} bars · style: {plan['style']} · made with FLOW</div>
+<h1>Blueprint · {ref['file']}</h1><div class="meta">{plan['bpm']:.0f} BPM · {ref['key']['tonic']} {ref['key']['mode']} · {plan['bars']} bars · style: {plan['style']} · made with Alma</div>
 <div class="card"><div class="eyebrow">STRUCTURE</div><div style="display:flex;gap:8px;align-items:flex-end">{strip}</div></div>
 <div class="card"><div class="eyebrow">BUILD STEPS</div><ol>{steps}</ol></div>
 <div class="card"><div class="eyebrow">TRACKS</div><table>{rows}</table></div>
@@ -212,18 +212,18 @@ ol li{{margin:6px 0}}</style></head><body><div class="wrap">
 def export_all(plan: dict, ref: dict, out_dir: str, progress=None) -> dict:
     os.makedirs(out_dir, exist_ok=True)
     stems = render_stems(plan, os.path.join(out_dir, "Stems"), progress=progress)
-    midi = write_midi(plan, os.path.join(out_dir, "FLOW markers and patterns.mid"))
+    midi = write_midi(plan, os.path.join(out_dir, "Alma markers and patterns.mid"))
     report = write_report(plan, ref, os.path.join(out_dir, "Blueprint.html"))
     with open(os.path.join(out_dir, "blueprint.json"), "w") as f:
         json.dump({"plan": {k: v for k, v in plan.items()}, "reference": {k: v for k, v in ref.items() if k != "bar_features"}}, f, indent=1, default=str)
     with open(os.path.join(out_dir, "README.txt"), "w") as f:
         f.write(
-            f"FLOW export · {ref['file']} · {plan['bpm']:.0f} BPM · {plan['bars']} bars\n\n"
+            f"Alma export · {ref['file']} · {plan['bpm']:.0f} BPM · {plan['bars']} bars\n\n"
             "HOW TO USE IN ANY DAW\n"
             f"1. Create a new project at {plan['bpm']:.0f} BPM.\n"
             "2. Drag every file from Stems/ onto new tracks, all starting at bar 1. They are already arranged.\n"
-            "3. Import 'FLOW markers and patterns.mid': it carries the section markers and MIDI patterns for bass/synth/drums.\n"
+            "3. Import 'Alma markers and patterns.mid': it carries the section markers and MIDI patterns for bass/synth/drums.\n"
             "   Logic: File > Import > MIDI File.  FL Studio: drag onto the playlist.  Cubase/Studio One/Reaper: File > Import.\n"
             "4. Open Blueprint.html for the structure and the build steps.\n\n"
-            "Ableton Live users: use FLOW's 'Build in Ableton' target instead; it writes a real editable Set.\n")
+            "Ableton Live users: use Alma's 'Build in Ableton' target instead; it writes a real editable Set.\n")
     return {"stems": stems, "midi": midi, "report": report, "folder": out_dir}

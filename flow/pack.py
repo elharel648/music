@@ -77,7 +77,7 @@ def scan_pack(folder: str, bpm: float | None = None, max_files: int = 2000) -> d
     elif not has_drums:
         warnings.append("No drums found. Choose the pack's TOP folder (the one that contains Drums, Loops and FX), or several folders at once.")
     elif not has_kick:
-        warnings.append("No kick drum found. FLOW builds the groove around a kick; add one or choose the pack's top folder.")
+        warnings.append("No kick drum found. Alma builds the groove around a kick; add one or choose the pack's top folder.")
     return {"folder": folder, "folders": folders, "count": len(samples), "samples": samples, "by_role": {k: len(v) for k, v in by_role.items()},
             "bpm_hint": bpm_hint, "key_hint": key_hint, "has_kick": has_kick, "has_drums": has_drums, "warnings": warnings,
             "_by_role": by_role}
@@ -122,9 +122,9 @@ def download_icloud(folder: str, progress=None, timeout: float = 600.0) -> dict:
 
 
 def copy_pack_local(folder: str, dest_root: str | None = None, progress=None) -> str:
-    """Copy the pack to a folder that iCloud does not evict (default ~/Music/FLOW Samples/<name>). Returns the new path(s)."""
+    """Copy the pack to a folder that iCloud does not evict (default ~/Music/Alma Samples/<name>). Returns the new path(s)."""
     import shutil
-    dest_root = dest_root or os.path.join(os.path.expanduser("~"), "Music", "FLOW Samples")
+    dest_root = dest_root or os.path.join(os.path.expanduser("~"), "Music", "Alma Samples")
     os.makedirs(dest_root, exist_ok=True)
     outs = []
     for base in [f for f in str(folder).split(os.pathsep) if f.strip()]:

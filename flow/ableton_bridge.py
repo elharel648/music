@@ -9,7 +9,7 @@ import urllib.parse
 from typing import Callable
 
 HOST = "127.0.0.1"
-PORTS = (9878, 9877)  # FLOW Bridge first, then the original AbletonMCP script
+PORTS = (9878, 9877)  # Alma Bridge first, then the original AbletonMCP script
 
 
 class BridgeError(RuntimeError):
@@ -31,7 +31,7 @@ class Live:
                 return s
             except OSError as e:
                 last = e
-        raise BridgeError("Ableton Live is not reachable. Open Live, enable the FLOW Bridge control surface (Settings › Link, Tempo & MIDI), and keep a Live Set in front.") from last
+        raise BridgeError("Ableton Live is not reachable. Open Live, enable the Alma Bridge control surface (Settings › Link, Tempo & MIDI), and keep a Live Set in front.") from last
 
     @property
     def is_flow_bridge(self) -> bool:

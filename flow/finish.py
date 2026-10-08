@@ -57,7 +57,7 @@ URIS = {
 
 
 def apply(live, plan: dict, base_index: int, options: set[str], sidechain: str | None, progress: Callable[[str, float], None] | None = None) -> list[str]:
-    """Apply the chosen moves to the tracks FLOW built (plan['tracks'][i] lives at track base_index + i)."""
+    """Apply the chosen moves to the tracks Alma built (plan['tracks'][i] lives at track base_index + i)."""
     prog = progress or (lambda m, p: None)
     warnings: list[str] = []
     tracks = plan["tracks"]

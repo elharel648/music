@@ -1,8 +1,8 @@
-"""Generate flow/bridge/FLOW/__init__.py: the FLOW Ableton bridge, forked from AbletonMCP (MIT, Siddharth Ahuja).
+"""Generate flow/bridge/Alma/__init__.py: the Alma Ableton bridge, forked from AbletonMCP (MIT, Siddharth Ahuja).
 
   python tools/make_bridge.py "/path/to/AbletonMCP/__init__.py"
 
-Changes vs. upstream: port 9878, binds to 127.0.0.1 only, FLOW naming, and commands for mixer volume/pan/sends,
+Changes vs. upstream: port 9878, binds to 127.0.0.1 only, Alma naming, and commands for mixer volume/pan/sends,
 master-track devices and parameters. Everything else is upstream code; the MIT notice is kept.
 """
 from __future__ import annotations
@@ -10,14 +10,14 @@ import os
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "flow", "bridge", "FLOW", "__init__.py")
+OUT = os.path.join(ROOT, "flow", "bridge", "Alma", "__init__.py")
 
-NOTICE = '''# FLOW Bridge for Ableton Live — a Remote Script that lets the FLOW desktop app build arrangements in the Set in front.
+NOTICE = '''# Alma Bridge for Ableton Live — a Remote Script that lets the Alma desktop app build arrangements in the Set in front.
 # Forked from AbletonMCP by Siddharth Ahuja (https://github.com/ahujasid/ableton-mcp), MIT License:
 #   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 #   documentation files (the "Software"), to deal in the Software without restriction... THE SOFTWARE IS PROVIDED
 #   "AS IS", WITHOUT WARRANTY OF ANY KIND. (Full text: https://opensource.org/licenses/MIT)
-# FLOW additions (c) 2026 Harel Eliyahu. Listens on 127.0.0.1:9878 only.
+# Alma additions (c) 2026 Harel Eliyahu. Listens on 127.0.0.1:9878 only.
 '''
 
 MAIN_THREAD_ADD = '"create_locator", "set_track_volume", "set_track_pan", "set_send", "load_on_master", "set_master_parameter"]:'
@@ -39,7 +39,7 @@ READ_ADD = '''            elif command_type == "get_master_parameters":
             elif command_type == "get_track_info":'''
 
 METHODS = '''
-    # ---- FLOW additions -------------------------------------------------
+    # ---- Alma additions -------------------------------------------------
     @staticmethod
     def _db_to_volume(db):
         """Live's volume slider: 0.85 = 0 dB, 1.0 = +6 dB; below 0 dB roughly 0.025 per dB, curving to -inf."""
@@ -104,7 +104,7 @@ def main():
     code = code.replace("    def _get_device_parameters(self, track_index, device_index):", METHODS, 1)
     code = code.replace("DEFAULT_PORT = 9877", "DEFAULT_PORT = 9878", 1)
     code = code.replace('HOST = "0.0.0.0"', 'HOST = "127.0.0.1"', 1)
-    code = code.replace("AbletonMCP: Listening", "FLOW Bridge: Listening")
+    code = code.replace("AbletonMCP: Listening", "Alma Bridge: Listening")
     code = code.replace("# AbletonMCP/init.py", NOTICE, 1)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, "w", encoding="utf-8").write(code)

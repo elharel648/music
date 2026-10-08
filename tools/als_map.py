@@ -1,7 +1,7 @@
 """Read the arrangement of a Live Set (.als) offline: which track plays on which bar.
 
 A professional template or a finished project is an answer key: every clip sits on a known bar on a
-named track. This turns one .als into a bar-by-bar layer map plus the numbers FLOW's arrangement
+named track. This turns one .als into a bar-by-bar layer map plus the numbers Alma's arrangement
 rules should be measured against (first kick bar, breakdown lengths, layers in the drop vs the break).
 
     python tools/als_map.py "Set.als"            # one set, human table

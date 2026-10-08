@@ -5,7 +5,7 @@ A plan is DAW-agnostic: tracks with spans in bars, one-shot hits in bars, MIDI n
 from __future__ import annotations
 import math
 import numpy as np
-from . import patterns, styles as stylelib
+from . import patterns, profiles, styles as stylelib
 
 STYLE_TEMPLATES = {k: st.template for k, st in stylelib.STYLES.items()}  # kept for the CLI and older callers
 
@@ -14,7 +14,7 @@ ONESHOT_ROLES = {"kick", "clap", "ohat", "chat", "tom", "tom_b", "tom_c", "perc"
 MELODIC = {"bass", "synth"}
 
 
-MIN_SECONDS = 120.0  # a FLOW track is never shorter than two minutes
+MIN_SECONDS = 120.0  # a Alma track is never shorter than two minutes
 SHORT_REF_BARS = 48  # below this (or fewer than 3 sections) the reference is a clip, not a track: use a typical structure
 TYPICAL_STRUCTURE = [("Intro", 16, 1.0), ("Groove", 24, 1.0), ("Drop", 32, 1.0), ("Breakdown", 16, 0.0), ("Build", 8, 0.0), ("Drop 2", 32, 1.0), ("Outro", 16, 1.0)]
 
@@ -39,7 +39,7 @@ def reference_sections(ref: dict, structure: str = "reference") -> tuple[list[di
     for label, bars, kr in TYPICAL_STRUCTURE:
         out.append({"label": label, "start": start, "end": start + bars, "bars": bars, "kick_ratio": kr})
         start += bars
-    return out, f"The reference is {ref.get('bars', 0)} bars with {len(secs)} section{'s' if len(secs) != 1 else ''}: a clip, not a track. FLOW used a typical structure instead."
+    return out, f"The reference is {ref.get('bars', 0)} bars with {len(secs)} section{'s' if len(secs) != 1 else ''}: a clip, not a track. Alma used a typical structure instead."
 
 
 def target_bars(length_seconds: float | None, bpm: float, ref_bars: int) -> int:
@@ -50,7 +50,7 @@ def target_bars(length_seconds: float | None, bpm: float, ref_bars: int) -> int:
     return max(floor, int(round(bars / 8.0)) * 8)
 
 
-CAPS = {"Build": 16, "Breakdown": 32, "Intro": 24, "Outro": 24}  # tension sections, intros and outros do not grow with the track; drops and grooves do
+CAPS = profiles.HOUSE.caps  # tension sections, intros and outros do not grow with the track; drops and grooves do
 
 
 def _phrase(bars: float) -> int:
@@ -58,16 +58,17 @@ def _phrase(bars: float) -> int:
     return max(4, int(round(bars / unit)) * unit)
 
 
-def scale_sections(sections: list[dict], total: int) -> list[dict]:
+def scale_sections(sections: list[dict], total: int, caps: dict[str, int] | None = None) -> list[dict]:
+    caps = caps or CAPS
     """Scale section lengths to `total` bars: proportional, snapped to phrases, builds/breakdowns capped."""
     ref_total = sum(s["end"] - s["start"] for s in sections)
     out = []
     for s in sections:
         ideal = (s["end"] - s["start"]) / ref_total * total
-        bars = _phrase(min(ideal, CAPS.get(s["label"], 10 ** 6)))
+        bars = _phrase(min(ideal, caps.get(s["label"], 10 ** 6)))
         out.append({"label": s["label"], "bars": bars, "kick_ratio": s.get("kick_ratio", 1.0)})
     diff = total - sum(s["bars"] for s in out)
-    growable = [i for i, s in enumerate(out) if s["label"] not in CAPS] or list(range(len(out)))
+    growable = [i for i, s in enumerate(out) if s["label"] not in caps] or list(range(len(out)))
     order = sorted(growable, key=lambda i: -out[i]["bars"])
     i = 0
     while diff != 0 and order:
@@ -90,7 +91,7 @@ def scale_sections(sections: list[dict], total: int) -> list[dict]:
 MIN_SECTION = 8
 
 
-def normalize_sections(secs: list[dict]) -> tuple[list[dict], list[str]]:
+def normalize_sections(secs: list[dict], profile: profiles.Profile = profiles.HOUSE) -> tuple[list[dict], list[str]]:
     """A structure a DJ would recognise, whatever the reference did: no slivers, an intro that does not drag,
     at least one breakdown + build before the biggest drop, an outro. Returns (sections, notes)."""
     out = [dict(x) for x in secs]
@@ -109,9 +110,10 @@ def normalize_sections(secs: list[dict]) -> tuple[list[dict], list[str]]:
             merged.append(x)
     out = merged
     # an intro longer than 24 bars is an intro and a groove
-    if out and out[0]["label"] == "Intro" and (out[0]["end"] - out[0]["start"]) > 24:
+    over, keep = profile.intro_split
+    if out and out[0]["label"] == "Intro" and (out[0]["end"] - out[0]["start"]) > over:
         a = out[0]
-        cut = a["start"] + 16
+        cut = a["start"] + keep
         out = [dict(a, end=cut), dict(a, label="Groove", start=cut)] + out[1:]
     # a breakdown must exist before the last drop
     drops = [i for i, x in enumerate(out) if x["label"].startswith("Drop")]
@@ -126,14 +128,14 @@ def normalize_sections(secs: list[dict]) -> tuple[list[dict], list[str]]:
             b0 = prev["end"] - 16
             out[host] = dict(prev, end=b0)
             out[host + 1:host + 1] = [dict(prev, label="Breakdown", start=b0, end=b0 + 8, kick_ratio=0.0), dict(prev, label="Build", start=b0 + 8, end=b0 + 16, kick_ratio=0.0)]
-            notes.append("The reference never drops the kick; FLOW opened a breakdown and a build before the drop.")
+            notes.append("The reference never drops the kick; Alma opened a breakdown and a build before the drop.")
         else:
             big = max(drops, key=lambda i: size(out[i]))
             d = out[big]
             if size(d) >= 32:
                 mid = d["start"] + ((size(d) // 2) // 8) * 8
                 out[big:big + 1] = [dict(d, end=mid), dict(d, label="Breakdown", start=mid, end=mid + 8, kick_ratio=0.0), dict(d, label="Build", start=mid + 8, end=mid + 16, kick_ratio=0.0), dict(d, label="Drop 2" if d["label"] == "Drop" else d["label"], start=mid + 16)]
-                notes.append("The reference never drops the kick; FLOW split the drop around a breakdown and a build.")
+                notes.append("The reference never drops the kick; Alma split the drop around a breakdown and a build.")
     # the end is an outro
     if out and out[-1]["label"].startswith("Drop") and (out[-1]["end"] - out[-1]["start"]) >= 24:
         d = out[-1]
@@ -152,7 +154,7 @@ RESTERS = ["hat_loop", "perc_loop", "shaker_loop", "perc_loop2", "ohat", "chat"]
 DRUMS = {"kick", "clap", "chat", "ohat", "tom", "tom_b", "tom_c", "perc", "hat_loop", "perc_loop", "perc_loop2", "shaker_loop", "bass"}
 
 
-def shape_layers(wanted: dict[str, list[dict]], sections: list[dict], total: int) -> dict[str, list[tuple[int, int]]]:
+def shape_layers(wanted: dict[str, list[dict]], sections: list[dict], total: int, profile: profiles.Profile = profiles.HOUSE) -> dict[str, list[tuple[int, int]]]:
     """From 'which sections each role belongs to' to spans that breathe: staggered entries every phrase,
     the kick and bass resting on the last bar of each 16-bar phrase, drums silent on the bar before a drop,
     percussion loops taking turns to rest, outros thinning out."""
@@ -161,6 +163,7 @@ def shape_layers(wanted: dict[str, list[dict]], sections: list[dict], total: int
         for sct in secs:
             active[r][sct["start"]:sct["end"]] = True
     rank = {r: i for i, r in enumerate(ENTRY_ORDER)}
+    p = profile
     prev_roles: set[str] = set()
     for si, sct in enumerate(sections):
         here = {r for r, secs in wanted.items() if sct in secs}
@@ -178,14 +181,25 @@ def shape_layers(wanted: dict[str, list[dict]], sections: list[dict], total: int
                 cut = sct["end"] - (i + 1) * 4
                 if cut > sct["start"] + 4:
                     active[r][cut:sct["end"]] = False
-        elif label not in ("Breakdown", "Build"):
-            phrase = 8 if bars >= 32 else 4
-            for i, r in enumerate(new):
-                delay = min(i, 3) * phrase
-                if label == "Intro" and r == "kick" and bars >= 16:
-                    delay = max(delay, 8)
+        elif label == "Breakdown":
+            if p.break_kick == "half" and "kick" in here and bars >= 8:
+                active["kick"][sct["start"]:sct["start"] + bars // 2] = False
+        elif label != "Build":
+            phrase = p.entry_phrase if bars >= 2 * p.entry_phrase else max(4, (bars // 8) * 2)
+            kick_delay = int(round(bars * p.intro_kick_frac / 4)) * 4 if (label == "Intro" and bars >= 16) else 0
+            for r in new:
+                g = p.group_of(r)
+                delay = g * phrase
+                if label == "Intro" and r == "kick":
+                    delay = max(delay, kick_delay)
+                elif label == "Intro" and g == 0 and r not in ("atmos", "pad"):
+                    delay = kick_delay                   # bass and percussion arrive with the kick, never before it
+                elif label == "Intro" and g >= 1:
+                    delay = kick_delay + g * phrase      # after the kick, the next layers wait a phrase (corpus: hats/claps/synths at kick +16)
                 if delay and delay < bars:
                     active[r][sct["start"]:sct["start"] + delay] = False
+                elif delay >= bars:
+                    active[r][sct["start"]:sct["end"]] = False
         # phrase breaths inside grooves and drops
         if is_drop or label in ("Groove",):
             for k in range(1, bars // 16 + 1):
@@ -203,7 +217,7 @@ def shape_layers(wanted: dict[str, list[dict]], sections: list[dict], total: int
                         active[r][b] = False
         # the bar before a drop is silent for kick and bass; the impact lands on the drop
         nxt = sections[si + 1] if si + 1 < len(sections) else None
-        if nxt and (nxt["label"].startswith("Drop") or nxt["label"] in ("Breakdown", "Build")) and label not in ("Build",) and bars > 4:
+        if p.silent_before_drop and nxt and (nxt["label"].startswith("Drop") or nxt["label"] in ("Breakdown", "Build")) and label not in ("Build",) and bars > 4:
             for r in BREATHERS:
                 if r in active:
                     active[r][nxt["start"] - 1] = False
@@ -237,9 +251,10 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
     tmpl = st.template
     structure = structure if structure in ("reference", "typical") else "reference"
     ref_secs, note = reference_sections(ref, structure)
-    ref_secs, shape_notes = normalize_sections(ref_secs)
+    prof = profiles.for_style(st)
+    ref_secs, shape_notes = normalize_sections(ref_secs, prof)
     total = target_bars(length_seconds, bpm, ref["bars"] if note is None else sum(s["bars"] for s in ref_secs))
-    sections = scale_sections(ref_secs, total)
+    sections = scale_sections(ref_secs, total, prof.caps)
     tonic = ref["key"]["pc"]
 
     def source(role):
@@ -267,7 +282,7 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
         for sct in sections:
             label = sct["label"] if sct["label"] in tmpl else ("Drop 2" if sct["label"].startswith("Drop") else "Groove")
             ok = role in tmpl[label]
-            if role == "kick" and sct["kick_ratio"] < 0.35:
+            if role == "kick" and sct["kick_ratio"] < 0.35 and not (prof.break_kick == "half" and sct["label"] in ("Breakdown", "Build")):
                 ok = False
             if role == "kick" and sct["label"] == "Intro" and sct["kick_ratio"] >= 0.35:
                 ok = True
@@ -275,7 +290,7 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
                 secs_for.append(sct)
         if secs_for:
             wanted[role] = secs_for
-    shaped = shape_layers(wanted, sections, total)
+    shaped = shape_layers(wanted, sections, total, prof)
     tracks = []
     for role in roles:
         src = source(role)
@@ -324,7 +339,7 @@ def build_plan(ref: dict, kit: dict, loops: dict, bpm: float | None = None, leng
         "tracks": tracks + fx_tracks, "locators": locators, "sidechain": sidechain,
         "reference": {"file": ref["file"], "bars": ref["bars"], "bpm": ref["bpm"]},
         "placeholders": [t["name"] for t in tracks if t["role"] in MELODIC],
-        "notes": ([note] if note else []) + shape_notes,
+        "notes": ([note] if note else []) + shape_notes, "profile": prof.key,
         "structure": "reference" if (structure == "reference" and note is None) else "typical",
     }
 
