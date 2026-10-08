@@ -22,7 +22,7 @@ NOTICE = '''# Alma Bridge for Ableton Live — a Remote Script that lets the Alm
 # Alma additions (c) 2026 Harel Eliyahu. Listens on 127.0.0.1:9878 only.
 '''
 
-MAIN_THREAD_ADD = '"create_locator", "set_track_volume", "set_track_pan", "set_send", "load_on_master", "set_master_parameter", "replace_track_clips"]:'
+MAIN_THREAD_ADD = '"create_locator", "set_track_volume", "set_track_pan", "set_send", "load_on_master", "set_master_parameter", "replace_track_clips", "delete_tracks_by_name", "clear_locators"]:'
 
 DISPATCH_ADD = '''                        elif command_type == "set_track_volume":
                             result = self._set_track_volume(params.get("track_index", 0), params.get("db", 0.0))
@@ -35,6 +35,10 @@ DISPATCH_ADD = '''                        elif command_type == "set_track_volume
                         elif command_type == "replace_track_clips":
                             result = self._replace_track_clips(params.get("track_index", 0), params.get("path", ""), params.get("spans", []),
                                                                params.get("clip_bars", 4), params.get("hits", []), params.get("sweeps", []), params.get("name"))
+                        elif command_type == "delete_tracks_by_name":
+                            result = self._delete_tracks_by_name(params.get("names", []))
+                        elif command_type == "clear_locators":
+                            result = self._clear_locators(params.get("names", []))
                         elif command_type == "set_master_parameter":
                             result = self._set_master_parameter(params.get("device_index", 0), params.get("parameter_index", 0), params.get("value", 0.0))
                         elif command_type == "set_tempo":'''
@@ -45,6 +49,30 @@ READ_ADD = '''            elif command_type == "get_master_parameters":
 
 METHODS = '''
     # ---- Alma additions -------------------------------------------------
+    def _delete_tracks_by_name(self, names):
+        """Remove the tracks a previous Alma build wrote, found by their exact names so the user's own tracks are never touched."""
+        wanted = set(str(n) for n in names)
+        idx = [i for i, t in enumerate(self._song.tracks) if t.name in wanted]
+        for i in reversed(idx):
+            self._song.delete_track(i)
+        return {"deleted": len(idx)}
+
+    def _clear_locators(self, names):
+        """Remove cue points whose names Alma wrote (Intro, Drop, Breakdown...). Live has no delete call: jump to the cue and toggle."""
+        wanted = set(str(n) for n in names)
+        song = self._song
+        original = song.current_song_time
+        removed = 0
+        for cue in [c for c in song.cue_points if c.name in wanted]:
+            song.current_song_time = cue.time
+            song.set_or_delete_cue()
+            removed += 1
+        try:
+            song.current_song_time = original
+        except Exception:
+            pass
+        return {"removed": removed}
+
     def _replace_track_clips(self, track_index, path, spans, clip_bars, hits, sweeps, name):
         """Swap one track's sound after a build: drop every arrangement clip on the track, import the new file into
         slot 0 (the sweep into slot 1) and lay it out again on the same bars. Devices, volume and routing stay."""

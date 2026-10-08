@@ -28,7 +28,7 @@ PREP_KEYS = ("reference", "pack", "length", "style", "bpm", "synth", "finish", "
 
 def prepare(ref_path: str, pack_dir: str, length: float | None, style: str = "melodic_techno", bpm: float | None = None, midi_synth: str | None = None,
             progress=None, work_dir: str | None = None, finish_opts: set[str] | None = None, on_plan=None, vocal: str | None = None,
-            structure: str = "reference", kit_overrides: dict | None = None) -> dict:
+            structure: str = "reference", kit_overrides: dict | None = None, ref: dict | None = None) -> dict:
     """Everything up to the plan: measure, choose from the user's sounds, render loops, place the vocal, plan, sweeps.
     Returns a context that `commit` writes to a DAW and `render_preview` turns into a mix to listen to."""
     from . import finish as finishmod, transitions
@@ -43,7 +43,7 @@ def prepare(ref_path: str, pack_dir: str, length: float | None, style: str = "me
         prog("Some sounds are still in iCloud. Downloading them now…", 0.03)
         packmod.download_icloud(pack_dir, progress=lambda m, p: prog(m, 0.03 + 0.07 * p))
         pk = packmod.scan_pack(pack_dir)
-    ref = analysis.analyze_reference(ref_path, bpm_hint=bpm or pk.get("bpm_hint"))
+    ref = ref or analysis.analyze_reference(ref_path, bpm_hint=bpm or pk.get("bpm_hint"))
     bpm = bpm or ref["bpm"]
     prog(f"Reference: {ref['bpm']:.0f} BPM, {ref['key']['tonic']} {ref['key']['mode']}, {ref['bars']} bars, {len(ref['sections'])} sections", 0.15)
     if pk.get("warnings"):
@@ -81,8 +81,18 @@ def prepare(ref_path: str, pack_dir: str, length: float | None, style: str = "me
     return {"ref": ref, "pack": pk, "kit": kit, "loops": loops, "plan": plan, "work": work, "bpm": bpm, "ref_path": ref_path, "finish_opts": finish_opts}
 
 
-def commit(ctx: dict, target: str, out: str | None = None, sidechain: str | None = None, force: bool = False, progress=None) -> dict:
-    """Write the prepared plan: into the Live Set in front, or as stems + MIDI + Blueprint."""
+SECTION_LABELS = ("Intro", "Groove", "Drop", "Breakdown", "Build", "Return", "Drop 2", "Drop 3", "Drop 4", "Breakdown 2", "Breakdown 3", "Outro", "End")
+
+
+def replaceable(prev_names: list[str] | None, now_names: list[str], fresh: bool) -> bool:
+    """Can Build write into the set in front by replacing a previous Alma build? Only when every track of that build is still there."""
+    return bool(prev_names) and not fresh and all(n in now_names for n in prev_names)
+
+
+def commit(ctx: dict, target: str, out: str | None = None, sidechain: str | None = None, force: bool = False, progress=None,
+           replace_names: list[str] | None = None) -> dict:
+    """Write the prepared plan: into the Live Set in front, or as stems + MIDI + Blueprint.
+    replace_names: the tracks of the previous build to remove first (a rebuild after changing style, length or sounds)."""
     from . import finish as finishmod
     prog = progress or (lambda m, p: None if m.startswith("@") else print(f"[{p * 100:5.1f}%] {m}"))
     plan, ref, kit, finish_opts = ctx["plan"], ctx["ref"], ctx["kit"], ctx["finish_opts"]
@@ -90,6 +100,11 @@ def commit(ctx: dict, target: str, out: str | None = None, sidechain: str | None
     if target == "ableton":
         from .ableton_bridge import Live
         live = Live()
+        if replace_names:
+            live.clear_locators(SECTION_LABELS)
+            n = live.delete_tracks_by_name(replace_names)
+            prog(f"Removed the {n} tracks from the last build; your own tracks stay", 0.4)
+            force = True
         base = live.session()["track_count"]
         rep = live.apply_plan(plan, progress=lambda m, p: prog(m, 0.4 + 0.45 * p), force=force)
         moves = finish_opts - {"transitions"}

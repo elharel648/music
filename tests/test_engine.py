@@ -391,3 +391,12 @@ def test_bridge_version_matches_shipped_script():
     m = re.search(r'ALMA_BRIDGE_VERSION = "([^"]+)"', src)
     assert m and m.group(1) == ableton_bridge.BRIDGE_VERSION
     assert '"alma_bridge": ALMA_BRIDGE_VERSION' in src and 'command_type == "replace_track_clips"' in src
+
+
+def test_rebuild_only_when_the_last_build_is_still_there():
+    from flow import cli
+    prev = ["Kick · Kick 08", "Bass · Bass Shot 04"]
+    assert cli.replaceable(prev, ["Kick · Kick 08", "Bass · Bass Shot 04", "My vocal"], fresh=False)   # user added a track: still a rebuild
+    assert not cli.replaceable(prev, ["Kick · Kick 08"], fresh=False)                                 # user deleted one: do not guess
+    assert not cli.replaceable(prev, ["1-MIDI", "2-Audio"], fresh=True)                                # empty set: a plain build
+    assert not cli.replaceable([], ["Something"], fresh=False)

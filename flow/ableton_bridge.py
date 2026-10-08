@@ -9,7 +9,7 @@ import urllib.parse
 from typing import Callable
 
 HOST = "127.0.0.1"
-BRIDGE_VERSION = "2"  # the Alma Bridge this app ships (flow/bridge/Alma); an older one in Live lacks newer commands
+BRIDGE_VERSION = "3"  # the Alma Bridge this app ships (flow/bridge/Alma); an older one in Live lacks newer commands
 PORTS = (9878, 9877)  # Alma Bridge first, then the original AbletonMCP script
 
 
@@ -166,6 +166,12 @@ class Live:
         """Swap one built track's sound in place: same bars, new file. Devices and mixer settings stay."""
         return self.call("replace_track_clips", track_index=int(track_index), path=path, spans=[[int(a), int(b)] for a, b in spans],
                          clip_bars=int(clip_bars or 4), hits=[float(h) for h in (hits or [])], sweeps=[[float(b), pth] for b, pth in (sweeps or [])], name=name)
+
+    def delete_tracks_by_name(self, names: list[str]) -> int:
+        return int((self.call("delete_tracks_by_name", names=list(names)) or {}).get("deleted", 0))
+
+    def clear_locators(self, names: list[str]) -> int:
+        return int((self.call("clear_locators", names=list(names)) or {}).get("removed", 0))
 
     def apply_plan(self, plan: dict, progress: Callable[[str, float], None] | None = None, force: bool = False) -> dict:
         prog = progress or (lambda m, p: None)

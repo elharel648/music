@@ -114,6 +114,7 @@ class Api:
         self._ctx_key: str | None = None
         self._kit_cache: dict[tuple, dict] = {}
         self._log: list[str] = []
+        self._refs: dict[tuple, dict] = {}
         self._last: dict = {}
         self.media = MediaServer()
 
@@ -337,8 +338,11 @@ class Api:
                 return {"ok": False, "reason": "Live is not running or the Alma Bridge control surface is off"}
             from .ableton_bridge import BRIDGE_VERSION
             ver = live.bridge_version()
-            return {"ok": True, "fresh": live.is_fresh_set(), "tracks": live.session()["track_count"],
-                    "bridge": ver, "bridge_outdated": ver != BRIDGE_VERSION}
+            names = live.track_names()
+            fresh = live.is_fresh_set()
+            prev = self._last_track_names()
+            return {"ok": True, "fresh": fresh, "tracks": len(names), "bridge": ver, "bridge_outdated": ver != BRIDGE_VERSION,
+                    "rebuild": flowcli.replaceable(prev, names, fresh), "alma_tracks": sum(1 for n in names if n in prev)}
         except Exception as e:
             return {"ok": False, "reason": f"{e}"}
 
@@ -358,7 +362,8 @@ class Api:
         ctx = flowcli.prepare(opts["reference"], opts["pack"], length, opts.get("style", "melodic_techno"), opts.get("bpm") or None, opts.get("synth") or None,
                               progress=self._emit, work_dir=opts.get("work_dir") or None, finish_opts=set(fin) if isinstance(fin, list) else None,
                               on_plan=self._emit_plan, vocal=opts.get("vocal") or None, structure=opts.get("structure") or "reference",
-                              kit_overrides=opts.get("kit") or None)
+                              kit_overrides=opts.get("kit") or None, ref=self._refs.get((opts["reference"], opts["pack"], opts.get("bpm") or None)))
+        self._refs[(opts["reference"], opts["pack"], opts.get("bpm") or None)] = ctx["ref"]   # style and length changes skip the analysis
         self._ctx, self._ctx_key = ctx, key
         return ctx
 
@@ -404,13 +409,25 @@ class Api:
             ctx["preview"] = res
         self.window.evaluate_js(f"window.flowPreview({json.dumps(res, default=str)})")
 
+    def _last_track_names(self) -> list[str]:
+        rep = (self._last.get("summary") or {}).get("ableton") or {}
+        return [t["name"] for t in rep.get("tracks", []) if t.get("name")]
+
     def build(self, opts: dict):
         self.save_session(opts)
 
         def go():
             ctx = self._prepare(opts)
+            replace = None
+            if opts.get("target", "stems") == "ableton":
+                from .ableton_bridge import Live
+                live = Live()
+                prev = self._last_track_names()
+                if prev and live.available() and flowcli.replaceable(prev, live.track_names(), live.is_fresh_set()):
+                    replace = prev
+                    self._emit(f"Replacing the {len(prev)} tracks from the last build", 0.4)
             res = flowcli.commit(ctx, opts.get("target", "stems"), opts.get("out") or None, opts.get("sidechain") or None, bool(opts.get("force")),
-                                 progress=lambda m, p: self._emit(m, 0.4 + 0.6 * p))
+                                 progress=lambda m, p: self._emit(m, 0.4 + 0.6 * p), replace_names=replace)
             res.pop("reference", None)
             from . import arrange
             summary = {**arrange.plan_view(res.get("plan", {})), "export": res.get("export"), "ableton": res.get("ableton"), "kit": res.get("kit")}
