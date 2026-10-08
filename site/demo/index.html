@@ -897,6 +897,12 @@
   .big button.num .n { font-size:26px; font-weight:500; font-variant-numeric:tabular-nums; line-height:1; color:#F4F1EA; }
   .big button.num .u { font-size:10px; font-weight:500; color:rgba(244,241,234,.55); letter-spacing:.04em; }
   .big svg { transform:rotate(-90deg); }
+
+  /* The finished build says DONE, and AGAIN when you reach for it. The label is always warm white on the dish. */
+  .big button, .big.done button, .big.ready button { color:#F4F1EA; }
+  .big button.dn { display:grid; place-content:center; }
+  .big button.dn .a, .big button.dn .b { grid-area:1/1; text-align:center; transition:opacity .2s; }
+  .big button.dn .b { opacity:0; color:#B9B8F5; } .big button.dn:hover .a { opacity:0; } .big button.dn:hover .b { opacity:1; }
 </style>
 </head>
 <body>
@@ -1382,12 +1388,14 @@ const BIG_N=72;
 (function bigDots(){ const g=$('bigDots'); let o=''; for(let i=0;i<BIG_N;i++){ const a=i/BIG_N*Math.PI*2; o+=`<circle class="bd" cx="${(53+49*Math.cos(a)).toFixed(2)}" cy="${(53+49*Math.sin(a)).toFixed(2)}" r="1.15"/>`; } g.innerHTML=o; })();
 function setProg(p){ p=Math.min(1,Math.max(0,p)); const k=Math.round(p*BIG_N); document.querySelectorAll('#bigDots .bd').forEach((d,i)=>{ d.classList.toggle('on', i<k); d.classList.toggle('lead', k>0 && k<BIG_N && i===k-1); });
   const w=$('bigWrap'); if(w.classList.contains('working')) showBigNum(Math.round(p*100)); }
+function applyBuildLabel(){ const w=$('bigWrap'), b=$('buildBtn'); if(w.classList.contains('working')) return; b.classList.remove('num','dn');
+  if(w.classList.contains('done')){ b.classList.add('dn'); b.innerHTML='<span class="a">DONE</span><span class="b">AGAIN</span>'; } else b.textContent = w.classList.contains('err') ? 'RETRY' : 'BUILD'; }
 function showBigNum(n){ const b=$('buildBtn'); b.classList.add('num'); b.innerHTML=`<span class="n">${n}</span><span class="u">%</span>`; }
-function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); if(st==='working') showBigNum(0); else { const b=$('buildBtn'); if(b.classList.contains('num')){ b.classList.remove('num'); b.textContent = st==='err' ? 'RETRY' : 'BUILD'; } } document.querySelector('.mod[data-m=bld]').classList.toggle('built', st==='done'); }
+function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); if(st==='working') showBigNum(0); else applyBuildLabel(); document.querySelector('.mod[data-m=bld]').classList.toggle('built', st==='done'); }
 function resetBuild(){ S.builtKit=null; S.builtInLive=false; S.swapMsg=''; stopPlayer(); $('tp').classList.add('hidden'); $('buildTL').classList.remove('stopped'); if(TL){ TL.destroy(); TL=null; } S.plan=null; S.built=false; $('log').textContent=''; $('log').classList.add('hidden'); $('toggleLog').textContent='Details'; $('buildTL').classList.remove('hidden'); $('buildTL').classList.add('building'); bigState('working');
   $('tlCard').innerHTML='<div class="skel"></div>'; $('stopCard').classList.add('hidden'); $('openOut').classList.add('hidden'); $('again').classList.add('hidden'); $('toggleLog').classList.remove('hidden'); setProg(0); setPhase(0); $('statusLine').textContent='Starting…'; $('buildBtn').textContent=''; $('buildBtn').disabled=true; $('bst').textContent='Building…'; setMod('bld','Working','work'); }
 function currentOpts(){ return { reference:S.refPath, pack:S.packPath, length:S.len, target:S.target, out:S.out, style:S.style, structure:S.structure, kit:S.kitOverrides, vocal:S.vocalPath||null, bpm:parseFloat($('bpmIn').value)||null, synth:$('synthSel').value||null, sidechain:$('scSel').value||null, finish: S.finish ? [...S.finish] : null, force:false }; }
-async function startPreview(){ S.building=true; resetBuild(); markNext(); setActive('bld'); $('buildBtn').textContent='BUILD'; $('bst').textContent='Preparing your track to listen to…'; setMod('bld','Preparing','work'); $('listenBtn').disabled=true;
+async function startPreview(){ S.building=true; resetBuild(); markNext(); setActive('bld'); applyBuildLabel(); $('bst').textContent='Preparing your track to listen to…'; setMod('bld','Preparing','work'); $('listenBtn').disabled=true;
   S.lastOpts = currentOpts(); const r = await api().preview(S.lastOpts); if(!r.ok){ window.flowError(r.error); } }
 $('listenBtn').onclick = ()=>{ if(S.preview && !S.previewStale){ $('playBtn').click(); return; } startPreview(); };
 function listenLabel(){ $('listenBtn').textContent = (S.preview && !S.previewStale) ? (player.paused ? 'Play' : 'Pause') : (S.preview ? 'Listen again' : 'Listen first'); }
@@ -1414,14 +1422,14 @@ window.flowProgress = (msg,pct)=>{ if(msg.startsWith('@track:')){ if(TL) TL.reve
   setPhase(pct<0.15?0 : pct<0.3?1 : pct<0.4?2 : (S.target==='ableton' && pct>=0.85 ? 4 : 3)); };
 window.flowError = msg=>{ if(S.swapping){ S.swapping=false; S.swapMsg=esc(msg); renderKit(); return; } S.building=false; $('listenBtn').disabled=false; markNext(); $('buildTL').classList.remove('building'); $('buildTL').classList.add('stopped'); bigState('err'); setProg(1); setPhase(S.phase, 'err'); $('statusLine').textContent = ''; setMod('bld','Stopped','err');
   $('stopMsg').textContent = msg; $('stopTitle').textContent = /not empty|New Live Set|tracks open/.test(msg) ? 'Live needs an empty set' : (/not reachable|not running|control surface/.test(msg) ? 'Live is not reachable' : 'The build stopped');
-  if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; $('buildBtn').textContent='RETRY'; $('buildBtn').disabled=false; $('bst').textContent='Stopped. Fix the cause, then retry.'; liveStatus(); };
+  if(!TL) $('buildTL').classList.add('hidden'); $('stopCard').classList.remove('hidden'); $('log').textContent += 'ERROR: '+msg+'\n'; applyBuildLabel(); $('buildBtn').disabled=false; $('bst').textContent='Stopped. Fix the cause, then retry.'; liveStatus(); };
 window.flowDone = async sum=>{ S.building=false; S.built=true; S.builtKit={...S.kitOverrides}; S.builtInLive=!!sum.ableton; S.swapMsg=''; renderKit(); markNext(); $('buildTL').classList.remove('building'); bigState('done'); setProg(1); setPhase(5); setMod('bld','Done','on');
   $('statusLine').textContent = sum.ableton ? 'In Live. Press Cmd+S.' : 'In the folder.'; const nUsed = sum.kit ? Object.keys(sum.kit).length : null; const from = `From your sounds${nUsed?` (${nUsed} used)`:''}, ${sum.style_name||curStyle().name} · ${fmt(S.len)}, ${sum.structure==='typical'?'typical structure':'reference structure'}.`; $('bst').textContent = sum.ableton ? 'Your track is in Live. Press Cmd+S.' : 'Your track is in the folder.'; $('bsub').textContent = from;
   if(!TL) window.flowPlan(sum); TL.revealAll();
   if(sum.notes && sum.notes.length) $('log').textContent += 'NOTE: ' + sum.notes.join(' ') + '\n'; const warns = (sum.ableton && sum.ableton.warnings) ? sum.ableton.warnings : []; if(warns.length){ $('log').textContent += 'WARNINGS: ' + warns.join(' · ') + '\n'; $('bsub').textContent += ` ${warns.length} note${warns.length===1?'':'s'} in Details.`; }
   if(sum.kit){ S.usedCount=Object.keys(sum.kit).length; renderKit(); } $('again').classList.remove('hidden'); if(sum.export){ $('openOut').classList.remove('hidden'); $('openOut').onclick=()=>api().open_path(sum.export.folder); }
-  $('buildBtn').textContent='BUILD'; $('buildBtn').disabled=false; $('listenBtn').disabled=false; listenLabel(); refreshStatus(); $('tp').classList.remove('hidden'); if(!(S.preview && !S.previewStale)){ $('playBtn').disabled=true; $('ptime').textContent='Preparing playback…'; } };
-$('again').onclick=()=>{ S.built=false; S.usedCount=null; renderKit(); $('bsub').textContent='Builds this arrangement from your sounds and your direction. Nothing is decided for you.'; $('buildBtn').textContent='BUILD'; $('again').classList.add('hidden'); $('openOut').classList.add('hidden'); gateBuild(); setActive('ref'); };
+  applyBuildLabel(); $('buildBtn').disabled=false; $('listenBtn').disabled=false; listenLabel(); refreshStatus(); $('tp').classList.remove('hidden'); if(!(S.preview && !S.previewStale)){ $('playBtn').disabled=true; $('ptime').textContent='Preparing playback…'; } };
+$('again').onclick=()=>{ S.built=false; S.usedCount=null; renderKit(); $('bsub').textContent='Builds this arrangement from your sounds and your direction. Nothing is decided for you.'; applyBuildLabel(); $('again').classList.add('hidden'); $('openOut').classList.add('hidden'); gateBuild(); setActive('ref'); };
 gateBuild();
 window.flowUpdate = u=>{ if(!u || !u.available) return; const c=$('updChip'), t=$('updTxt'); c.classList.remove('hidden'); c.classList.toggle('req', !!u.required); c.title = u.notes||''; S.updateRequired = !!u.required; S.update = u;
   if(u.state==='downloading'){ t.textContent = `Update ${u.version} · ${u.pct||0}%`; c.onclick = null; c.classList.add('busy'); }
