@@ -34,7 +34,7 @@ def fb():
         cred = credentials.Certificate(CRED)
         import json
         project = json.load(open(CRED))["project_id"]
-        firebase_admin.initialize_app(cred, {"storageBucket": os.environ.get("ALMA_BUCKET", f"{project}.appspot.com")})
+        firebase_admin.initialize_app(cred, {"storageBucket": os.environ.get("ALMA_BUCKET", f"{project}.firebasestorage.app")})
     return firestore.client(), storage.bucket()
 
 
