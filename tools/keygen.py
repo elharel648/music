@@ -1,4 +1,4 @@
-"""License key tool for the FLOW owner.
+"""License key tool for the Alma owner.
 
   python tools/keygen.py init                 -> creates keys/private.pem (KEEP SECRET, BACK UP) and patches flow/license.py with the public key
   python tools/keygen.py issue EMAIL [--days N] -> prints a key for a customer (perpetual unless --days)

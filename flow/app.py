@@ -1,4 +1,4 @@
-"""FLOW desktop app: a pywebview window hosting ui/index.html, with a small Python API behind it."""
+"""Alma desktop app: a pywebview window hosting ui/index.html, with a small Python API behind it."""
 from __future__ import annotations
 import json
 import os
@@ -218,7 +218,7 @@ class Api:
             return {"ok": False, "error": f"{e}"}
 
     def kit_options(self, folder: str, bpm: float | None = None, overrides: dict | None = None):
-        """The kit FLOW proposes from the user's pack, with every candidate per role, so the user can swap any of them."""
+        """The kit Alma proposes from the user's pack, with every candidate per role, so the user can swap any of them."""
         try:
             pk = self._packs.get(folder) or packmod.scan_pack(folder)
             self._packs[folder] = pk
@@ -254,7 +254,7 @@ class Api:
             return {"ok": False, "error": f"{e}"}
 
     def audition_url(self, path: str):
-        """A playable URL for one of the user's own sounds (only files inside the chosen pack folders or FLOW's work folder)."""
+        """A playable URL for one of the user's own sounds (only files inside the chosen pack folders or Alma's work folder)."""
         try:
             real = os.path.realpath(path)
             roots = [os.path.realpath(f) for f in self._pack_folders]
@@ -295,20 +295,20 @@ class Api:
         return [{"key": k, "name": n, "hint": h, "on": k in finish.DEFAULT_ON} for k, n, h in finish.OPTIONS]
 
     def bridge_paths(self):
-        src = os.path.join(getattr(sys, "_MEIPASS", os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "flow", "bridge", "FLOW")
+        src = os.path.join(getattr(sys, "_MEIPASS", os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "flow", "bridge", "Alma")
         if not os.path.isdir(src):
-            src = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bridge", "FLOW")
+            src = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bridge", "Alma")
         home = os.path.expanduser("~")
         if sys.platform == "darwin":
-            dst = os.path.join(home, "Music", "Ableton", "User Library", "Remote Scripts", "FLOW")
+            dst = os.path.join(home, "Music", "Ableton", "User Library", "Remote Scripts", "Alma")
         elif sys.platform.startswith("win"):
-            dst = os.path.join(home, "Documents", "Ableton", "User Library", "Remote Scripts", "FLOW")
+            dst = os.path.join(home, "Documents", "Ableton", "User Library", "Remote Scripts", "Alma")
         else:
-            dst = os.path.join(home, "Ableton", "User Library", "Remote Scripts", "FLOW")
+            dst = os.path.join(home, "Ableton", "User Library", "Remote Scripts", "Alma")
         return src, dst
 
     def install_bridge(self):
-        """Copy the FLOW Bridge Remote Script into Live's User Library. Live must be restarted and the surface enabled."""
+        """Copy the Alma Bridge Remote Script into Live's User Library. Live must be restarted and the surface enabled."""
         import shutil
         try:
             src, dst = self.bridge_paths()
@@ -319,7 +319,7 @@ class Api:
                 shutil.rmtree(dst)
             shutil.copytree(src, dst)
             return {"ok": True, "path": dst,
-                    "steps": ["Quit and reopen Ableton Live.", "Settings › Link, Tempo & MIDI › Control Surface: choose FLOW.", "Open File › New Live Set and build again."]}
+                    "steps": ["Quit and reopen Ableton Live.", "Settings › Link, Tempo & MIDI › Control Surface: choose Alma.", "Open File › New Live Set and build again."]}
         except Exception as e:
             return {"ok": False, "error": str(e)}
 
@@ -355,7 +355,7 @@ class Api:
 
     def _run(self, fn):
         if self._busy:
-            return {"ok": False, "error": "FLOW is still working on the previous step"}
+            return {"ok": False, "error": "Alma is still working on the previous step"}
         ok, st = lic.can_build()
         if not ok:
             return {"ok": False, "error": st.get("reason") or "License required"}

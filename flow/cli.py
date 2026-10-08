@@ -50,7 +50,7 @@ def prepare(ref_path: str, pack_dir: str, length: float | None, style: str = "ho
         raise RuntimeError(" ".join(pk["warnings"]) + f" (folder: {pack_dir})")
     kit = packmod.choose_kit(pk, bpm, overrides=kit_overrides)
     prog(f"From your sounds: {len(kit)} roles", 0.22)
-    work = work_dir or os.path.join(tempfile.gettempdir(), "FLOW loops")
+    work = work_dir or os.path.join(tempfile.gettempdir(), "Alma loops")
     transpose = {}
     for role in ("bass", "synth"):
         s_ = kit.get(role)
@@ -99,14 +99,14 @@ def commit(ctx: dict, target: str, out: str | None = None, sidechain: str | None
             rep["finish"] = sorted(moves)
         result["ableton"] = rep
     else:
-        out_dir = out or os.path.join(os.path.dirname(ctx["ref_path"]), "FLOW export")
+        out_dir = out or os.path.join(os.path.dirname(ctx["ref_path"]), "Alma export")
         exp = export.export_all(plan, ref, out_dir, progress=lambda m, p: prog(m, 0.4 + 0.6 * p))
         result["export"] = exp
     return result
 
 
 def render_preview(ctx: dict, path: str | None = None, progress=None) -> dict:
-    path = path or os.path.join(ctx["work"], "FLOW preview.wav")
+    path = path or os.path.join(ctx["work"], "Alma preview.wav")
     return export.render_mix(ctx["plan"], path, progress=progress)
 
 
@@ -119,7 +119,7 @@ def run_build(ref_path: str, pack_dir: str, length: float | None, target: str, o
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(prog="flow", description=f"FLOW {__version__}: reference in, your sounds in, an arrangement out.")
+    ap = argparse.ArgumentParser(prog="flow", description=f"Alma {__version__}: reference in, your sounds in, an arrangement out.")
     sub = ap.add_subparsers(dest="cmd")
     a = sub.add_parser("analyze", help="Measure a reference track")
     a.add_argument("ref")
@@ -142,11 +142,11 @@ def main(argv=None) -> int:
     for arg, kw in (("--ref", {"required": True}), ("--pack", {"required": True}), ("--length", {}), ("--style", {"default": "house"}), ("--vocal", {}),
                     ("--structure", {"choices": ["reference", "typical"], "default": "reference"}), ("--bpm", {"type": float}), ("--out", {"required": True})):
         pv.add_argument(arg, **kw)
-    sub.add_parser("plugins", help="List installed plug-ins FLOW recognizes")
+    sub.add_parser("plugins", help="List installed plug-ins Alma recognizes")
     sub.add_parser("license", help="Show trial / license status")
     k = sub.add_parser("activate", help="Activate with a license key")
     k.add_argument("key")
-    ap.add_argument("--version", action="version", version=f"FLOW {__version__}")
+    ap.add_argument("--version", action="version", version=f"Alma {__version__}")
     args = ap.parse_args(argv)
     if args.cmd == "analyze":
         r = analysis.analyze_reference(args.ref, bpm_hint=args.bpm)

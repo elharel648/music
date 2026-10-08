@@ -1,4 +1,4 @@
-name: Build FLOW (macOS + Windows)
+name: Build Alma (macOS + Windows)
 
 on:
   push:
@@ -11,9 +11,9 @@ jobs:
       matrix:
         include:
           - os: macos-14
-            artifact: FLOW-mac
+            artifact: Alma-mac
           - os: windows-latest
-            artifact: FLOW-windows
+            artifact: Alma-windows
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -33,12 +33,12 @@ jobs:
       - name: Package macOS DMG
         if: runner.os == 'macOS'
         run: |
-          mkdir stage && cp -R dist/FLOW.app stage/ && ln -s /Applications stage/Applications
-          hdiutil create -volname FLOW -srcfolder stage -ov -format UDZO dist/FLOW-mac.dmg
+          mkdir stage && cp -R dist/Alma.app stage/ && ln -s /Applications stage/Applications
+          hdiutil create -volname Alma -srcfolder stage -ov -format UDZO dist/Alma-mac.dmg
       - name: Package Windows zip
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path dist/FLOW/* -DestinationPath dist/FLOW-windows.zip
+        run: Compress-Archive -Path dist/Alma/* -DestinationPath dist/Alma-windows.zip
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}

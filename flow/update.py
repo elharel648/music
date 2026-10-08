@@ -41,7 +41,7 @@ def evaluate(manifest: dict, current: str = __version__, public_key_hex: str | N
 def check(url: str = UPDATE_URL, timeout: float = 4.0) -> dict | None:
     """Fetch and evaluate the manifest. Any network or parse problem returns None; the app never blocks on this."""
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "FLOW-update-check", "Cache-Control": "no-cache"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Alma-update-check", "Cache-Control": "no-cache"})
         with urllib.request.urlopen(req, timeout=timeout) as r:
             if r.status != 200:
                 return None

@@ -1,9 +1,9 @@
-# FLOW Bridge for Ableton Live — a Remote Script that lets the FLOW desktop app build arrangements in the Set in front.
+# Alma Bridge for Ableton Live — a Remote Script that lets the Alma desktop app build arrangements in the Set in front.
 # Forked from AbletonMCP by Siddharth Ahuja (https://github.com/ahujasid/ableton-mcp), MIT License:
 #   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 #   documentation files (the "Software"), to deal in the Software without restriction... THE SOFTWARE IS PROVIDED
 #   "AS IS", WITHOUT WARRANTY OF ANY KIND. (Full text: https://opensource.org/licenses/MIT)
-# FLOW additions (c) 2026 Harel Eliyahu. Listens on 127.0.0.1:9878 only.
+# Alma additions (c) 2026 Harel Eliyahu. Listens on 127.0.0.1:9878 only.
 
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -97,7 +97,7 @@ class AbletonMCP(ControlSurface):
         self.log_message("AbletonMCP initialized")
         
         # Show a message in Ableton
-        self.show_message("FLOW Bridge: Listening for commands on port " + str(DEFAULT_PORT))
+        self.show_message("Alma Bridge: Listening for commands on port " + str(DEFAULT_PORT))
     
     def disconnect(self):
         """Called when Ableton closes or the control surface is removed"""
@@ -2188,7 +2188,7 @@ class AbletonMCP(ControlSurface):
             raise
 
 
-    # ---- FLOW additions -------------------------------------------------
+    # ---- Alma additions -------------------------------------------------
     @staticmethod
     def _db_to_volume(db):
         """Live's volume slider: 0.85 = 0 dB, 1.0 = +6 dB; below 0 dB roughly 0.025 per dB, curving to -inf."""

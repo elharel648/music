@@ -1,7 +1,7 @@
 """Trial + license keys. Keys are Ed25519-signed tokens verified offline; the private key never ships.
 
-Format of a key:  FLOW-<base64url(payload json)>.<base64url(signature)>
-payload: {"email": ..., "issued": "YYYY-MM-DD", "expires": "YYYY-MM-DD" | null, "product": "FLOW", "seats": 1}
+Format of a key:  ALMA-<base64url(payload json)>.<base64url(signature)>
+payload: {"email": ..., "issued": "YYYY-MM-DD", "expires": "YYYY-MM-DD" | null, "product": "Alma", "seats": 1}
 """
 from __future__ import annotations
 import base64
@@ -17,7 +17,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey, 
 from cryptography.exceptions import InvalidSignature
 
 TRIAL_DAYS = 14
-PRODUCT = "FLOW"
+PRODUCT = "Alma"
 # Public key (hex). Replaced by tools/keygen.py --init; the matching private key stays with the owner.
 PUBLIC_KEY_HEX = "e075583bfade38e3f2c167acd3c4c677c856f7c1798f304d6480a24b3d3a0a1b"
 _STATE_SALT = b"flow-state-v1"
@@ -87,8 +87,8 @@ def verify_key(key: str, public_key_hex: str | None = None) -> dict:
     """Return the payload if the key is valid for this product and not expired; raise ValueError otherwise."""
     public_key_hex = public_key_hex or PUBLIC_KEY_HEX
     key = key.strip()
-    if not key.startswith("FLOW-") or "." not in key:
-        raise ValueError("That is not a FLOW license key.")
+    if not (key.startswith("ALMA-") or key.startswith("FLOW-")) or "." not in key:
+        raise ValueError("That is not a Alma license key.")
     body, sig = key[5:].split(".", 1)
     payload_b = _b64d(body)
     try:
@@ -109,7 +109,7 @@ def issue_key(private_key: Ed25519PrivateKey, email: str, days: int | None = Non
     payload = {"email": email, "issued": today.isoformat(), "expires": (today + dt.timedelta(days=days)).isoformat() if days else None,
                "product": PRODUCT, "seats": seats}
     body = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
-    return "FLOW-" + _b64e(body) + "." + _b64e(private_key.sign(body))
+    return "ALMA-" + _b64e(body) + "." + _b64e(private_key.sign(body))
 
 
 def activate(key: str) -> dict:

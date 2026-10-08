@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alma — mark candidates</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root { --paper:#FFFFFF; --ink:#111113; --sec:#6B6B70; --mut:#A3A3A8; --line:#ECECEE; --canvas:#0B0B0D; --warm:#F4F1EA; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--paper); color:var(--ink); font-family:"Satoshi",sans-serif; -webkit-font-smoothing:antialiased; }
+  body { padding:56px 64px 96px; }
+  h1 { font-size:13px; font-weight:500; color:var(--sec); letter-spacing:0; margin:0 0 48px; }
+  h1 b { color:var(--ink); font-weight:500; }
+  .cand { display:grid; grid-template-columns:200px 1fr; gap:40px; padding:40px 0; border-top:1px solid var(--line); align-items:start; }
+  .cand h2 { font-size:15px; font-weight:500; margin:0 0 6px; }
+  .cand p { font-size:12.5px; color:var(--sec); line-height:1.55; margin:0; max-width:180px; }
+  .row { display:flex; align-items:flex-end; gap:40px; flex-wrap:wrap; }
+  .dock { display:flex; align-items:flex-end; gap:22px; padding:18px 22px; border-radius:18px; background:#1C1C1E; }
+  .dock.light { background:#F2F2F4; }
+  .ico { display:block; }
+  .wm { display:flex; align-items:center; gap:28px; margin-top:28px; }
+  .wordmark { font-size:34px; font-weight:500; letter-spacing:-0.035em; line-height:1; }
+  .wordmark.sm { font-size:15px; letter-spacing:-0.02em; }
+  .wordmark .dot { display:inline-block; width:.26em; height:.26em; border-radius:50%; background:currentColor; margin-left:.12em; vertical-align:baseline; }
+  .tb { display:flex; align-items:center; gap:10px; padding:10px 14px; border:1px solid var(--line); border-radius:10px; }
+  .tb .sym { width:14px; height:14px; }
+  .note { font-size:11.5px; color:var(--mut); margin-top:10px; }
+</style>
+</head>
+<body>
+<h1><b>Alma</b> · three marks · one is right</h1>
+
+<div class="cand" id="c1"></div>
+<div class="cand" id="c2"></div>
+<div class="cand" id="c3"></div>
+
+<script>
+// Apple-style squircle (superellipse) path for the icon body.
+function squircle(size, n = 4.6, steps = 160) {
+  const r = size / 2, pts = [];
+  for (let i = 0; i < steps; i++) {
+    const t = (i / steps) * Math.PI * 2, c = Math.cos(t), s = Math.sin(t);
+    pts.push([r + Math.sign(c) * r * Math.pow(Math.abs(c), 2 / n), r + Math.sign(s) * r * Math.pow(Math.abs(s), 2 / n)]);
+  }
+  return 'M' + pts.map(p => p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join('L') + 'Z';
+}
+const WARM = '#F4F1EA', CANVAS = '#0B0B0D';
+
+// 1 · Disc — the knob, the world. A warm disc with a concave cap and one pip.
+function disc(size, id) {
+  const s = 1000, c = 500;
+  return `<svg class="ico" width="${size}" height="${size}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="${id}cap" cx="50%" cy="42%" r="60%"><stop offset="0" stop-color="#E9E5DC"/><stop offset=".72" stop-color="${WARM}"/><stop offset="1" stop-color="#FBFAF7"/></radialGradient>
+    <radialGradient id="${id}bg" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#141416"/><stop offset="1" stop-color="${CANVAS}"/></radialGradient>
+  </defs>
+  <path d="${squircle(s)}" fill="url(#${id}bg)"/>
+  <circle cx="${c}" cy="${c}" r="300" fill="url(#${id}cap)"/>
+  <circle cx="${c}" cy="${c}" r="300" fill="none" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="2"/>
+  <line x1="${c}" y1="${c - 300 + 34}" x2="${c}" y2="${c - 300 + 34 + 92}" stroke="${CANVAS}" stroke-width="22" stroke-linecap="round" transform="rotate(32 ${c} ${c})"/>
+</svg>`;
+}
+
+// 2 · Horizon — a world drawn as one hairline ring, with the display's baseline running through it.
+function horizon(size, id) {
+  const s = 1000, c = 500, r = 290, y = 600, w = 26;
+  const dx = Math.sqrt(r * r - (y - c) * (y - c)) - w * 1.6;
+  return `<svg class="ico" width="${size}" height="${size}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">
+  <path d="${squircle(s)}" fill="${CANVAS}"/>
+  <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${WARM}" stroke-width="${w}"/>
+  <line x1="${c - dx}" y1="${y}" x2="${c + dx}" y2="${y}" stroke="${WARM}" stroke-width="${w}" stroke-linecap="round"/>
+</svg>`;
+}
+
+// 3 · The letter — a geometric single-storey "a": a bowl and a stem, nothing else.
+function letter(size, id) {
+  const s = 1000;
+  return `<svg class="ico" width="${size}" height="${size}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">
+  <path d="${squircle(s)}" fill="${CANVAS}"/>
+  <circle cx="470" cy="520" r="215" fill="none" stroke="${WARM}" stroke-width="78"/>
+  <line x1="685" y1="305" x2="685" y2="735" stroke="${WARM}" stroke-width="78" stroke-linecap="round"/>
+</svg>`;
+}
+
+function mono(fn, size) { // 14px template symbol for the title bar: ink on paper
+  return fn(size, 'm' + size).replace(/#F4F1EA|#E9E5DC|#FBFAF7/g, '#111113').replace(/fill="url\(#\w+\)"/g, 'fill="none"').replace(/fill="#0B0B0D"/g, 'fill="none"').replace(/stroke="#0B0B0D"/g, 'stroke="#FFFFFF"');
+}
+
+function block(el, title, text, fn, key) {
+  el.innerHTML = `
+    <div><h2>${title}</h2><p>${text}</p></div>
+    <div>
+      <div class="row">
+        ${fn(256, key + 'a')}
+        <div class="dock">${fn(128, key + 'b')}${fn(64, key + 'c')}${fn(32, key + 'd')}</div>
+        <div class="dock light">${fn(64, key + 'e')}${fn(32, key + 'f')}</div>
+      </div>
+      <div class="wm">
+        ${fn(40, key + 'g')}
+        <span class="wordmark">alma</span>
+        <span class="tb"><span class="sym">${mono(fn, 14)}</span><span class="wordmark sm">alma</span></span>
+      </div>
+      <div class="note">256 · dock 128 / 64 / 32 · light dock · wordmark Satoshi 500, −3.5% tracking · title-bar symbol</div>
+    </div>`;
+}
+block(document.getElementById('c1'), '1 · Disc', 'The knob is the world. A warm, slightly concave disc on black with one pip at two o’clock. Reads as hardware at 256 and as a planet at 32.', disc, 'd');
+block(document.getElementById('c2'), '2 · Horizon', 'One hairline ring, cut by the baseline of the display. The world and the stage it sits on. The most reduced of the three.', horizon, 'h');
+block(document.getElementById('c3'), '3 · Letter', 'A single-storey a built from a circle and a stem. Owns the name; the circle keeps the world. Closest to a type foundry mark.', letter, 'l');
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>FLOW</title>
+<title>Alma</title>
 <script>try{ const t=localStorage.getItem('flow-theme'); if(t==='dark'||t==='light') document.documentElement.dataset.theme=t; }catch(e){}</script>
 <link rel="stylesheet" href="fonts/fonts.css?satoshi">
 <style>
@@ -29,8 +29,8 @@
   /* ---------- the device ---------- */
   .dev { position:absolute; inset:10px; margin:auto; max-width:1480px; max-height:940px; border-radius:16px; background:var(--dev); box-shadow:var(--shadow); border:1px solid var(--line); display:grid; grid-template-rows:50px minmax(190px,1fr) clamp(330px,44%,400px) 28px; overflow:hidden; transition:background .35s, border-color .35s; }
   .bar { display:flex; align-items:center; gap:14px; padding:0 16px 0 18px; }
-  .brand { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2em; font-size:12px; }
-  .brand svg rect { fill:var(--ink); transform-origin:bottom; animation:bars var(--beat) ease-in-out infinite; animation-delay:calc(var(--k) * var(--beat) / -5); }
+  .brand { display:flex; align-items:center; gap:8px; font-weight:500; letter-spacing:-.02em; font-size:15px; }
+  .brand .mark { display:block; }
   @keyframes bars { 0%,100% { opacity:.55; } 50% { opacity:1; } }
   .sess { flex:1; text-align:center; font:500 11.5px var(--mono); color:var(--sec); letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .sess b { color:var(--ink); font-weight:600; }
@@ -532,7 +532,7 @@
 <body>
 <div class="dev" id="dev">
   <header class="bar">
-    <div class="brand"><svg width="18" height="14" viewBox="0 0 22 18" aria-hidden="true"><rect style="--k:0" x="0" y="9" width="3" height="9" rx="1"/><rect style="--k:1" x="5" y="5" width="3" height="13" rx="1"/><rect style="--k:2" x="10" y="0" width="3" height="18" rx="1"/><rect style="--k:3" x="15" y="7" width="3" height="11" rx="1"/><rect style="--k:4" x="20" y="3" width="2" height="15" rx="1"/></svg>FLOW</div>
+    <div class="brand"><svg class="mark" width="16" height="16" viewBox="0 0 1000 1000" aria-hidden="true"><path d="M500 0C130 0 0 130 0 500s130 500 500 500 500-130 500-500S870 0 500 0z" fill="var(--ink)"/><circle cx="500" cy="500" r="300" fill="var(--bg)"/><line x1="500" y1="234" x2="500" y2="326" stroke="var(--ink)" stroke-width="40" stroke-linecap="round" transform="rotate(32 500 500)"/></svg>alma</div>
     <div class="sess" id="sess">No reference</div>
     <div class="right">
       <button class="chip upd hidden" id="updChip" title=""><i></i><span id="updTxt">Update</span></button>
@@ -543,7 +543,7 @@
   </header>
 
   <section class="disp" id="disp">
-    <div class="dv" data-v="gate"><div class="gate"><h2>Your trial has ended.</h2><p>Enter the license key you received after purchase. Keys are verified on this computer; nothing is sent anywhere.</p><div class="in"><input type="text" id="keyInput" placeholder="FLOW-…"><button class="dbtn" id="activateBtn">Activate</button></div><div class="dmsg" id="gateMsg"></div><div class="dmsg" id="gateMeta"></div></div></div>
+    <div class="dv" data-v="gate"><div class="gate"><h2>Your trial has ended.</h2><p>Enter the license key you received after purchase. Keys are verified on this computer; nothing is sent anywhere.</p><div class="in"><input type="text" id="keyInput" placeholder="ALMA-…"><button class="dbtn" id="activateBtn">Activate</button></div><div class="dmsg" id="gateMsg"></div><div class="dmsg" id="gateMeta"></div></div></div>
     <div class="dv" data-v="ref"><canvas class="full" id="waveCv"></canvas><div class="tl hidden" id="refTL"></div><div class="cap" id="refCap">No reference · the display breathes until it has a tempo</div></div>
     <div class="dv" data-v="snd"><div class="seq" id="seqEl" aria-hidden="true"></div><div id="kitView" class="hidden"></div><div class="cap" id="sndCap">No sounds · 16 steps, waiting for a kit</div></div>
     <div class="dv" data-v="dir"><div id="dirView"></div><div class="cap" id="dirCap"></div></div>
@@ -555,7 +555,7 @@
           <div class="frow"><div class="body"><div class="k">Sidechain</div><div class="h">On every track except the kick.</div><select class="dsel hidden" id="scSel"><option value="">None</option></select><div class="prow"><div class="psel" data-for="scSel"><button class="arr" data-d="-1"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="mid"><span class="cur">None</span><small>Plug-in</small></div><button class="arr" data-d="1"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div><button class="dbtn" id="scanPlug" style="margin-top:8px">Scan</button></div></div></div>
           <div class="dmsg" id="plugMsg"></div>
           <div class="frow hidden" id="outRow"><div class="body"><div class="k">Output folder</div><div class="h" id="outPath">Next to the reference</div></div><button class="dbtn" id="pickOut">Choose</button></div>
-          <div class="frow hidden" id="bridgeRow"><div class="body"><div class="k">FLOW Bridge</div><div class="h" id="bridgeMsg">Live is not reachable. Install the bridge, restart Live, enable it under Link, Tempo &amp; MIDI.</div></div><button class="dbtn" id="installBridge">Install</button></div>
+          <div class="frow hidden" id="bridgeRow"><div class="body"><div class="k">Alma Bridge</div><div class="h" id="bridgeMsg">Live is not reachable. Install the bridge, restart Live, enable it under Link, Tempo &amp; MIDI.</div></div><button class="dbtn" id="installBridge">Install</button></div>
         </div>
       </div>
     </div>
@@ -625,7 +625,7 @@
   </section>
 
   <audio id="player" preload="auto"></audio><audio id="aud" preload="auto"></audio>
-  <footer class="foot"><span>FLOW <span id="ver"></span> © 2026 Harel Eliyahu</span><span class="sp"></span><span class="st" id="liveSt"><i id="liveLed"></i><span id="liveTxt">Ableton Live</span></span></footer>
+  <footer class="foot"><span>Alma <span id="ver"></span> © 2026 Harel Eliyahu</span><span class="sp"></span><span class="st" id="liveSt"><i id="liveLed"></i><span id="liveTxt">Ableton Live</span></span></footer>
 </div>
 
 <script>
@@ -791,7 +791,7 @@ function mountTimeline(el, cfg){
 /* ---------- license, session, resume ---------- */
 async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed`:(st.state==='trial'?`Trial · ${st.days_left} days`:'Trial ended'); $('ver').textContent = st.version||'';
   S.licensed = st.state!=='expired'; $('deck').classList.toggle('locked', !S.licensed);
-  if(!S.licensed){ $('gateMeta').textContent=`FLOW ${st.version} · machine ${st.machine}`; showView('gate'); } return st; }
+  if(!S.licensed){ $('gateMeta').textContent=`Alma ${st.version} · machine ${st.machine}`; showView('gate'); } return st; }
 window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle();
   const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').slice(0,28); $('resumeChip').classList.remove('hidden'); }
   setActive('ref'); liveStatus(); });
@@ -830,7 +830,7 @@ async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Read
   const warn = (r.pack.warnings||[]);
   if(warn.some(w=>/iCloud/.test(w))){ const n = (warn.find(w=>/iCloud/.test(w)).match(/^(\d+)/)||[0,'some'])[1];
     msg($('packMsg'), `${n} sounds live in iCloud, not on this Mac. Downloading…`, 'warn'); const origProgress = window.flowProgress; window.flowProgress = (m)=>{ if(!m.startsWith('@')) $('packMsg').textContent = m; };
-    const d = await api().download_icloud(p); window.flowProgress = origProgress; if(d.ok){ msg($('packMsg'), 'Downloaded. iCloud may evict them again; keep a copy outside iCloud to be safe.', 'ok'); $('packMsg').innerHTML += ` <button class="lk" id="keepLocal" style="margin-left:6px">Keep a local copy</button>`; $('keepLocal').onclick = async ()=>{ msg($('packMsg'), 'Copying to Music › FLOW Samples…', 'ok'); const c = await api().copy_pack_local(p); if(c.ok){ S.packPath=c.folder; await scanPack(); } else msg($('packMsg'), c.error, 'err'); };
+    const d = await api().download_icloud(p); window.flowProgress = origProgress; if(d.ok){ msg($('packMsg'), 'Downloaded. iCloud may evict them again; keep a copy outside iCloud to be safe.', 'ok'); $('packMsg').innerHTML += ` <button class="lk" id="keepLocal" style="margin-left:6px">Keep a local copy</button>`; $('keepLocal').onclick = async ()=>{ msg($('packMsg'), 'Copying to Music › Alma Samples…', 'ok'); const c = await api().copy_pack_local(p); if(c.ok){ S.packPath=c.folder; await scanPack(); } else msg($('packMsg'), c.error, 'err'); };
       const r2 = await api().scan_pack(p); if(r2.ok){ S.pack=r2.pack; renderPack(r2.pack); } return; }
     msg($('packMsg'), d.error || `${d.remaining} files did not download. In Finder: right-click the folder › Download Now, then choose it again.`, 'err'); setMod('snd','Error','err'); return; }
   if(warn.length){ msg($('packMsg'), warn.join(' '), 'err'); setMod('snd','Check','err'); } else { msg($('packMsg'), ''); setMod('snd','Ready','on'); }
@@ -858,7 +858,7 @@ function drawPeaks(cv, pk, empty){ const dpr=fitCanvas(cv); if(!dpr) return; con
   const n=pk.length, gap=W/n; ctx.fillStyle=`rgba(${ACC()},.9)`; for(let i=0;i<n;i++){ const h=Math.max(dpr, pk[i]*H*.95); ctx.fillRect(i*gap+gap*.2, (H-h)/2, Math.max(dpr, gap*.6), h); } }
 function renderKit(){ const rows = S.kit; if(!rows.length) return; drawKindWaves(); const sel = rows.filter(r=>r.chosen).length; $('roUsed').textContent = S.usedCount ? `${sel} selected · ${S.usedCount} used` : `${sel} selected`;
   const stem = n => esc(String(n).replace(/^TPS - Oasis - /,'').replace(/\.[^.]+$/,''));
-  $('kitView').innerHTML = `<div class="dvhead"><div class="t">Your sounds<small>${rows.length} roles · ${S.pack?S.pack.count:0} sounds</small></div><div class="r">${Object.keys(S.kitOverrides).length ? `<b>${Object.keys(S.kitOverrides).length}</b> changed by you` : 'FLOW\u2019s first pick · swap any'}</div></div>
+  $('kitView').innerHTML = `<div class="dvhead"><div class="t">Your sounds<small>${rows.length} roles · ${S.pack?S.pack.count:0} sounds</small></div><div class="r">${Object.keys(S.kitOverrides).length ? `<b>${Object.keys(S.kitOverrides).length}</b> changed by you` : 'Alma\u2019s first pick · swap any'}</div></div>
     <div class="tiles">${rows.map(r=>{ const n=r.candidates.length; const idx=r.chosen ? Math.max(0, r.candidates.findIndex(c=>c.path===r.chosen.path)) : -1;
       return `<div class="tile ${S.kitOverrides[r.role]!==undefined?'ov':''}" data-role="${esc(r.role)}" title="${esc(r.chosen?(r.chosen.rel||r.chosen.path):'')}"><div class="tr"><span class="kl">${esc(r.label)}</span><span class="kc">${idx+1}/${n}</span></div><canvas class="tw"></canvas><div class="tn">${r.chosen?stem(r.chosen.name):'—'}</div><div class="tc"><button class="kb" data-d="-1" ${n<2?'disabled':''}>${KIT_ICON.prev}</button><button class="kb" data-d="1" ${n<2?'disabled':''}>${KIT_ICON.next}</button><button class="kb pl" ${r.chosen?'':'disabled'}>${KIT_ICON.play}</button></div></div>`; }).join('')}</div>`;
   $('kitView').querySelectorAll('.tile').forEach(tile=>{ const role=tile.dataset.role; const r=rows.find(x=>x.role===role); tile.querySelectorAll('.kb[data-d]').forEach(b=>b.onclick=()=>cycleKit(role, +b.dataset.d)); const pl=tile.querySelector('.pl'); const go=()=>{ if(r&&r.chosen) audition(r.chosen.path, pl); }; if(pl) pl.onclick=go; const cv=tile.querySelector('canvas'); cv.onclick=go;
