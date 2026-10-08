@@ -540,6 +540,31 @@
   .dv.on { animation:dvin .34s var(--ease) both; }
   @keyframes dvin { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
   .flip { position:fixed; z-index:50; pointer-events:none; border-radius:8px; opacity:.9; transform-origin:top left; transition:transform .5s cubic-bezier(.3,1,.35,1), opacity .5s ease; will-change:transform; }
+
+  /* Reference and Sounds: the plate is the control. Empty, it is a button; filled, it holds the name, one strip, one line of facts. */
+  .well.pick { justify-content:center; align-items:center; padding:12px 14px; transition:border-color .2s, transform .25s var(--ease); outline:none; }
+  .well.pick:not(.filled) { cursor:pointer; }
+  .well.pick:not(.filled):hover, .well.pick:not(.filled):focus-visible { border-color:var(--ink); }
+  .well.pick:not(.filled):active { transform:scale(.995); }
+  .well.pick .empty { display:flex; flex-direction:column; align-items:center; gap:12px; color:var(--sec); font-size:12.5px; font-weight:500; letter-spacing:-.005em; }
+  .well.pick .empty svg { width:28px; height:28px; stroke:currentColor; fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; opacity:.75; }
+  .well.pick:not(.filled):hover .empty { color:var(--ink); }
+  .well.pick .meta { display:none; }
+  .well.pick.filled { align-items:stretch; cursor:default; }
+  .well.pick.filled .empty { display:none; }
+  .well.pick.filled .meta { display:flex; flex-direction:column; justify-content:space-between; flex:1; min-height:0; gap:8px; }
+  .well.pick .top { display:flex; align-items:center; gap:10px; min-height:22px; }
+  .well.pick .top b { flex:1; min-width:0; font-size:12.5px; font-weight:600; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .well.pick .mini { flex:1; min-height:28px; max-height:48px; margin:0; }
+  .well.pick .facts { font:500 10.5px var(--mono); color:var(--sec); letter-spacing:.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums; }
+  .well.pick .facts b { color:var(--ink); font-weight:500; }
+  #roUsed:not(:empty)::before { content:" · "; }
+  .roles { flex:1; display:flex; flex-wrap:wrap; align-content:center; gap:5px 12px; font:500 10.5px var(--mono); color:var(--sec); letter-spacing:.02em; min-height:0; }
+  .roles span b { color:var(--ink); font-weight:500; margin-left:4px; }
+  .roles span.off, .roles span.off b { color:var(--mut); }
+  .roles span.has { cursor:pointer; } .roles span.has:hover, .roles span.has:hover b { color:var(--acc); }
+  .well.pick.next { animation:nextring var(--beat) ease-out infinite; }
+  @media (max-height:760px) { .well.pick .mini { max-height:32px; } .roles { gap:3px 9px; font-size:9.5px; } }
 </style>
 </head>
 <body>
@@ -587,11 +612,9 @@
     <div class="mod" data-m="ref" style="--mc:var(--c-ref)">
       <div class="mh"><i class="led" id="ledRef"></i><span class="mn">Reference</span><span class="ms" id="msRef">Empty</span></div>
       <div class="mb">
-        <div class="frow2"><div class="fname empty" id="refName"><b>No track</b></div><button class="sb pri" id="pickRef">Choose</button></div>
-        <div class="well">
-          <div class="hero"><span class="v dim" id="roBpm">—</span><span class="u" id="roBpmL">BPM</span></div>
-          <canvas class="mini" id="refMini" aria-hidden="true"></canvas>
-          <div class="grid4"><div><div class="v dim" id="roKey">—</div><div class="l">Key</div></div><div><div class="v dim" id="roBars">—</div><div class="l">Bars</div></div><div><div class="v dim" id="roLen">—</div><div class="l">Length</div></div><div><div class="v dim" id="roSec">—</div><div class="l">Sections</div></div></div>
+        <div class="well pick" id="pickRef" role="button" tabindex="0" aria-label="Choose a reference track">
+          <div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h2M6 8v8M9 4v16M12 7v10M15 10v4M18 6v12M21 11v2"/></svg><span>Choose a track</span></div>
+          <div class="meta"><div class="top"><b id="refName">No track</b><button class="ta" id="refChange">Change</button></div><canvas class="mini" id="refMini" aria-hidden="true"></canvas><div class="facts" id="refFacts"><b id="roBpm">—</b> BPM · <b id="roKey">—</b> · <b id="roBars">—</b> bars · <b id="roLen">—</b><span id="roBpmL" hidden></span><b id="roSec" hidden></b></div></div>
         </div>
         <div class="msg" id="refMsg"></div>
         <div class="mrow hidden" id="refTools"><button class="ta hidden" id="refStop">Stop</button><button class="ta" id="analyzeBtn">Re-analyze</button></div>
@@ -600,11 +623,9 @@
     <div class="mod" data-m="snd" style="--mc:var(--c-snd)">
       <div class="mh"><i class="led" id="ledSnd"></i><span class="mn">Sounds</span><span class="ms" id="msSnd">Empty</span></div>
       <div class="mb">
-        <div class="frow2"><div class="fname empty" id="packName"><b>No sounds</b></div><button class="sb pri" id="pickPack">Choose</button></div>
-        <div class="well">
-          <div class="hero"><span class="v dim" id="roCount">—</span><span class="u">Sounds</span><span class="u" id="roUsed" style="margin-left:auto"></span></div>
-          <canvas class="mini" id="sndMini" aria-hidden="true" style="display:none"></canvas><div class="tip" id="sndTip"></div>
-          <div class="kinds" id="roleLeds"></div>
+        <div class="well pick" id="pickPack" role="button" tabindex="0" aria-label="Choose your sounds">
+          <div class="empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Choose your sounds</span></div>
+          <div class="meta"><div class="top"><b id="packName">No sounds</b><button class="ta" id="packChange">Change</button></div><div class="roles" id="roleLeds"></div><canvas class="mini" id="sndMini" aria-hidden="true" style="display:none"></canvas><div class="tip" id="sndTip"></div><div class="facts"><b id="roCount">—</b> sounds<span id="roUsed"></span></div></div>
         </div>
         <div class="msg" id="packMsg"></div>
         <div class="vrow" id="vocalRow"><svg width="13" height="13" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0014 0"/><path d="M12 17v4M8 21h8"/></svg><div class="body" id="vocalName">Vocal, optional</div><button class="x hidden" id="vocalClear" aria-label="Remove vocal"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><button class="ta" id="pickVocal">Add</button></div>
@@ -838,13 +859,13 @@ $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classL
 
 /* ---------- reference ---------- */
 let REFTL = null;
-function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('refName').className='fname'; $('refName').title=S.refPath; $('refName').innerHTML = `<b>${esc(n)}</b>`; $('pickRef').textContent='Change'; $('pickRef').classList.remove('pri'); $('refTools').classList.remove('hidden'); $('sess').innerHTML = `<b>${esc(n)}</b>`; }
+function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('pickRef').classList.add('filled'); $('refName').textContent=n; $('refName').title=S.refPath; $('refTools').classList.remove('hidden'); $('sess').innerHTML = `<b>${esc(n)}</b>`; }
 async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; refAud.url=null; refAud.active=false; setRefFile(); setActive('ref'); analyze(); }
-$('pickRef').onclick = pickRef;
+$('pickRef').onclick = ()=>{ if(!$('pickRef').classList.contains('filled')) pickRef(); }; $('refChange').onclick = e=>{ e.stopPropagation(); pickRef(); }; $('pickRef').onkeydown = e=>{ if((e.key==='Enter'||e.key===' ') && !$('pickRef').classList.contains('filled')){ e.preventDefault(); pickRef(); } };
 async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=parseFloat($('bpmIn').value)||null;
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ setMod('ref','Error','err'); $('refMsg').className='msg err'; $('refMsg').textContent=r.error; return; }
   S.ref=r.ref; const k=r.ref.key; setBeat(r.ref.bpm); setMod('ref','Measured','on'); const shortRef = r.ref.bars < 48 || r.ref.sections.length < 3; msg($('refMsg'), shortRef ? `Short reference: ${r.ref.bars} bars. A typical ${curStyle()?curStyle().name:''} structure will be used.` : '', shortRef ? 'warn' : '');
-  ['roBpm','roKey','roBars','roLen','roSec'].forEach(id=>$(id).classList.remove('dim')); tickNum($('roBpm'), Math.round(r.ref.bpm)); $('roBpmL').textContent = r.ref.tempo_info.source==='estimated' ? 'BPM · detected' : 'BPM · from name'; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
+  ['roBpm','roKey','roBars','roLen','roSec'].forEach(id=>$(id).classList.remove('dim')); tickNum($('roBpm'), Math.round(r.ref.bpm)); $('refFacts').title = r.ref.tempo_info.source==='estimated' ? 'Tempo detected from the audio' : 'Tempo taken from the file name'; $('roBpmL').textContent=''; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
   $('sess').innerHTML = `<b>${esc(r.ref.file || S.refPath.split(/[\\/]/).pop())}</b> · ${Math.round(r.ref.bpm)} BPM · ${esc(k.tonic)} ${k.mode==='minor'?'min':'maj'} · ${r.ref.bars} bars`;
   const el = r.ref.elements||{}; const en = el.energy||[]; const mn=Math.min(...en), mx=Math.max(...en); const curve = en.map(v=> mx>mn ? (v-mn)/(mx-mn) : 0.5);
   const lanes = el.kick ? [{name:'Kick', cls:'k', blocks:spansFromBools(el.kick).map(([a,b])=>({a,b,k:'span'}))}, {name:'Hats and top', cls:'', blocks:spansFromBools(el.hats).map(([a,b])=>({a,b,k:'span'}))}] : [];
@@ -855,7 +876,7 @@ $('analyzeBtn').onclick = analyze;
 function tickNum(n, target){ if(reduced){ n.textContent=target; return; } const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
 
 /* ---------- sounds ---------- */
-function setPackFile(){ const parts=S.packPath.split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('packName').className='fname'; $('packName').title=parts.join('\n'); $('packName').innerHTML = `<b>${esc(parts.length>1 ? parts.length+' folders' : parts[0].split(/[\\/]/).pop())}</b>`; $('pickPack').textContent='Change'; $('pickPack').classList.remove('pri'); }
+function setPackFile(){ const parts=S.packPath.split(/:(?=\/)|;(?=[A-Za-z]:\\)/); $('pickPack').classList.add('filled'); $('packName').title=parts.join('\n'); $('packName').textContent = parts.length>1 ? parts.length+' folders' : parts[0].split(/[\\/]/).pop(); }
 function msg(el, text, kind){ el.className = 'msg' + (kind?' '+kind:''); el.textContent = text||''; }
 async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Reading','work'); msg($('packMsg'),'Reading every file…'); $('roCount').textContent='—'; $('roCount').classList.add('dim'); $('roUsed').textContent=''; renderLeds({}); S.kit=[]; S.kitOverrides={}; S.usedCount=null;
   const r = await api().scan_pack(p); if(!r.ok){ setMod('snd','Error','err'); msg($('packMsg'), r.error, 'err'); return; } S.pack=r.pack;
@@ -870,13 +891,10 @@ async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Read
 const ROLE_LEDS = [['kick','Kick'],['clap','Clap'],['chat','Hats'],['perc','Perc'],['bass','Bass'],['synth','Synth'],['pad','Pad'],['atmos','Atmos'],['fx','FX']];
 const KIND_ROLES = {kick:['kick'], clap:['clap'], chat:['chat','ohat','hat_loop'], perc:['perc','perc_loop','shaker_loop','perc_loop2'], bass:['bass'], synth:['synth'], pad:['pad'], atmos:['atmos'], fx:['impact','uplifter','downlifter']};
 function renderLeds(br){ const n = k => k==='chat' ? ((br.chat||0)+(br.ohat||0)+(br.shaker||0)) : k==='perc' ? ((br.perc||0)+(br.top||0)) : k==='fx' ? ((br.fx||0)+(br.impact||0)+(br.uplifter||0)+(br.downlifter||0)) : (br[k]||0);
-  $('roleLeds').innerHTML = ROLE_LEDS.map(([k,l],i)=>`<div class="kr ${n(k)?'':'off'}" data-kind="${k}"><span class="kl">${l}</span><canvas style="--d:${i*45}ms"></canvas><b>${S.pack ? (n(k)||'—') : '—'}</b></div>`).join('');
+  $('roleLeds').innerHTML = ROLE_LEDS.map(([k,l])=>`<span class="${n(k)?'':'off'}" data-kind="${k}">${l}<b>${S.pack ? (n(k)||'—') : '—'}</b></span>`).join('');
   drawKindWaves(); }
 function kindSound(k){ for(const role of KIND_ROLES[k]||[]){ const r=S.kit.find(x=>x.role===role && x.chosen); if(r) return r.chosen; } return null; }
-function drawKindWaves(){ const dark=document.documentElement.dataset.theme==='dark'; const empty = dark?'rgba(255,255,255,.1)':'rgba(20,20,30,.1)';
-  $('roleLeds').querySelectorAll('.kr').forEach(row=>{ const k=row.dataset.kind, cv=row.querySelector('canvas'), snd=kindSound(k); row.classList.toggle('has', !!snd);
-    if(snd){ drawPeaks(cv, PEAKS.get(snd.path)||null, empty); peaksFor(snd.path).then(pk=>{ if(row.isConnected) drawPeaks(cv, pk, empty); }); row.onclick=()=>audition(snd.path, null); row.title=snd.name; } else { drawPeaks(cv, null, empty); row.onclick=null; }
-    requestAnimationFrame(()=>requestAnimationFrame(()=>cv.classList.add('shown'))); }); }
+function drawKindWaves(){ $('roleLeds').querySelectorAll('span[data-kind]').forEach(el=>{ const snd=kindSound(el.dataset.kind); el.classList.toggle('has', !!snd); el.title = snd ? snd.name : ''; el.onclick = snd ? ()=>audition(snd.path, null) : null; }); }
 function kitRows(br){ return Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); }
 function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCount'), pack.count); const br=pack.by_role||{}; renderLeds(br); loadKit();
   const rows = Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); const mx = rows.length ? rows[0][1] : 1;
@@ -904,7 +922,8 @@ function cycleKit(role, d){ const r=S.kit.find(x=>x.role===role); if(!r || r.can
 async function audition(path, btn){ const a=$('aud'); refAud.active=false; if(btn && btn.classList.contains('on')){ a.pause(); return; } const r = await api().audition_url(path); if(!r.ok) return; document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on')); a.src=r.url; a.currentTime=0; a.play().catch(()=>{}); if(btn){ btn.classList.add('on'); a.onended=()=>btn.classList.remove('on'); a.onpause=()=>btn.classList.remove('on'); } }
 function markStale(){ if(S.preview){ S.previewStale=true; stopPlayer(); $('tp').classList.add('hidden'); } listenLabel(); }
 async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; setActive('snd'); await scanPack(); }
-$('pickPack').onclick = pickPack; renderLeds({});
+$('pickPack').onclick = ()=>{ if(!$('pickPack').classList.contains('filled')) pickPack(); }; $('packChange').onclick = e=>{ e.stopPropagation(); pickPack(); }; $('pickPack').onkeydown = e=>{ if((e.key==='Enter'||e.key===' ') && !$('pickPack').classList.contains('filled')){ e.preventDefault(); pickPack(); } };
+ renderLeds({});
 async function describeVocal(){ const p=S.vocalPath; const n=p.split(/[\\/]/).pop().replace(/\.[^.]+$/,''); $('vocalRow').classList.add('has'); $('vocalRow').title=p; $('vocalName').innerHTML = `${esc(n)}<small id="vocalMeta">Listening…</small>`; $('vocalClear').classList.remove('hidden'); $('pickVocal').textContent='Change';
   const r = await api().analyze_vocal(p); if(!r.ok){ $('vocalMeta').textContent = r.error; return; } const v=r.vocal; S.vocal=v;
   const key = v.key ? `${NOTES[v.key.pc]} ${v.key.mode==='minor'?'min':'maj'}` : 'key unknown'; const bpm = v.bpm ? `${v.bpm} BPM` : 'tempo taken as the project’s';
@@ -954,7 +973,7 @@ $('finBtn').onclick = ()=>{ S.finOpen = !S.finOpen; $('finBtn').classList.toggle
 async function liveStatus(){ if(S.target!=='ableton'){ $('liveLed').className=''; $('liveTxt').textContent='Stems + MIDI'; return {ok:true,fresh:true}; }
   const r = await api().ableton_status(); $('liveLed').className = r.ok ? ((r.fresh||r.rebuild)?'ok':'bad') : 'bad'; $('liveTxt').textContent = r.ok ? (r.fresh ? 'Live is ready, empty set in front' : (r.rebuild ? 'Live has your last build open' : `Live has ${r.tracks} tracks open`)) : 'Live is not reachable'; return r; }
 async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!=='stems'); $('bridgeRow').classList.add('hidden'); if(!S.finishLoaded) loadFinish();
-  if(S.target==='ableton'){ $('targetHint').className='hint'; $('targetHint').textContent='Checking Live…'; const r = await liveStatus(); if(r.ok && r.bridge_outdated){ $('bridgeRow').classList.remove('hidden'); $('bridgeMsg').textContent = 'This version of Alma ships a newer bridge. Install it, then quit and reopen Live.'; } $('targetHint').className = 'hint ' + (r.ok ? ((r.fresh||r.rebuild)?'ok':'warn') : 'warn'); $('targetHint').textContent = r.ok ? (r.fresh?'Live is ready · empty set in front':(r.rebuild?`Your last build is open in Live · Build replaces its ${r.alma_tracks} tracks, nothing else`:`Live has ${r.tracks} tracks open. File › New Live Set first.`)) : r.reason; if(!r.ok) $('bridgeRow').classList.remove('hidden'); return r; }
+  if(S.target==='ableton'){ $('targetHint').className='hint hidden'; $('targetHint').textContent=''; const r = await liveStatus(); if(r.ok && r.bridge_outdated){ $('bridgeRow').classList.remove('hidden'); $('bridgeMsg').textContent = 'This version of Alma ships a newer bridge. Install it, then quit and reopen Live.'; } $('targetHint').className = 'hint ' + (r.ok ? ((r.fresh||r.rebuild)?'ok':'warn') : 'warn'); $('targetHint').textContent = r.ok ? (r.fresh?'':(r.rebuild?`Your last build is open in Live · Build replaces its ${r.alma_tracks} tracks, nothing else`:`Live has ${r.tracks} tracks open. File › New Live Set first.`)) : r.reason; $('targetHint').classList.toggle('hidden', !$('targetHint').textContent); if(!r.ok) $('bridgeRow').classList.remove('hidden'); return r; }
   await liveStatus(); $('targetHint').className='hint'; $('targetHint').textContent = 'Full-length stems and a MIDI file with markers, for any DAW.'; return {ok:true, fresh:true}; }
 $('installBridge').onclick = async ()=>{ $('bridgeMsg').textContent='Installing…'; const r = await api().install_bridge(); $('bridgeMsg').textContent = r.ok ? `Installed to ${r.path}. ${r.steps.join(' ')}` : r.error; };
 async function loadFinish(){ S.finishLoaded = true; const opts = await api().finish_options(); if(!S.finish) S.finish = new Set(opts.filter(o=>o.on).map(o=>o.key));
