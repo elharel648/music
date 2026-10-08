@@ -7,9 +7,9 @@ import json
 import re
 import urllib.request
 
-from . import __version__, license as lic
+from . import __version__, endpoints, license as lic
 
-UPDATE_URL = "https://raw.githubusercontent.com/elharel648/music/main/packaging/latest.json"
+UPDATE_URL = f"{endpoints.SITE_URL}/latest.json" if endpoints.SITE_URL else "https://raw.githubusercontent.com/elharel648/music/main/packaging/latest.json"
 
 
 def canonical(version: str, url: str, notes: str) -> bytes:
