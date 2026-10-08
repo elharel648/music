@@ -649,7 +649,7 @@
   .well.dir .frow2.subj { position:absolute; top:34px; left:12px; right:12px; margin:0; }
   .well.dir .knob { position:absolute; left:50%; top:var(--axis); transform:translate(-50%,-50%); --k:var(--ctl); width:var(--k); height:var(--k); margin:0; }
   .well.dir .knob .cap { left:11%; top:11%; width:78%; height:78%; }
-  .well.dir .kval { position:absolute; left:0; right:0; top:calc(var(--axis) + var(--ctl) / 2 + 6px); text-align:center; display:flex; flex-direction:column; align-items:center; }
+  .well.dir .kval { position:absolute; left:0; right:0; top:calc(var(--axis) + var(--ctl) / 2 + 2px); text-align:center; display:flex; flex-direction:column; align-items:center; }
   .well.dir .drow { position:absolute; left:12px; right:12px; bottom:12px; margin:0; padding:0; width:auto; display:flex; align-items:center; justify-content:space-between; gap:8px; }
   .well.dir .drow .tg.sm { margin-left:0; flex:0 0 auto; } .well.dir .bpmbox .in { width:44px; }
   @media (max-width:1060px) { .well.dir .bpmbox .dl { display:none; } .well.dir .bpmbox .in { width:40px; } }
@@ -793,6 +793,32 @@
   .well.dir .drow { justify-content:space-between; }
   .well.dir .bpmbox .in { width:38px; } .well.dir .bpmbox .dl { display:inline; }
   .well.bld .pfoot.pre .ta { font-size:11.5px; }
+
+  /* The tempo is a slider: the value above, a thin recessed track with a small cap, the unit below. A tick marks the reference's tempo. */
+  .hs, .well.dir .drow .hs { display:grid; grid-template-rows:auto auto auto; justify-items:center; align-items:center; row-gap:2px; width:118px; height:auto; outline:none; cursor:default; user-select:none; -webkit-user-select:none; }
+  .hs .v { font:500 12px var(--mono); color:var(--sec); letter-spacing:.02em; line-height:1; font-variant-numeric:tabular-nums; }
+  .hs .v.own { color:var(--ink); }
+  .hs .track { position:relative; width:100%; height:4px; margin:6px 0; border-radius:2px; background:#E6E6EA; box-shadow:inset 0 1px 2px rgba(20,20,30,.14), inset 0 0 0 1px rgba(20,20,30,.04); cursor:ew-resize; }
+  .hs .track .tick { position:absolute; top:-3px; width:1px; height:10px; margin-left:-.5px; background:var(--mut); opacity:.6; pointer-events:none; }
+  .hs .track .cap { position:absolute; top:50%; width:22px; height:14px; margin:-7px 0 0 -11px; border-radius:5px; cursor:ew-resize;
+    background:radial-gradient(circle at 35% 25%, #FFFFFF 0%, #F6F6F8 40%, #E3E3E8 85%, #D2D2D8 100%); box-shadow:0 2px 4px rgba(20,20,30,.18), 0 0 0 1px rgba(20,20,30,.07), inset 0 1px 0 #fff, inset 0 -1px 2px rgba(20,20,30,.06); transition:left .08s linear; }
+  .hs .track .cap::after { content:""; position:absolute; left:50%; top:3px; bottom:3px; width:1.5px; margin-left:-.75px; border-radius:1px; background:#111113; opacity:.85; }
+  .hs:focus-visible .track .cap { box-shadow:0 2px 4px rgba(20,20,30,.18), 0 0 0 1px var(--acc), inset 0 1px 0 #fff; }
+  .hs .lbl { font:500 9px var(--mono); color:var(--mut); letter-spacing:.14em; text-transform:uppercase; }
+  :root[data-theme=dark] .hs .track { background:#111218; box-shadow:inset 0 1px 2px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.05); }
+  :root[data-theme=dark] .hs .track .cap { background:radial-gradient(circle at 35% 25%, #4A4B55 0%, #34353E 40%, #22232A 85%, #17181E 100%); box-shadow:0 2px 4px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+  :root[data-theme=dark] .hs .track .cap::after { background:#F4F1EA; }
+  .well.dir .drow { align-items:end; }
+  @media (max-height:760px) { .well.dir .kval b { font-size:20px; } .well.dir .drow { bottom:9px; } .hs .track { margin:5px 0; } }
+
+  /* Direction's bottom: the tempo on one line (value · track · BPM), the structure switch under it; the readout on one baseline above. */
+  .well.dir .kval { flex-direction:row; align-items:baseline; justify-content:center; gap:8px; top:calc(var(--axis) + var(--ctl) / 2); }
+  .well.dir .kval b { font-size:clamp(20px, 3vh, 26px); } .well.dir .kval small { margin:0; display:inline; }
+  .well.dir .drow { display:grid; grid-template-rows:20px 22px; row-gap:4px; align-items:center; justify-items:stretch; bottom:12px; }
+  .well.dir .drow #structSeg { justify-self:center; }
+  .hs, .well.dir .drow .hs { display:flex; flex-direction:row; align-items:center; gap:8px; width:100%; height:20px; justify-self:stretch; }
+  .hs .v { width:26px; text-align:right; } .hs .track { flex:1; margin:0; } .hs .lbl { width:26px; }
+  @media (max-height:760px) { .well.dir .kval b { font-size:20px; } .well.dir .drow { bottom:9px; row-gap:3px; } }
 </style>
 </head>
 <body>
@@ -872,7 +898,7 @@
           <span class="kend l">2:00</span><span class="kend r">10:00</span>
         </div>
         <div class="kval"><b id="lcdBig">4:30</b><small><span id="lcdSub">136 bars</span></small></div>
-        <div class="drow"><div class="vf bpmbox" title="Tempo. Follows the reference until you change it."><input class="in" type="text" id="bpmIn" placeholder="—" inputmode="numeric" maxlength="3"><span class="steps"><button type="button" id="bpmUp" aria-label="Faster"><svg viewBox="0 0 10 6"><path d="M1 5l4-4 4 4"/></svg></button><button type="button" id="bpmDn" aria-label="Slower"><svg viewBox="0 0 10 6"><path d="M1 1l4 4 4-4"/></svg></button></span><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><span class="pill"><i></i></span><button data-v="typical">Typical</button></div></div>
+        <div class="drow"><div class="hs bpmbox" id="bpmSlider" title="Tempo. Drag; double-click to follow the reference again." tabindex="0" role="slider" aria-label="Tempo" aria-valuemin="90" aria-valuemax="160"><b class="v" id="bpmVal">—</b><div class="track" id="bpmTrack"><i class="tick" id="bpmTick"></i><span class="cap" id="bpmCap"></span></div><span class="lbl">BPM</span><input type="text" id="bpmIn" placeholder="—" hidden></div><div class="tg sm" id="structSeg" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><span class="pill"><i></i></span><button data-v="typical">Typical</button></div></div>
       </div>
       <div class="hint hidden" id="targetHint"></div>
     </div>
@@ -1085,7 +1111,7 @@ $('fbSend').onclick = async ()=>{ const t=$('fbText').value.trim(); if(!t){ $('f
   else if(r.ok){ $('fbMsg').innerHTML=`No connection. Saved to <b>${esc(r.path.split('/').pop())}</b> on your Desktop — send that file to Harel.`; $('fbText').value=''; }
   else $('fbMsg').textContent = r.error || 'Could not send.'; };
 $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classList.add('hidden'); S.refPath=l.reference; setRefFile(); await analyze(); S.packPath=l.pack; await scanPack(); S.style=l.style||'melodic_techno'; S.target=l.target||'ableton'; S.out=l.out||null; if(S.out) $('outPath').textContent=S.out;
-  document.querySelectorAll('#targetSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.target)); renderStyle(); if(l.length) setLen(l.length); if(l.bpm) $('bpmIn').value=l.bpm;
+  document.querySelectorAll('#targetSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.target)); renderStyle(); if(l.length) setLen(l.length); if(l.bpm) $('bpmIn').value=l.bpm; drawBpm();
   if(l.synth||l.sidechain){ await scanPlugins(); $('synthSel').value=l.synth||''; $('scSel').value=l.sidechain||''; syncPsel(); }
   if(Array.isArray(l.finish)){ S.finish = new Set(l.finish); S.finishLoaded=false; }
   if(l.vocal){ S.vocalPath=l.vocal; await describeVocal(); }
@@ -1106,7 +1132,7 @@ async function analyze(){ setMod('ref','Listening','work'); $('refMsg').classNam
   const lanes = el.kick ? [{name:'Kick', cls:'k', blocks:spansFromBools(el.kick).map(([a,b])=>({a,b,k:'span'}))}, {name:'Hats and top', cls:'', blocks:spansFromBools(el.hats).map(([a,b])=>({a,b,k:'span'}))}] : [];
   $('refTL').classList.remove('hidden'); $('refCap').textContent = ''; syncIdle();
   if(REFTL) REFTL.destroy(); REFTL = mountTimeline($('refTL'), {total:r.ref.bars, bpm:r.ref.bpm, sections:r.ref.sections, curve, lanes, overview:r.ref.overview, color:getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()||'#5C5BE0', rightInfo: bar=>`Kick ${el.kick&&el.kick[bar-1]?'on':'off'} · ${fmt((bar-1)*240/r.ref.bpm)}`});
-  $('bpmIn').placeholder = String(Math.round(r.ref.bpm)); if(refUsable()) S.structure='reference'; renderStruct(); setLen(Math.max(150, Math.min(600, Math.ceil(r.ref.duration/30)*30))); renderStyle(); if(S.view==='dir') drawDir(); gateBuild(); if(S.pack) loadKit(); if(stopSeq){ stopSeq(); stopSeq=null; syncIdle(); } }
+  $('bpmIn').placeholder = String(Math.round(r.ref.bpm)); drawBpm(); if(refUsable()) S.structure='reference'; renderStruct(); setLen(Math.max(150, Math.min(600, Math.ceil(r.ref.duration/30)*30))); renderStyle(); if(S.view==='dir') drawDir(); gateBuild(); if(S.pack) loadKit(); if(stopSeq){ stopSeq(); stopSeq=null; syncIdle(); } }
 $('analyzeBtn').onclick = analyze;
 function tickNum(n, target){ if(reduced){ n.textContent=target; return; } const t0=performance.now(), T=700; const tick=now=>{ const p=Math.min(1,(now-t0)/T); const e=1-Math.pow(1-p,3); n.textContent=Math.round(target*e); if(p<1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
 
@@ -1216,7 +1242,18 @@ function syncSwitches(){ document.querySelectorAll('.tg.sm').forEach(sw=>{ const
 document.querySelectorAll('.tg.sm .pill').forEach(pl=>pl.onclick=()=>{ const sw=pl.closest('.tg.sm'); const bs=sw.querySelectorAll('button'); const other = bs[0].classList.contains('on') ? bs[1] : bs[0]; if(!other.disabled) other.click(); });
 function bpmNow(){ const i=$('bpmIn'); return parseFloat(i.value) || parseFloat(i.placeholder) || (S.ref && S.ref.bpm) || 124; }
 function nudgeBpm(d){ const i=$('bpmIn'); i.value=String(Math.max(60, Math.min(200, Math.round(bpmNow()+d)))); i.dispatchEvent(new Event('change')); }
-$('bpmUp').onclick=()=>nudgeBpm(1); $('bpmDn').onclick=()=>nudgeBpm(-1);
+const BPM_MIN=90, BPM_MAX=160; const bpmPct=v=>(Math.max(BPM_MIN,Math.min(BPM_MAX,v))-BPM_MIN)/(BPM_MAX-BPM_MIN)*100;
+function drawBpm(temp){ const i=$('bpmIn'); const v = temp!=null ? temp : bpmNow(); const det=parseFloat(i.placeholder)||null; $('bpmCap').style.left=bpmPct(v)+'%'; $('bpmVal').textContent=Math.round(v); $('bpmVal').classList.toggle('own', !!i.value || temp!=null); $('bpmSlider').setAttribute('aria-valuenow', Math.round(v));
+  const t=$('bpmTick'); if(det){ t.style.left=bpmPct(det)+'%'; t.style.display='block'; } else t.style.display='none'; }
+(function bpmSlider(){ const tr=$('bpmTrack'), sl=$('bpmSlider'); let drag=null;
+  const at=e=>{ const r=tr.getBoundingClientRect(); return Math.round(BPM_MIN + Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*(BPM_MAX-BPM_MIN)); };
+  tr.addEventListener('pointerdown', e=>{ e.preventDefault(); tr.setPointerCapture(e.pointerId); drag=at(e); drawBpm(drag); sl.focus(); });
+  tr.addEventListener('pointermove', e=>{ if(drag==null) return; drag=at(e); drawBpm(drag); });
+  const end=e=>{ if(drag==null) return; const v=drag; drag=null; $('bpmIn').value=String(v); $('bpmIn').dispatchEvent(new Event('change')); };
+  tr.addEventListener('pointerup', end); tr.addEventListener('pointercancel', end);
+  sl.addEventListener('dblclick', ()=>{ $('bpmIn').value=''; $('bpmIn').dispatchEvent(new Event('change')); });
+  sl.addEventListener('keydown', e=>{ if(e.key==='ArrowRight'||e.key==='ArrowUp'){ e.preventDefault(); nudgeBpm(e.shiftKey?5:1); } if(e.key==='ArrowLeft'||e.key==='ArrowDown'){ e.preventDefault(); nudgeBpm(e.shiftKey?-5:-1); } });
+  $('bpmIn').addEventListener('change', ()=>drawBpm()); drawBpm(); })();
 window.addEventListener('resize', syncSwitches); document.addEventListener('click', e=>{ if(e.target.closest('.tg.sm')) requestAnimationFrame(syncSwitches); });
 function renderStruct(){ requestAnimationFrame(syncSwitches); const ok=refUsable(); if(!ok && S.structure==='reference') S.structure='typical'; const rb=document.querySelector('#structSeg button[data-v="reference"]'); rb.disabled=!ok; rb.title = ok ? '' : 'The reference is too short to carry a structure'; document.querySelectorAll('#structSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===S.structure)); if(S.view==='dir') drawDir(); }
 document.querySelectorAll('#structSeg button').forEach(b=>b.onclick=()=>{ if(b.disabled) return; S.structure=b.dataset.v; renderStruct(); markStale(); });
