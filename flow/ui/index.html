@@ -568,6 +568,27 @@
   .roles span.has { cursor:pointer; } .roles span.has:hover, .roles span.has:hover b { color:var(--acc); }
   .well.pick.next { animation:nextring var(--beat) ease-out infinite; }
   @media (max-height:760px) { .well.pick .mini { max-height:32px; } .roles { gap:3px 9px; font-size:9.5px; } }
+
+  /* The deck, flattened: no card around the plate. Title line, one plate, one line of actions. The plate carries the active state. */
+  .deck { gap:14px; padding:12px 14px 10px; }
+  .mod, .mod.act { background:transparent; border:0; border-radius:0; box-shadow:none; overflow:visible; }
+  .mh, .mod.act .mh { height:24px; flex-basis:24px; padding:0 2px; border-bottom:0; gap:8px; }
+  .mh .led { display:none; }
+  .mn { font-size:12.5px; } .ms { font-size:11px; }
+  .mb { padding:4px 0 0; gap:8px; }
+  .mod .mb .frow2 { padding:0 2px; }
+  .well { border-radius:12px; transition:border-color .25s var(--ease); }
+  .mod.act .well { border-color:color-mix(in srgb, var(--acc) 55%, var(--line)); }
+  .mod[data-m=bld] .mb .frow2 { display:none; order:2; }        /* the display's status line already says what happened */
+  .mod[data-m=bld].req .mb .frow2 { display:flex; }                /* except when an update is required: say it here too */
+  .mod[data-m=bld] .mb .frow2 .fname b { font-size:11.5px; font-weight:500; color:var(--warn); }
+  .mod[data-m=bld] .mb .mrow { order:3; }
+  .mod[data-m=bld] .mb .well { order:1; }
+  .mrow, .vrow, .msg, .hint { padding-left:2px; padding-right:2px; }
+  .mod .mb .mrow, .mod .mb .vrow { min-height:22px; height:22px; }
+  .foot .foot-act { margin-right:18px; font-size:11.5px; }
+  .kval small { letter-spacing:.08em; }
+  @media (max-height:760px) { .deck { gap:10px; padding:8px 12px 8px; } }
 </style>
 </head>
 <body>
@@ -644,7 +665,7 @@
             <div class="cap" id="knobBody"><i class="pip"></i></div>
             <span class="kend l">2:00</span><span class="kend r">10:00</span>
           </div>
-          <div class="kval"><b id="lcdBig">4:30</b><small>Length · <span id="lcdSub">136 bars</span></small></div>
+          <div class="kval"><b id="lcdBig">4:30</b><small><span id="lcdSub">136 bars</span></small></div>
           <div class="drow"><div class="bpmbox" title="Your tempo. Empty follows the reference."><input class="in" type="text" id="bpmIn" placeholder="—"><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" style="margin-left:auto" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
         </div>
         <div class="mrow" style="justify-content:space-between;margin-top:0"><div class="tg sm" id="targetSeg"><button data-v="ableton" class="on">Live</button><button data-v="stems">Stems + MIDI</button></div><button class="ta" id="finBtn" style="white-space:nowrap">Finish<span class="xw"> &amp; plug-ins</span></button></div>
@@ -656,14 +677,14 @@
       <div class="mb">
         <div class="frow2"><div class="fname wrap"><b id="bst">Waiting for a reference and your sounds</b></div></div>
         <div class="well bld"><div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div></div>
-        <div class="fname wrap"><small class="clamp" id="bsub">Builds this arrangement from your sounds and your direction. Nothing is decided for you.</small></div>
-        <div class="mrow" style="justify-content:flex-start;margin-top:0"><button class="ta hidden" id="listenBtn">Listen first</button><button class="ta hidden" id="openOut">Open folder</button><button class="ta hidden" id="again">Build another</button><button class="ta hidden" id="toggleLog">Details</button><span class="sp"></span><button class="ta" id="fbBtn">Feedback</button></div>
+        <div class="fname wrap hidden"><small class="clamp" id="bsub"></small></div>
+        <div class="mrow" style="justify-content:flex-start;margin-top:0"><button class="ta hidden" id="listenBtn">Listen first</button><button class="ta hidden" id="openOut">Open folder</button><button class="ta hidden" id="again">Build another</button><button class="ta hidden" id="toggleLog">Details</button></div>
       </div>
     </div>
   </section>
 
   <audio id="player" preload="auto"></audio><audio id="aud" preload="auto"></audio>
-  <footer class="foot"><span>Alma <span id="ver"></span> © 2026 Harel Eliyahu</span><span class="sp"></span><span class="st" id="liveSt"><i id="liveLed"></i><span id="liveTxt">Ableton Live</span></span></footer>
+  <footer class="foot"><span>Alma <span id="ver"></span> © 2026 Harel Eliyahu</span><span class="sp"></span><button class="ta foot-act" id="fbBtn">Feedback</button><span class="st" id="liveSt"><i id="liveLed"></i><span id="liveTxt">Ableton Live</span></span></footer>
 </div>
 
 <script>
@@ -996,7 +1017,7 @@ $('scanPlug').onclick = scanPlugins;
 let TL = null;
 (function meters(){ $('meter').innerHTML = Array.from({length:18},(_,i)=>`<i style="--m:${(.35+Math.abs(Math.sin(i*1.7))*.65).toFixed(2)};animation-delay:${(i*.07).toFixed(2)}s;animation-duration:${(.7+Math.abs(Math.cos(i))*.7).toFixed(2)}s"></i>`).join(''); })();
 function markNext(){ const next = S.building ? null : (!S.ref ? 'ref' : (!S.pack ? 'snd' : (S.built ? null : 'bld'))); const map={ref:'pickRef',snd:'pickPack',bld:'bigWrap'}; Object.values(map).forEach(id=>$(id).classList.remove('next')); if(next) $(map[next]).classList.add('next'); }
-function gateBuild(){ const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building && !S.updateRequired; $('buildBtn').disabled = !ok; $('listenBtn').classList.toggle('hidden', !ok); listenLabel(); if(!S.building && !S.built){ $('bst').textContent = S.updateRequired ? 'Update Alma to keep building. Click the chip above.' : ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
+function gateBuild(){ document.querySelector('.mod[data-m=bld]').classList.toggle('req', !!S.updateRequired); const ok = !!(S.ref && S.pack && !(S.pack.warnings||[]).length) && !S.building && !S.updateRequired; $('buildBtn').disabled = !ok; $('listenBtn').classList.toggle('hidden', !ok); listenLabel(); if(!S.building && !S.built){ $('bst').textContent = S.updateRequired ? 'Update Alma to keep building. Click the chip above.' : ok ? (S.target==='ableton' ? 'Ready. Writes into the Live Set in front.' : 'Ready. Stems and MIDI to a folder.') : (S.ref ? 'Waiting for your sounds' : (S.pack ? 'Waiting for a reference' : 'Waiting for a reference and your sounds')); setMod('bld', ok?'Ready':'Waiting', ok?'on':''); bigState(ok?'ready':'wait'); } markNext(); }
 function setPhase(i, state){ S.phase=i; [...$('phases').children].forEach((s,n)=>{ s.className = n<i ? 'done' : (n===i ? (state||'act') : ''); }); }
 function setProg(p){ $('prog').style.strokeDashoffset = (308*(1-Math.min(1,Math.max(0,p)))).toFixed(1); }
 function bigState(st){ const w=$('bigWrap'); w.classList.remove('wait','ready','working','done','err'); w.classList.add(st); }
