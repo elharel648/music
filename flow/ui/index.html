@@ -569,7 +569,7 @@
         <div class="bhead"><div class="tp hidden" id="tp"><button class="tbtn" id="playBtn" aria-label="Play"><svg class="play" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z"/></svg><svg class="pause" viewBox="0 0 10 10"><path d="M2 1h2.4v8H2zM5.6 1H8v8H5.6z"/></svg></button><span class="ptime" id="ptime">0:00 / 0:00</span></div><div class="phases" id="phases"><span>Measuring</span><span>From your sounds</span><span>Arranging</span><span>Writing</span><span>Finishing</span></div><div class="meter" id="meter" aria-hidden="true"></div><div class="statusline" id="statusLine"></div></div>
         <div class="tl" id="tlCard" style="flex:1;min-height:0"><div class="skel"></div></div>
       </div>
-      <div class="stop hidden" id="stopCard"><div class="t" id="stopTitle">The build stopped</div><div class="m" id="stopMsg"></div><div class="note">Nothing was lost. Fix the cause and press Retry; your settings are kept, even after a restart.</div></div>
+      <div class="stop hidden" id="stopCard"><div class="t" id="stopTitle">The build stopped</div><div class="m" id="stopMsg"></div><div class="note">Nothing was lost. Fix the cause and press Retry; your settings are kept, even after a restart.</div><div class="fbrow" style="margin-top:12px"><button class="dbtn" id="stopSend">Send this report</button><span class="dmsg" id="stopSent" style="margin:0 0 0 10px"></span></div></div>
       <div class="log hidden" id="log"></div>
     </div>
   </section>
@@ -797,9 +797,10 @@ function mountTimeline(el, cfg){
 async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed`:(st.state==='trial'?`Trial · ${st.days_left} days`:'Trial ended'); $('ver').textContent = st.version||'';
   S.licensed = st.state!=='expired'; $('deck').classList.toggle('locked', !S.licensed);
   if(!S.licensed){ $('gateMeta').textContent=`Alma ${st.version} · machine ${st.machine}`; showView('gate'); } return st; }
-window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle();
+window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle(); checkTarget();
   const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').slice(0,28); $('resumeChip').classList.remove('hidden'); }
   setActive('ref'); liveStatus(); });
+$('stopSend').onclick = async ()=>{ $('stopSend').disabled=true; $('stopSent').textContent='Sending…'; const r = await api().send_feedback('Build stopped: ' + $('stopMsg').textContent); $('stopSend').disabled=false; $('stopSent').textContent = r.ok ? (r.sent ? 'Sent. Thank you.' : `Saved to your Desktop as ${esc(r.path.split('/').pop())} — send it to Harel.`) : (r.error||'Could not send.'); };
 $('fbBtn').onclick = ()=>{ S.fbFrom = S.view; $('fbMsg').textContent=''; showView('fb'); setTimeout(()=>$('fbText').focus(), 50); };
 $('fbCancel').onclick = ()=>showView(S.fbFrom || (S.built ? 'build' : 'ref'));
 $('fbSend').onclick = async ()=>{ const t=$('fbText').value.trim(); if(!t){ $('fbMsg').textContent='Write a line first.'; return; } $('fbSend').disabled=true; $('fbMsg').textContent='Sending…';
@@ -934,7 +935,7 @@ $('finBtn').onclick = ()=>{ S.finOpen = !S.finOpen; $('finBtn').classList.toggle
 async function liveStatus(){ if(S.target!=='ableton'){ $('liveLed').className=''; $('liveTxt').textContent='Stems + MIDI'; return {ok:true,fresh:true}; }
   const r = await api().ableton_status(); $('liveLed').className = r.ok ? (r.fresh?'ok':'bad') : 'bad'; $('liveTxt').textContent = r.ok ? (r.fresh ? 'Live is ready, empty set in front' : `Live has ${r.tracks} tracks open`) : 'Live is not reachable'; return r; }
 async function checkTarget(){ $('outRow').classList.toggle('hidden', S.target!=='stems'); $('bridgeRow').classList.add('hidden'); if(!S.finishLoaded) loadFinish();
-  if(S.target==='ableton'){ $('targetHint').className='hint'; $('targetHint').textContent='Checking Live…'; const r = await liveStatus(); $('targetHint').className = 'hint ' + (r.ok ? (r.fresh?'ok':'warn') : 'warn'); $('targetHint').textContent = r.ok ? (r.fresh?'Live is ready · empty set in front':`Live has ${r.tracks} tracks open. File › New Live Set first.`) : r.reason; if(!r.ok) $('bridgeRow').classList.remove('hidden'); return r; }
+  if(S.target==='ableton'){ $('targetHint').className='hint'; $('targetHint').textContent='Checking Live…'; const r = await liveStatus(); if(r.ok && r.bridge_outdated){ $('bridgeRow').classList.remove('hidden'); $('bridgeMsg').textContent = 'This version of Alma ships a newer bridge. Install it, then quit and reopen Live.'; } $('targetHint').className = 'hint ' + (r.ok ? (r.fresh?'ok':'warn') : 'warn'); $('targetHint').textContent = r.ok ? (r.fresh?'Live is ready · empty set in front':`Live has ${r.tracks} tracks open. File › New Live Set first.`) : r.reason; if(!r.ok) $('bridgeRow').classList.remove('hidden'); return r; }
   await liveStatus(); $('targetHint').className='hint'; $('targetHint').textContent = 'Full-length stems and a MIDI file with markers, for any DAW.'; return {ok:true, fresh:true}; }
 $('installBridge').onclick = async ()=>{ $('bridgeMsg').textContent='Installing…'; const r = await api().install_bridge(); $('bridgeMsg').textContent = r.ok ? `Installed to ${r.path}. ${r.steps.join(' ')}` : r.error; };
 async function loadFinish(){ S.finishLoaded = true; const opts = await api().finish_options(); if(!S.finish) S.finish = new Set(opts.filter(o=>o.on).map(o=>o.key));

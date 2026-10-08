@@ -11,6 +11,8 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "flow", "bridge", "Alma", "__init__.py")
+sys.path.insert(0, ROOT)
+from flow.ableton_bridge import BRIDGE_VERSION as ALMA_BRIDGE_VERSION  # single source of truth
 
 NOTICE = '''# Alma Bridge for Ableton Live — a Remote Script that lets the Alma desktop app build arrangements in the Set in front.
 # Forked from AbletonMCP by Siddharth Ahuja (https://github.com/ahujasid/ableton-mcp), MIT License:
@@ -141,6 +143,8 @@ def main():
     code = code.replace('            elif command_type == "get_track_info":', READ_ADD, 1)
     code = code.replace("    def _get_device_parameters(self, track_index, device_index):", METHODS, 1)
     code = code.replace("DEFAULT_PORT = 9877", "DEFAULT_PORT = 9878", 1)
+    code = code.replace("PROTOCOL_VERSION = 1", 'PROTOCOL_VERSION = 1\nALMA_BRIDGE_VERSION = "%s"  # bump when a command is added; the app asks for it and prompts a reinstall' % ALMA_BRIDGE_VERSION, 1)
+    code = code.replace('            "passive_listeners": True,', '            "passive_listeners": True,\n            "alma_bridge": ALMA_BRIDGE_VERSION,', 1)
     code = code.replace('HOST = "0.0.0.0"', 'HOST = "127.0.0.1"', 1)
     code = code.replace("AbletonMCP: Listening", "Alma Bridge: Listening")
     code = code.replace("# AbletonMCP/init.py", NOTICE, 1)

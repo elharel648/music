@@ -9,6 +9,7 @@ import urllib.parse
 from typing import Callable
 
 HOST = "127.0.0.1"
+BRIDGE_VERSION = "2"  # the Alma Bridge this app ships (flow/bridge/Alma); an older one in Live lacks newer commands
 PORTS = (9878, 9877)  # Alma Bridge first, then the original AbletonMCP script
 
 
@@ -66,6 +67,16 @@ class Live:
             return True
         except BridgeError:
             return False
+
+    def bridge_version(self) -> str:
+        """The Alma Bridge version answering in Live: "0" for the original AbletonMCP script or an Alma bridge older than 2."""
+        for cmd in ("get_script_info", "get_remote_script_info"):
+            try:
+                info = self.call(cmd) or {}
+                return str(info.get("alma_bridge") or "0")
+            except BridgeError:
+                continue
+        return "0"
 
     def session(self) -> dict:
         return self.call("get_session_info")

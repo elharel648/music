@@ -29,6 +29,7 @@ HOST = "127.0.0.1"
 # this to EXPECTED_REMOTE_SCRIPT_VERSION.
 SCRIPT_VERSION = "1.7.0"
 PROTOCOL_VERSION = 1
+ALMA_BRIDGE_VERSION = "2"  # bump when a command is added; the app asks for it and prompts a reinstall
 
 SCRIPT_CAPABILITIES = [
     "get_session_info",
@@ -536,6 +537,7 @@ class AbletonMCP(ControlSurface):
             "capabilities": list(SCRIPT_CAPABILITIES),
             "snapshot_schema": "ableton_mcp_snapshot_v2",
             "passive_listeners": True,
+            "alma_bridge": ALMA_BRIDGE_VERSION,
         }
     
     def _safe_song_property(self, attr, cast, default):

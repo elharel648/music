@@ -86,12 +86,24 @@ def cmd_revoke(args):
 
 
 def cmd_release(args):
+    """Upload the DMG, point releases/mac at it, and write the signed update manifest the installed apps poll."""
+    import json
+    from flow import update, endpoints
+    from keygen import load_private
     db, bucket = fb()
     name = os.path.basename(args.dmg)
     blob = bucket.blob(f"releases/{name}")
     blob.upload_from_filename(args.dmg, content_type="application/x-apple-diskimage")
     db.collection("releases").document("mac").set({"version": args.version, "path": name, "published_at": dt.datetime.now(dt.timezone.utc)})
     print(f"released {args.version}: gs://{bucket.name}/releases/{name}")
+    site = endpoints.SITE_URL or "https://SITE-URL-NOT-SET"
+    man = update.sign_manifest(load_private(), args.version, f"{site}/#access", args.notes or "")
+    for out in (os.path.join(ROOT, "site", "latest.json"), os.path.join(ROOT, "packaging", "latest.json")):
+        with open(out, "w") as f:
+            json.dump(man, f, indent=1)
+    print("update manifest written to site/latest.json — commit and push so Netlify serves it; running apps show 'Update' on next launch")
+    if not endpoints.SITE_URL:
+        print("WARNING: flow/endpoints.py SITE_URL is empty; the manifest points nowhere useful yet")
 
 
 def cmd_feedback(args):
@@ -108,7 +120,7 @@ def main():
     l = sub.add_parser("list"); l.add_argument("--all", action="store_true")
     a = sub.add_parser("approve"); a.add_argument("email"); a.add_argument("--days", type=int)
     r = sub.add_parser("revoke"); r.add_argument("email")
-    rel = sub.add_parser("release"); rel.add_argument("version"); rel.add_argument("dmg")
+    rel = sub.add_parser("release"); rel.add_argument("version"); rel.add_argument("dmg"); rel.add_argument("--notes", default="")
     f = sub.add_parser("feedback"); f.add_argument("--limit", type=int, default=20)
     args = ap.parse_args()
     {"list": cmd_list, "approve": cmd_approve, "revoke": cmd_revoke, "release": cmd_release, "feedback": cmd_feedback}[args.cmd](args)

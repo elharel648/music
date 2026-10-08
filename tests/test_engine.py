@@ -381,3 +381,13 @@ def test_swap_roles_replaces_only_changed_tracks(tmp_path):
     assert idx == 3 + clap_i and spans == old["spans"] and name.startswith("Clap ·") and "clap1" in path and path != old["source"]["path"]
     assert os.path.exists(path) and ctx["kit"]["clap"]["path"] == other and plan["tracks"][clap_i]["source"]["path"] == path
     assert cli.swap_roles(ctx, {"clap": other}, live=live)["replaced"] == [] and len(live.calls) == 1   # nothing else changed: nothing touched
+
+
+def test_bridge_version_matches_shipped_script():
+    """The bridge file in the bundle must announce the version the app expects, or every user would be told to reinstall."""
+    import re
+    from flow import ableton_bridge
+    src = open(os.path.join(os.path.dirname(__file__), "..", "flow", "bridge", "Alma", "__init__.py")).read()
+    m = re.search(r'ALMA_BRIDGE_VERSION = "([^"]+)"', src)
+    assert m and m.group(1) == ableton_bridge.BRIDGE_VERSION
+    assert '"alma_bridge": ALMA_BRIDGE_VERSION' in src and 'command_type == "replace_track_clips"' in src

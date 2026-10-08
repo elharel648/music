@@ -334,8 +334,11 @@ class Api:
             from .ableton_bridge import Live
             live = Live(timeout=4)
             if not live.available():
-                return {"ok": False, "reason": "Live is not running or the AbletonMCP control surface is off"}
-            return {"ok": True, "fresh": live.is_fresh_set(), "tracks": live.session()["track_count"]}
+                return {"ok": False, "reason": "Live is not running or the Alma Bridge control surface is off"}
+            from .ableton_bridge import BRIDGE_VERSION
+            ver = live.bridge_version()
+            return {"ok": True, "fresh": live.is_fresh_set(), "tracks": live.session()["track_count"],
+                    "bridge": ver, "bridge_outdated": ver != BRIDGE_VERSION}
         except Exception as e:
             return {"ok": False, "reason": f"{e}"}
 
