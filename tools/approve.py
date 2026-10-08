@@ -113,8 +113,7 @@ def cmd_release(args):
     db.collection("releases").document("mac").set({"version": args.version, "path": name, "sha256": update.sha256_of(args.dmg), "size": os.path.getsize(args.dmg),
                                                    "published_at": dt.datetime.now(dt.timezone.utc)})
     print(f"released {args.version}: gs://{bucket.name}/releases/{name}")
-    cmd_refresh(args)
-    write_manifest(db, bucket, args.version, args.notes or "", getattr(args, "min_version", "") or "")
+    cmd_refresh(args)   # rewrites every approved producer's link and the signed manifest
     if not endpoints.SITE_URL:
         print("WARNING: flow/endpoints.py SITE_URL is empty; the manifest points nowhere useful yet")
 
