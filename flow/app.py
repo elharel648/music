@@ -12,7 +12,7 @@ import uuid
 import mimetypes
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import __version__, PRODUCT, analysis, pack as packmod, plugins, license as lic, cli as flowcli, styles as stylelib
+from . import __version__, PRODUCT, analysis, audio, pack as packmod, plugins, license as lic, cli as flowcli, styles as stylelib
 
 
 def _ui_path() -> str:
@@ -228,6 +228,28 @@ class Api:
                 self._kit_cache[key] = packmod.candidates(pk, bpm)
             rows = packmod.kit_view(pk, bpm, overrides or {}, self._kit_cache[key])
             return {"ok": True, "kit": rows, "bpm": bpm}
+        except Exception as e:
+            return {"ok": False, "error": f"{e}"}
+
+    def sample_peaks(self, path: str, n: int = 48):
+        """48 peak values of one of the user's sounds (first 6 s), for the tile in the Sounds view."""
+        try:
+            real = os.path.realpath(path)
+            roots = [os.path.realpath(f) for f in self._pack_folders]
+            if not any(real == r or real.startswith(r + os.sep) for r in roots) or not os.path.isfile(real):
+                return {"ok": False, "error": "Not one of your sounds"}
+            cache = getattr(self, "_peaks", None)
+            if cache is None:
+                cache = self._peaks = {}
+            if real not in cache:
+                import numpy as np
+                y, sr = audio.load(real, sr=22050, mono=True)
+                m = np.abs(y[0][: sr * 6])
+                edges = np.linspace(0, len(m), n + 1).astype(int)
+                pk = [float(m[a:b].max()) if b > a else 0.0 for a, b in zip(edges[:-1], edges[1:])]
+                top = max(pk) or 1.0
+                cache[real] = [round(v / top, 3) for v in pk]
+            return {"ok": True, "peaks": cache[real]}
         except Exception as e:
             return {"ok": False, "error": f"{e}"}
 

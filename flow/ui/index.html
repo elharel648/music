@@ -407,6 +407,75 @@
   .foot .st { display:flex; align-items:center; gap:7px; }
   .foot .st i { width:5px; height:5px; border-radius:50%; background:var(--led-off); } .foot .st i.ok { background:var(--ok); box-shadow:0 0 6px var(--ok); } .foot .st i.bad { background:var(--warn); }
 </style>
+<style id="craft">
+  /* flat, hairline, 8px grid */
+  :root { --pulse-rgb:20,20,30; } :root[data-theme=dark] { --pulse-rgb:255,255,255; }
+  .mod { box-shadow:none; }
+  .mb { padding:10px 12px 12px; gap:8px; }
+  .well { box-shadow:none; border:1px solid var(--line); padding:12px; border-radius:10px; }
+  :root[data-theme=dark] .well { box-shadow:none; background:var(--ctrl); }
+  .frow2 { min-height:28px; }
+  .mrow { min-height:24px; gap:16px; }
+  .dv { padding:16px; }
+  /* three text styles per surface */
+  .u, .grid4 .l, .dl, .knobl, .rl, .cap, .dvhead .r, .kc, .hint, .kl, .tile .tr { font-family:var(--mono); font-weight:500; letter-spacing:.12em; text-transform:uppercase; }
+  .u, .grid4 .l, .dl, .knobl, .rl { font-size:9.5px; color:var(--mut); }
+  .cap, .dvhead .r, .kc, .tile .tr { font-size:10px; color:var(--d-mut); }
+  .dvhead .r b { color:var(--d-ink); font-weight:500; }
+  .dvhead .t { font-size:13px; font-weight:600; letter-spacing:-.01em; }
+  .dvhead .t small { font:500 10px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--d-mut); margin-left:10px; }
+  .hero .v { font-size:30px; }
+  .hero { flex-wrap:wrap; row-gap:2px; } #roUsed { flex-basis:100%; text-align:right; margin-top:-4px; }
+  .mini { min-height:56px; }
+  .msg { font:500 11px var(--mono); }
+  /* the map wins */
+  .tl .lane { height:10px; } .tl .blk { height:10px; border-radius:3px; } .tl .blk.v { height:10px; } .tl .lanes { gap:6px; margin-top:8px; }
+  .tl .lane .ln { font-size:12px; color:var(--d-sec); font-weight:500; } .tl .lane.act .ln { color:var(--d-ink); font-weight:600; }
+  .tl .band { height:8px; margin-top:12px; } .tl .seg { border-radius:4px; }
+  .tl .curve .line { stroke-width:2; }
+  .tl .names { height:30px; margin-top:8px; }
+  .tl .ticks { margin-top:6px; }
+  .tl .plot::before { background:repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 12.5%); }
+  /* one button family, one glyph set */
+  .sb:not(.pri) { border:0; background:transparent; padding:0; height:auto; font-size:11.5px; font-weight:600; color:var(--ink); border-radius:0; }
+  .sb:not(.pri):hover { opacity:.6; transform:none; }
+  .kb { width:22px; height:22px; border:0; background:transparent; color:var(--d-sec); border-radius:6px; }
+  .kb:hover { color:var(--d-ink); background:rgba(255,255,255,.08); } .kb.on { background:var(--d-ink); color:var(--d-bg); }
+  .kb svg { width:11px; height:11px; stroke-width:1.75; } .kb svg.f { width:9px; height:9px; }
+  .arr2 svg { width:12px; height:12px; stroke-width:1.75; }
+  .tbtn { border:1px solid rgba(255,255,255,.16); }
+  .vrow .x { border-radius:6px; }
+  /* colour roles: the song in accent, controls in ink */
+  .knob .dt.lit { fill:var(--ink); opacity:.5; } .knob .pip { background:var(--ink); box-shadow:none; }
+  @keyframes nextring { 0% { box-shadow:0 0 0 0 rgba(var(--pulse-rgb),.28); } 100% { box-shadow:0 0 0 9px rgba(var(--pulse-rgb),0); } }
+  .sw.on { background:var(--d-ink); } .sw.on::after { background:var(--d-bg); opacity:1; }
+  .ta.on { color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+  .tg button.on { box-shadow:0 1px 2px rgba(20,20,30,.1); }
+  /* one focal control per module: the knob */
+  .well.dir { align-items:center; justify-content:space-between; }
+  .knob { width:128px; height:128px; }
+  .knob .cap { left:19px; top:19px; width:90px; height:90px; }
+  .knob .pip { top:11px; width:5px; height:5px; margin-left:-2.5px; }
+  .kval { text-align:center; line-height:1; margin-top:2px; }
+  .kval b { display:block; font:500 22px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .kval small { display:block; margin-top:5px; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
+  .well.dir .drow { width:100%; }
+  /* the sounds, composed: one tile per role, the sound's own shape in it */
+  #kitView { height:100%; display:flex; flex-direction:column; }
+  .tiles { flex:1; min-height:0; display:grid; grid-template-columns:repeat(6,1fr); grid-auto-rows:1fr; gap:8px; }
+  .tile { position:relative; border:1px solid var(--d-line); border-radius:8px; padding:8px 10px 7px; min-height:74px; display:flex; flex-direction:column; gap:5px; transition:border-color .2s; }
+  .tile:hover { border-color:rgba(255,255,255,.24); } .tile.ov { border-color:rgba(var(--acc-rgb),.55); }
+  .tile .tr { display:flex; justify-content:space-between; gap:6px; }
+  .tile .tr .kl { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile canvas { width:100%; flex:1; min-height:22px; display:block; cursor:pointer; }
+  .tile .tn { font-size:11.5px; font-weight:500; color:var(--d-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile .tc { position:absolute; right:6px; bottom:4px; display:flex; gap:1px; opacity:0; transition:opacity .15s; background:linear-gradient(90deg, transparent, var(--d-bg) 25%); padding-left:14px; }
+  .tile:hover .tc, .tile .tc:has(.on) { opacity:1; }
+  /* continuity: views settle in, plates fly to the display */
+  .dv.on { animation:dvin .34s var(--ease) both; }
+  @keyframes dvin { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  .flip { position:fixed; z-index:50; pointer-events:none; border-radius:8px; opacity:.9; transform-origin:top left; transition:transform .5s cubic-bezier(.3,1,.35,1), opacity .5s ease; will-change:transform; }
+</style>
 </head>
 <body>
 <div class="dev" id="dev">
@@ -480,11 +549,11 @@
       <div class="mb" style="gap:6px;padding-top:9px">
         <div class="frow2 subj" id="styleSel"><button class="arr2" id="stPrev" aria-label="Previous style"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><div class="fname"><b id="stName">House</b><small id="stGroup">House · 120–128 BPM</small></div><button class="arr2" id="stNext" aria-label="Next style"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
         <div class="well dir">
-          <div class="hero"><span class="v" id="lcdBig">4:30</span><span class="u">Length · <span id="lcdSub">136 bars</span></span></div>
           <div class="knob" id="knob" tabindex="0" role="slider" aria-label="Length" aria-valuemin="120" aria-valuemax="600" aria-valuenow="270">
             <svg viewBox="0 0 200 200" aria-hidden="true"><g id="knobDots"></g></svg>
             <div class="cap" id="knobBody"><i class="pip"></i></div>
           </div>
+          <div class="kval"><b id="lcdBig">4:30</b><small>Length · <span id="lcdSub">136 bars</span></small></div>
           <div class="drow"><div class="bpmbox" title="Your tempo. Empty follows the reference."><input class="in" type="text" id="bpmIn" placeholder="—"><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" style="margin-left:auto" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
         </div>
         <div class="mrow" style="justify-content:space-between;margin-top:0"><div class="tg sm" id="targetSeg"><button data-v="ableton" class="on">Live</button><button data-v="stems">Stems + MIDI</button></div><button class="ta" id="finBtn" style="white-space:nowrap">Finish &amp; plug-ins</button></div>
@@ -529,7 +598,11 @@ function setBeat(bpm){ document.documentElement.style.setProperty('--beat', bpm 
 /* ---------- modules and the display ---------- */
 const LED = {ref:'ledRef', snd:'ledSnd', dir:'ledDir', bld:'ledBld'}, MS = {ref:'msRef', snd:'msSnd', dir:'msDir', bld:'msBld'};
 function setMod(m, word, led){ if(word!=null) $(MS[m]).textContent = word; if(led!=null){ $(LED[m]).className = 'led' + (led?' '+led:''); $(MS[m]).className = 'ms' + (led==='work'||led==='err' ? ' '+led : ''); } }
-function setActive(m){ S.active = m; document.querySelectorAll('.mod').forEach(el=>el.classList.toggle('act', el.dataset.m===m)); showView(m==='bld' ? 'build' : (m==='dir' && S.finOpen ? 'fin' : m)); }
+function setActive(m){ S.active = m; document.querySelectorAll('.mod').forEach(el=>el.classList.toggle('act', el.dataset.m===m)); const prev=S.view; showView(m==='bld' ? 'build' : (m==='dir' && S.finOpen ? 'fin' : m)); if(prev!==S.view) flipFor(m); }
+function flip(src, target){ if(reduced||!src||!target) return; const a=src.getBoundingClientRect(), b=target.getBoundingClientRect(); if(a.width<4||b.width<4) return; let img; try{ img=new Image(); img.src=src.toDataURL(); }catch(e){ return; }
+  img.className='flip'; Object.assign(img.style,{left:a.left+'px', top:a.top+'px', width:a.width+'px', height:a.height+'px'}); document.body.appendChild(img);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ img.style.transform=`translate(${b.left-a.left}px,${b.top-a.top}px) scale(${b.width/a.width},${b.height/a.height})`; img.style.opacity='0'; })); setTimeout(()=>img.remove(), 560); }
+function flipFor(m){ if(m==='ref' && S.ref) flip($('refMini'), $('refTL').querySelector('.curvewrap') || $('disp')); if(m==='snd' && S.pack) flip($('sndMini'), $('kitView').querySelector('.tiles') || $('disp')); }
 function showView(v){ if(S.view===v) return; document.querySelectorAll('.dv').forEach(d=>d.classList.toggle('on', d.dataset.v===v)); S.view = v; syncIdle(); if(v==='dir') drawDir(); }
 document.querySelectorAll('.mod').forEach(el=>el.addEventListener('pointerdown', ()=>{ if(el.dataset.m==='dir' && S.active==='dir') return; if(el.dataset.m==='dir') S.finOpen=false; setActive(el.dataset.m); }));
 
@@ -718,13 +791,18 @@ function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCo
   $('kitView').classList.remove('hidden'); $('sndCap').textContent = ''; syncIdle(); gateBuild(); }
 const KIT_ICON = {prev:'<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>', next:'<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>', play:'<svg class="f" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z"/></svg>'};
 async function loadKit(){ if(!S.packPath) return; const r = await api().kit_options(S.packPath, S.ref ? userBpm() : null, S.kitOverrides); if(!r.ok){ msg($('packMsg'), r.error, 'err'); return; } S.kit = r.kit; renderKit(); }
+const PEAKS = new Map();
+async function peaksFor(path){ if(PEAKS.has(path)) return PEAKS.get(path); const r = await api().sample_peaks(path); const pk = (r && r.ok) ? r.peaks : null; PEAKS.set(path, pk); return pk; }
+function drawPeaks(cv, pk){ const dpr=fitCanvas(cv); if(!dpr) return; const ctx=cv.getContext('2d'); const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); if(!pk){ ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(0,H/2-dpr*.5,W,dpr); return; }
+  const n=pk.length, gap=W/n; ctx.fillStyle=`rgba(${ACC()},.9)`; for(let i=0;i<n;i++){ const h=Math.max(dpr, pk[i]*H*.95); ctx.fillRect(i*gap+gap*.2, (H-h)/2, Math.max(dpr, gap*.6), h); } }
 function renderKit(){ const rows = S.kit; if(!rows.length) return; const sel = rows.filter(r=>r.chosen).length; $('roUsed').textContent = S.usedCount ? `${sel} selected · ${S.usedCount} used` : `${sel} selected`;
-  const stem = n => esc(String(n).replace(/\.[^.]+$/,''));
-  $('kitView').innerHTML = `<div class="dvhead"><div class="t">Your sounds<small>${rows.length} roles from ${S.pack?S.pack.count:0} sounds · swap any of them, play to hear</small></div><div class="r">${Object.keys(S.kitOverrides).length ? `<b>${Object.keys(S.kitOverrides).length}</b> changed by you` : 'FLOW\u2019s first pick'}</div></div>
-    <div class="kit2">${rows.map(r=>{ const n=r.candidates.length; const idx=r.chosen ? Math.max(0, r.candidates.findIndex(c=>c.path===r.chosen.path)) : -1;
-      return `<div class="krow ${S.kitOverrides[r.role]!==undefined?'ov':''}" data-role="${esc(r.role)}"><span class="kl">${esc(r.label)}</span><span class="kn" title="${esc(r.chosen?r.chosen.rel||r.chosen.path:'')}">${r.chosen?stem(r.chosen.name):'—'}</span><span class="kc">${idx+1}/${n}</span><button class="kb" data-d="-1" ${n<2?'disabled':''}>${KIT_ICON.prev}</button><button class="kb" data-d="1" ${n<2?'disabled':''}>${KIT_ICON.next}</button><button class="kb pl" ${r.chosen?'':'disabled'}>${KIT_ICON.play}</button></div>`; }).join('')}</div>`;
-  $('kitView').querySelectorAll('.krow').forEach(row=>{ const role=row.dataset.role; row.querySelectorAll('.kb[data-d]').forEach(b=>b.onclick=()=>cycleKit(role, +b.dataset.d)); const pl=row.querySelector('.pl'); if(pl) pl.onclick=()=>{ const r=S.kit.find(x=>x.role===role); if(r&&r.chosen) audition(r.chosen.path, pl); }; }); }
-function cycleKit(role, d){ const r=S.kit.find(x=>x.role===role); if(!r || r.candidates.length<2) return; const idx=r.chosen ? r.candidates.findIndex(c=>c.path===r.chosen.path) : -1; const next=r.candidates[(idx+d+r.candidates.length)%r.candidates.length]; r.chosen=next; S.kitOverrides[role]=next.path; markStale(); renderKit(); const pl=$('kitView').querySelector(`.krow[data-role="${role}"] .pl`); audition(next.path, pl); }
+  const stem = n => esc(String(n).replace(/^TPS - Oasis - /,'').replace(/\.[^.]+$/,''));
+  $('kitView').innerHTML = `<div class="dvhead"><div class="t">Your sounds<small>${rows.length} roles · ${S.pack?S.pack.count:0} sounds</small></div><div class="r">${Object.keys(S.kitOverrides).length ? `<b>${Object.keys(S.kitOverrides).length}</b> changed by you` : 'FLOW\u2019s first pick · swap any'}</div></div>
+    <div class="tiles">${rows.map(r=>{ const n=r.candidates.length; const idx=r.chosen ? Math.max(0, r.candidates.findIndex(c=>c.path===r.chosen.path)) : -1;
+      return `<div class="tile ${S.kitOverrides[r.role]!==undefined?'ov':''}" data-role="${esc(r.role)}" title="${esc(r.chosen?(r.chosen.rel||r.chosen.path):'')}"><div class="tr"><span class="kl">${esc(r.label)}</span><span class="kc">${idx+1}/${n}</span></div><canvas class="tw"></canvas><div class="tn">${r.chosen?stem(r.chosen.name):'—'}</div><div class="tc"><button class="kb" data-d="-1" ${n<2?'disabled':''}>${KIT_ICON.prev}</button><button class="kb" data-d="1" ${n<2?'disabled':''}>${KIT_ICON.next}</button><button class="kb pl" ${r.chosen?'':'disabled'}>${KIT_ICON.play}</button></div></div>`; }).join('')}</div>`;
+  $('kitView').querySelectorAll('.tile').forEach(tile=>{ const role=tile.dataset.role; const r=rows.find(x=>x.role===role); tile.querySelectorAll('.kb[data-d]').forEach(b=>b.onclick=()=>cycleKit(role, +b.dataset.d)); const pl=tile.querySelector('.pl'); const go=()=>{ if(r&&r.chosen) audition(r.chosen.path, pl); }; if(pl) pl.onclick=go; const cv=tile.querySelector('canvas'); cv.onclick=go;
+    if(r&&r.chosen){ drawPeaks(cv, PEAKS.get(r.chosen.path)||null); peaksFor(r.chosen.path).then(pk=>{ if(tile.isConnected) drawPeaks(cv, pk); }); } else drawPeaks(cv, null); }); }
+function cycleKit(role, d){ const r=S.kit.find(x=>x.role===role); if(!r || r.candidates.length<2) return; const idx=r.chosen ? r.candidates.findIndex(c=>c.path===r.chosen.path) : -1; const next=r.candidates[(idx+d+r.candidates.length)%r.candidates.length]; r.chosen=next; S.kitOverrides[role]=next.path; markStale(); renderKit(); const pl=$('kitView').querySelector(`.tile[data-role="${role}"] .pl`); audition(next.path, pl); }
 async function audition(path, btn){ const a=$('aud'); refAud.active=false; if(btn && btn.classList.contains('on')){ a.pause(); return; } const r = await api().audition_url(path); if(!r.ok) return; document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on')); a.src=r.url; a.currentTime=0; a.play().catch(()=>{}); if(btn){ btn.classList.add('on'); a.onended=()=>btn.classList.remove('on'); a.onpause=()=>btn.classList.remove('on'); } }
 function markStale(){ if(S.preview){ S.previewStale=true; stopPlayer(); $('tp').classList.add('hidden'); } listenLabel(); }
 async function pickPack(){ const p = await api().pick_folders(); if(!p) return; S.packPath=p; setActive('snd'); await scanPack(); }
