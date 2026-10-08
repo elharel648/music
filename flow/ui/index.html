@@ -695,6 +695,19 @@
   .disc .kv small { font:500 8.5px var(--mono); color:var(--mut); letter-spacing:.14em; text-transform:uppercase; margin-top:6px; }
   .disc.hit canvas { cursor:pointer; }
   .well.pick .screen, .well.pick .mid { display:none; }
+
+  /* The play cap is the knob's cap, smaller: same material, same dish, same hairline. The waveform ring grows and gets a base line and a soft halo. */
+  .disc .pp { width:46%; height:46%; border:0; overflow:visible; background:radial-gradient(circle at 35% 25%, #FFFFFF 0%, #F6F6F8 40%, #E3E3E8 85%, #D2D2D8 100%);
+    box-shadow:0 14px 26px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -2px 4px rgba(20,20,30,.06); }
+  .disc .pp::before { content:""; position:absolute; inset:17%; border-radius:50%; background:radial-gradient(circle at 50% 30%, #ECECF1 0%, #F7F7FA 45%, #FFFFFF 100%); box-shadow:inset 0 3px 6px rgba(20,20,30,.13), inset 0 -1px 0 rgba(255,255,255,.9), 0 1px 0 rgba(255,255,255,.8); }
+  .disc .pp::after { content:""; position:absolute; inset:16%; border-radius:50%; border:1px solid rgba(20,20,30,.05); pointer-events:none; }
+  .disc .pp svg { position:relative; z-index:1; width:22%; height:22%; }
+  .disc .pp:hover { background:radial-gradient(circle at 35% 25%, #FFFFFF 0%, #F8F8FA 40%, #E8E8ED 85%, #D8D8DE 100%); }
+  .disc .pp:active, .disc .pp.on { transform:translate(-50%,-50%) translateY(1px); box-shadow:0 8px 18px rgba(20,20,30,.14), 0 1px 2px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -2px 4px rgba(20,20,30,.06); }
+  :root[data-theme=dark] .disc .pp { background:radial-gradient(circle at 35% 25%, #4A4B55 0%, #34353E 40%, #22232A 85%, #17181E 100%); box-shadow:0 14px 26px rgba(0,0,0,.6), 0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14), inset 0 -2px 4px rgba(0,0,0,.4); }
+  :root[data-theme=dark] .disc .pp::before { background:radial-gradient(circle at 50% 30%, #1C1D23 0%, #26272E 45%, #30313A 100%); box-shadow:inset 0 3px 6px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.06); }
+  :root[data-theme=dark] .disc .pp::after { border-color:rgba(255,255,255,.05); }
+  .disc canvas { inset:-14%; width:128%; height:128%; }
 </style>
 </head>
 <body>
@@ -838,13 +851,15 @@ const refAud = {url:null, active:false};
 async function playRef(x){ const a=$('aud'); if(!S.refPath) return; if(!refAud.url){ const r=await api().audition_url(S.refPath); if(!r.ok) return; refAud.url=r.url; } document.querySelectorAll('.kb.pl.on').forEach(b=>b.classList.remove('on'));
   if(!a.src || a.src!==refAud.url){ a.src=refAud.url; await new Promise(res=>{ a.onloadedmetadata=res; a.onerror=res; a.load(); }); } refAud.active=true; a.currentTime = x*(a.duration||S.ref.duration||0); a.play().catch(()=>{}); }
 (function miniRef(){ const cv=$('refMini'); const ctx=cv.getContext('2d');
-  const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const src=S.ref&&S.ref.overview; const n=90; const cx=W/2, cy=H/2; const R=Math.min(W,H)/2; const ri=R*.58, span=R*.3;
+  const frame=()=>{ const dpr=fitCanvas(cv); if(dpr){ const W=cv.width,H=cv.height; ctx.clearRect(0,0,W,H); const src=S.ref&&S.ref.overview; const n=96; const cx=W/2, cy=H/2; const R=Math.min(W,H)/2; const rb=R*.66, span=R*.44;
       const a=$('aud'); const playing = src && refAud.active && !a.paused && a.duration; const prog = playing ? a.currentTime/a.duration : -1;
-      ctx.lineCap='round'; ctx.lineWidth=Math.max(1, R*.018);
+      if(src){ const g=ctx.createRadialGradient(cx,cy,rb*.55,cx,cy,R); g.addColorStop(0,`rgba(${ACC()},0)`); g.addColorStop(.45,`rgba(${ACC()},${playing?.10:.06})`); g.addColorStop(1,`rgba(${ACC()},0)`); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,R,0,6.283); ctx.fill();
+        ctx.beginPath(); ctx.arc(cx,cy,rb,0,6.283); ctx.strokeStyle=`rgba(${ACC()},.16)`; ctx.lineWidth=dpr; ctx.stroke(); }
+      ctx.lineCap='round'; ctx.lineWidth=Math.max(1, R*.017);
       for(let i=0;i<n;i++){ let v; if(src){ const s0=Math.floor(i/n*src.length), s1=Math.max(s0+1,Math.floor((i+1)/n*src.length)); v=Math.max(...src.slice(s0,s1)); } else v=.2;
-        const ang=-Math.PI/2 + i/n*Math.PI*2; const lit = prog>=0 && i/n<=prog; const len = ri + Math.max(R*.04, Math.sqrt(v)*span);
-        ctx.strokeStyle = src ? (lit?`rgba(${ACC()},.95)`:`rgba(${ACC()},.34)`) : 'rgba(20,20,30,.1)'; ctx.shadowBlur = lit?6*dpr:0; ctx.shadowColor=`rgba(${ACC()},.7)`;
-        ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*ri, cy+Math.sin(ang)*ri); ctx.lineTo(cx+Math.cos(ang)*len, cy+Math.sin(ang)*len); ctx.stroke(); }
+        const ang=-Math.PI/2 + i/n*Math.PI*2; const f=i/n; const lit = prog>=0 && f<=prog; const lead = prog>=0 && Math.abs(f-prog)*n<1.2; const half = Math.max(R*.03, Math.sqrt(v)*span)/2;
+        ctx.strokeStyle = src ? (lead?'#FFFFFF':(lit?`rgba(${ACC()},.95)`:`rgba(${ACC()},.38)`)) : 'rgba(20,20,30,.1)'; ctx.shadowBlur = lead?14*dpr:(lit?7*dpr:0); ctx.shadowColor=`rgba(${ACC()},.85)`;
+        ctx.beginPath(); ctx.moveTo(cx+Math.cos(ang)*(rb-half), cy+Math.sin(ang)*(rb-half)); ctx.lineTo(cx+Math.cos(ang)*(rb+half), cy+Math.sin(ang)*(rb+half)); ctx.stroke(); }
       ctx.shadowBlur=0; }
     if(!reduced) requestAnimationFrame(frame); }; frame();
   cv.addEventListener('click', e=>{ e.stopPropagation(); if(!S.ref) return; const r=cv.getBoundingClientRect(); const x=e.clientX-r.left-r.width/2, y=e.clientY-r.top-r.height/2; let t=(Math.atan2(y,x)+Math.PI/2)/(Math.PI*2); if(t<0) t+=1; playRef(t); });
