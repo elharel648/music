@@ -178,7 +178,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 // Firebase console › Project settings › General › Your apps › Web app › SDK setup (config). Public by design; the rules decide.
 const firebaseConfig = {
@@ -190,7 +189,7 @@ const firebaseConfig = {
   appId: "1:882492810429:web:d1c831324090ef9ba103d4"
 };
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
+const auth = getAuth(app), db = getFirestore(app);
 const $ = id => document.getElementById(id);
 const show = id => { for (const s of ["stepEmail", "stepApply", "stepStatus"]) $(s).classList.toggle("hidden", s !== id); };
 
@@ -236,11 +235,8 @@ async function refresh(u) {
   $("pill").textContent = "Approved"; $("statusText").textContent = `Welcome, ${prof.name}. You're one of the founding producers.`;
   if (!prof.key) { $("statusText").textContent += " Your key is on its way; check back in a few minutes."; return; }
   $("keyBox").textContent = prof.key;
-  try {
-    const rel = (await getDoc(doc(db, "releases", "mac"))).data();
-    $("dl").href = await getDownloadURL(ref(storage, "releases/" + rel.path));
-    $("ver").textContent = `Alma ${rel.version}`;
-  } catch (err) { $("ver").textContent = "Download not available: " + (err.code || err.message); console.error(err); }
+  if (prof.download_url) { $("dl").href = prof.download_url; $("ver").textContent = `Alma ${prof.download_version || ""}`; }
+  else { $("dl").removeAttribute("href"); $("ver").textContent = "The download link is being prepared; check back shortly."; }
   $("approved").classList.remove("hidden");
 }
 onAuthStateChanged(auth, refresh);

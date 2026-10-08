@@ -38,6 +38,18 @@ def fb():
     return firestore.client(), storage.bucket()
 
 
+LINK_DAYS = 30   # a signed download link is valid this long; release/refresh rewrites every approved profile's link
+
+
+def _signed_link(bucket, db) -> tuple[str, str] | None:
+    rel = db.collection("releases").document("mac").get().to_dict()
+    if not rel:
+        return None
+    blob = bucket.blob(f"releases/{rel['path']}")
+    url = blob.generate_signed_url(expiration=dt.timedelta(days=LINK_DAYS), version="v4", response_disposition=f'attachment; filename="{rel["path"]}"')
+    return url, rel["version"]
+
+
 def _profile_by_email(db, email: str):
     hits = list(db.collection("profiles").where("email", "==", email.strip().lower()).limit(1).stream())
     if not hits:
@@ -69,11 +81,14 @@ def cmd_list(args):
 def cmd_approve(args):
     from flow import license as lic
     from keygen import load_private
-    db, _ = fb()
+    db, bucket = fb()
     doc = _profile_by_email(db, args.email)
     p = doc.to_dict()
     key = p.get("key") or lic.issue_key(load_private(), p["email"], args.days)
-    doc.reference.set({"approved": True, "approved_at": dt.datetime.now(dt.timezone.utc), "founding": args.days is None, "key": key}, merge=True)
+    link = _signed_link(bucket, db)
+    doc.reference.set({"approved": True, "approved_at": dt.datetime.now(dt.timezone.utc), "founding": args.days is None, "key": key,
+                       "download_url": link[0] if link else None, "download_version": link[1] if link else None,
+                       "download_until": dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=LINK_DAYS)}, merge=True)
     print(f"approved {p['email']} ({p.get('name')}) · {'founding, no expiry' if args.days is None else f'{args.days} days'}")
     print(f"tell them: approved — open the same page, your key and the download are there.")
 
@@ -96,6 +111,7 @@ def cmd_release(args):
     blob.upload_from_filename(args.dmg, content_type="application/x-apple-diskimage")
     db.collection("releases").document("mac").set({"version": args.version, "path": name, "published_at": dt.datetime.now(dt.timezone.utc)})
     print(f"released {args.version}: gs://{bucket.name}/releases/{name}")
+    cmd_refresh(args)
     site = endpoints.SITE_URL or "https://SITE-URL-NOT-SET"
     man = update.sign_manifest(load_private(), args.version, f"{site}/#access", args.notes or "")
     for out in (os.path.join(ROOT, "site", "latest.json"), os.path.join(ROOT, "packaging", "latest.json")):
@@ -104,6 +120,17 @@ def cmd_release(args):
     print("update manifest written to site/latest.json — run `firebase deploy --only hosting` in site/ so it is served; running apps show 'Update' on next launch")
     if not endpoints.SITE_URL:
         print("WARNING: flow/endpoints.py SITE_URL is empty; the manifest points nowhere useful yet")
+
+
+def cmd_refresh(args):
+    """Rewrite every approved profile's signed download link (after a release, or when links are about to expire)."""
+    db, bucket = fb()
+    link = _signed_link(bucket, db)
+    n = 0
+    for d in db.collection("profiles").where("approved", "==", True).stream():
+        d.reference.set({"download_url": link[0], "download_version": link[1], "download_until": dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=LINK_DAYS)}, merge=True)
+        n += 1
+    print(f"download links refreshed for {n} approved producers ({link[1]}, {LINK_DAYS} days)")
 
 
 def cmd_feedback(args):
@@ -122,8 +149,9 @@ def main():
     r = sub.add_parser("revoke"); r.add_argument("email")
     rel = sub.add_parser("release"); rel.add_argument("version"); rel.add_argument("dmg"); rel.add_argument("--notes", default="")
     f = sub.add_parser("feedback"); f.add_argument("--limit", type=int, default=20)
+    sub.add_parser("refresh")
     args = ap.parse_args()
-    {"list": cmd_list, "approve": cmd_approve, "revoke": cmd_revoke, "release": cmd_release, "feedback": cmd_feedback}[args.cmd](args)
+    {"list": cmd_list, "approve": cmd_approve, "revoke": cmd_revoke, "release": cmd_release, "feedback": cmd_feedback, "refresh": cmd_refresh}[args.cmd](args)
 
 
 if __name__ == "__main__":
