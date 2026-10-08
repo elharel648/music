@@ -373,8 +373,8 @@ class Api:
         ctx = flowcli.prepare(opts["reference"], opts["pack"], length, opts.get("style", "melodic_techno"), opts.get("bpm") or None, opts.get("synth") or None,
                               progress=self._emit, work_dir=opts.get("work_dir") or None, finish_opts=set(fin) if isinstance(fin, list) else None,
                               on_plan=self._emit_plan, vocal=opts.get("vocal") or None, structure=opts.get("structure") or "reference",
-                              kit_overrides=opts.get("kit") or None, ref=self._refs.get((opts["reference"], opts["pack"], opts.get("bpm") or None)))
-        self._refs[(opts["reference"], opts["pack"], opts.get("bpm") or None)] = ctx["ref"]   # style and length changes skip the analysis
+                              kit_overrides=opts.get("kit") or None, ref=self._refs.get((opts["reference"], opts["pack"])))
+        self._refs[(opts["reference"], opts["pack"])] = ctx["ref"]   # style and length changes skip the analysis
         self._ctx, self._ctx_key = ctx, key
         return ctx
 

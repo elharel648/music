@@ -903,6 +903,12 @@
   .big button.dn { display:grid; place-content:center; }
   .big button.dn .a, .big button.dn .b { grid-area:1/1; text-align:center; transition:opacity .2s; }
   .big button.dn .b { opacity:0; color:#B9B8F5; } .big button.dn:hover .a { opacity:0; } .big button.dn:hover .b { opacity:1; }
+
+  /* Direction's bottom rows share one width and one centre line: tempo above, structure below, edges aligned. */
+  .well.dir .drow { left:50%; right:auto; transform:translateX(-50%); width:min(calc(100% - 36px), 224px); grid-template-columns:minmax(0,1fr); justify-content:stretch; justify-items:stretch; }
+  .well.dir .drow .hs, .hs { width:100%; }
+  .hs .v { width:30px; text-align:left; } .hs .lbl { width:30px; text-align:right; }
+  .well.dir .drow #structSeg { justify-self:stretch; width:100%; display:flex; justify-content:space-between; gap:0; }
 </style>
 </head>
 <body>
@@ -982,7 +988,7 @@
           <span class="kend l">2:00</span><span class="kend r">10:00</span>
         </div>
         <div class="kval"><b id="lcdBig">4:30</b><small><span id="lcdSub">136 bars</span></small></div>
-        <div class="drow"><div class="hs bpmbox" id="bpmSlider" title="Tempo. Drag; double-click to follow the reference again." tabindex="0" role="slider" aria-label="Tempo" aria-valuemin="90" aria-valuemax="160"><b class="v" id="bpmVal">—</b><div class="track" id="bpmTrack"><i class="tick" id="bpmTick"></i><span class="cap" id="bpmCap"></span></div><span class="lbl">BPM</span><input type="text" id="bpmIn" placeholder="—" hidden></div><div class="tg sm" id="structSeg" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><span class="pill"><i></i></span><button data-v="typical">Typical</button></div></div>
+        <div class="drow"><div class="hs bpmbox" id="bpmSlider" title="Your track's tempo, 80–180. The mark is the reference's. Double-click to follow it." tabindex="0" role="slider" aria-label="Tempo" aria-valuemin="80" aria-valuemax="180"><b class="v" id="bpmVal">—</b><div class="track" id="bpmTrack"><i class="tick" id="bpmTick"></i><span class="cap" id="bpmCap"></span></div><span class="lbl">BPM</span><input type="text" id="bpmIn" placeholder="—" hidden></div><div class="tg sm" id="structSeg" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><span class="pill"><i></i></span><button data-v="typical">Typical</button></div></div>
       </div>
       <div class="hint hidden" id="targetHint"></div>
     </div>
@@ -1186,7 +1192,7 @@ let REFTL = null;
 function setRefFile(){ const n=S.refPath.split(/[\\/]/).pop(); $('pickRef').classList.add('filled'); $('refName').textContent=n; $('refName').title=S.refPath; $('sess').innerHTML = `<b>${esc(n)}</b>`; }
 async function pickRef(){ const p = await api().pick_reference(); if(!p) return; S.refPath=p; refAud.url=null; refAud.active=false; setRefFile(); setActive('ref'); analyze(); }
 $('pickRef').onclick = ()=>{ if(!$('pickRef').classList.contains('filled')) pickRef(); }; $('refChange').onclick = e=>{ e.stopPropagation(); pickRef(); }; $('pickRef').onkeydown = e=>{ if((e.key==='Enter'||e.key===' ') && !$('pickRef').classList.contains('filled')){ e.preventDefault(); pickRef(); } };
-async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=parseFloat($('bpmIn').value)||null;
+async function analyze(){ setMod('ref','Listening','work'); $('refMsg').className='msg'; $('refMsg').textContent='Listening…'; const bpm=null;   /* the reference is always measured on its own grid */
   const r = await api().analyze(S.refPath, bpm); if(!r.ok){ setMod('ref','Error','err'); $('refMsg').className='msg err'; $('refMsg').textContent=r.error; return; }
   S.ref=r.ref; const k=r.ref.key; setBeat(r.ref.bpm); setMod('ref','Measured','on'); const shortRef = r.ref.bars < 48 || r.ref.sections.length < 3; msg($('refMsg'), shortRef ? `Short reference: ${r.ref.bars} bars. A typical ${curStyle()?curStyle().name:''} structure will be used.` : '', shortRef ? 'warn' : '');
   ['roBpm','roKey','roBars','roLen','roSec'].forEach(id=>$(id).classList.remove('dim')); tickNum($('roBpm'), Math.round(r.ref.bpm)); $('refFacts').title = r.ref.tempo_info.source==='estimated' ? 'Tempo detected from the audio' : 'Tempo taken from the file name'; $('roBpmL').textContent=''; $('roKey').textContent=`${k.tonic} ${k.mode==='minor'?'min':'maj'}`; $('roBars').textContent=r.ref.bars; $('roLen').textContent=fmt(r.ref.duration); S.refLenText=fmt(r.ref.duration); $('roSec').textContent=r.ref.sections.length;
@@ -1341,8 +1347,8 @@ function refUsable(){ return !!(S.ref && S.ref.bars >= 48 && S.ref.sections.leng
 function syncSwitches(){ document.querySelectorAll('.tg.sm').forEach(sw=>{ const bs=sw.querySelectorAll('button'); sw.classList.toggle('r', !!(bs[1] && bs[1].classList.contains('on'))); }); }
 document.querySelectorAll('.tg.sm .pill').forEach(pl=>pl.onclick=()=>{ const sw=pl.closest('.tg.sm'); const bs=sw.querySelectorAll('button'); const other = bs[0].classList.contains('on') ? bs[1] : bs[0]; if(!other.disabled) other.click(); });
 function bpmNow(){ const i=$('bpmIn'); return parseFloat(i.value) || parseFloat(i.placeholder) || (S.ref && S.ref.bpm) || 124; }
-function nudgeBpm(d){ const i=$('bpmIn'); i.value=String(Math.max(60, Math.min(200, Math.round(bpmNow()+d)))); i.dispatchEvent(new Event('change')); }
-const BPM_MIN=90, BPM_MAX=160; const bpmPct=v=>(Math.max(BPM_MIN,Math.min(BPM_MAX,v))-BPM_MIN)/(BPM_MAX-BPM_MIN)*100;
+function nudgeBpm(d){ const i=$('bpmIn'); i.value=String(Math.max(80, Math.min(180, Math.round(bpmNow()+d)))); i.dispatchEvent(new Event('change')); }
+const BPM_MIN=80, BPM_MAX=180; const bpmPct=v=>(Math.max(BPM_MIN,Math.min(BPM_MAX,v))-BPM_MIN)/(BPM_MAX-BPM_MIN)*100;
 function drawBpm(temp){ const i=$('bpmIn'); const v = temp!=null ? temp : bpmNow(); const det=parseFloat(i.placeholder)||null; $('bpmCap').style.left=bpmPct(v)+'%'; $('bpmVal').textContent=Math.round(v); $('bpmVal').classList.toggle('own', !!i.value || temp!=null); $('bpmSlider').setAttribute('aria-valuenow', Math.round(v));
   const t=$('bpmTick'); if(det){ t.style.left=bpmPct(det)+'%'; t.style.display='block'; } else t.style.display='none'; }
 (function bpmSlider(){ const tr=$('bpmTrack'), sl=$('bpmSlider'); let drag=null;
@@ -1357,7 +1363,7 @@ function drawBpm(temp){ const i=$('bpmIn'); const v = temp!=null ? temp : bpmNow
 window.addEventListener('resize', syncSwitches); document.addEventListener('click', e=>{ if(e.target.closest('.tg.sm')) requestAnimationFrame(syncSwitches); });
 function renderStruct(){ requestAnimationFrame(syncSwitches); const ok=refUsable(); if(!ok && S.structure==='reference') S.structure='typical'; const rb=document.querySelector('#structSeg button[data-v="reference"]'); rb.disabled=!ok; rb.title = ok ? '' : 'The reference is too short to carry a structure'; document.querySelectorAll('#structSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===S.structure)); if(S.view==='dir') drawDir(); }
 document.querySelectorAll('#structSeg button').forEach(b=>b.onclick=()=>{ if(b.disabled) return; S.structure=b.dataset.v; renderStruct(); markStale(); });
-$('bpmIn').addEventListener('change', ()=>{ if(S.view==='dir') drawDir(); setLen(S.len); markStale(); if(S.pack) loadKit(); if(S.refPath) analyze(); });
+$('bpmIn').addEventListener('change', ()=>{ if(S.view==='dir') drawDir(); setLen(S.len); markStale(); if(S.pack) loadKit(); });
 $('finBtn').onclick = ()=>{ S.finOpen = !S.finOpen; $('finBtn').classList.toggle('on', S.finOpen); setActive('dir'); if(!S.finishLoaded) loadFinish(); };
 async function liveStatus(){ if(S.target!=='ableton'){ $('liveLed').className=''; $('liveTxt').textContent='Stems + MIDI'; return {ok:true,fresh:true}; }
   const r = await api().ableton_status(); $('liveLed').className = r.ok ? ((r.fresh||r.rebuild)?'ok':'bad') : 'bad'; $('liveTxt').textContent = r.ok ? (r.fresh ? 'Live is ready, empty set in front' : (r.rebuild ? 'Live has your last build open' : `Live has ${r.tracks} tracks open`)) : 'Live is not reachable'; return r; }

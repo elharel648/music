@@ -43,7 +43,8 @@ def prepare(ref_path: str, pack_dir: str, length: float | None, style: str = "me
         prog("Some sounds are still in iCloud. Downloading them now…", 0.03)
         packmod.download_icloud(pack_dir, progress=lambda m, p: prog(m, 0.03 + 0.07 * p))
         pk = packmod.scan_pack(pack_dir)
-    ref = ref or analysis.analyze_reference(ref_path, bpm_hint=bpm or pk.get("bpm_hint"))
+    # the reference is measured on ITS OWN grid; a tempo the user sets is the project's tempo (loops, length in bars, Live's tempo), never a hint
+    ref = ref or analysis.analyze_reference(ref_path, bpm_hint=pk.get("bpm_hint"))
     bpm = bpm or ref["bpm"]
     prog(f"Reference: {ref['bpm']:.0f} BPM, {ref['key']['tonic']} {ref['key']['mode']}, {ref['bars']} bars, {len(ref['sections'])} sections", 0.15)
     if pk.get("warnings"):

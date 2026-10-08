@@ -434,3 +434,17 @@ def test_choose_kit_accepts_a_sample_from_outside_the_pack(tmp_path):
     rows = pack.kit_view(pk, 124, {"kick": other}, cands)
     assert rows[0]["chosen"]["name"] == "My Kick.wav" and rows[0]["chosen"]["external"] is True
     assert pack.choose_kit(pk, 124, {"kick": "/nowhere/missing.wav"}, cands)["kick"]["path"] == cands["kick"][0]["path"]   # a missing file falls back
+
+
+def test_project_tempo_moves_the_project_not_the_reference_structure():
+    """A tempo the user sets changes the project (bpm, bars for the same length); the reference's sections stay where they were measured."""
+    from flow import arrange
+    ref = _fake_ref()
+    kit = {"kick": {"path": "x", "name": "Kick.wav", "duration": 0.4, "is_loop": False}}
+    loops = {"kick": {"path": "k.wav", "bars": 4, "source": "Kick.wav"}}
+    slow = arrange.build_plan(ref, kit, loops, bpm=124.0, length_seconds=270)
+    fast = arrange.build_plan(ref, kit, loops, bpm=136.0, length_seconds=270)
+    assert slow["bpm"] == 124.0 and fast["bpm"] == 136.0
+    assert fast["bars"] > slow["bars"]                                       # the same 4:30 holds more bars at a higher tempo
+    assert abs(fast["bars"] / slow["bars"] - 136 / 124) < 0.08
+    assert [s["label"] for s in slow["sections"]] == [s["label"] for s in fast["sections"]]   # same story, scaled
