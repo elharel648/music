@@ -456,6 +456,15 @@
   .knob { width:128px; height:128px; }
   .knob .cap { left:19px; top:19px; width:90px; height:90px; }
   .knob .pip { top:11px; width:5px; height:5px; margin-left:-2.5px; }
+  .knob .cap { background:radial-gradient(circle at 35% 25%, #FFFFFF 0%, #F6F6F8 40%, #E3E3E8 85%, #D2D2D8 100%); box-shadow:0 16px 28px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -2px 4px rgba(20,20,30,.06); }
+  .knob .cap::before { content:""; position:absolute; inset:13px; border-radius:50%; background:radial-gradient(circle at 50% 30%, #ECECF1 0%, #F7F7FA 45%, #FFFFFF 100%); box-shadow:inset 0 3px 6px rgba(20,20,30,.13), inset 0 -1px 0 rgba(255,255,255,.9), 0 1px 0 rgba(255,255,255,.8); }
+  .knob .cap::after { content:""; position:absolute; inset:12px; border-radius:50%; border:1px solid rgba(20,20,30,.05); pointer-events:none; }
+  :root[data-theme=dark] .knob .cap { background:radial-gradient(circle at 35% 25%, #4A4B55 0%, #34353E 40%, #22232A 85%, #17181E 100%); box-shadow:0 16px 28px rgba(0,0,0,.6), 0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14), inset 0 -2px 4px rgba(0,0,0,.4); }
+  :root[data-theme=dark] .knob .cap::before { background:radial-gradient(circle at 50% 30%, #1C1D23 0%, #26272E 45%, #30313A 100%); box-shadow:inset 0 3px 6px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.06); }
+  :root[data-theme=dark] .knob .cap::after { border-color:rgba(255,255,255,.05); }
+  .knob .pip { top:4px; width:3px; height:8px; margin-left:-1.5px; border-radius:2px; background:var(--ink); opacity:.7; }
+  .knob .kend { position:absolute; bottom:2px; font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.06em; }
+  .knob .kend.l { left:6px; } .knob .kend.r { right:2px; }
   .kval { text-align:center; line-height:1; margin-top:2px; }
   .kval b { display:block; font:500 22px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
   .kval small { display:block; margin-top:5px; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
@@ -552,6 +561,7 @@
           <div class="knob" id="knob" tabindex="0" role="slider" aria-label="Length" aria-valuemin="120" aria-valuemax="600" aria-valuenow="270">
             <svg viewBox="0 0 200 200" aria-hidden="true"><g id="knobDots"></g></svg>
             <div class="cap" id="knobBody"><i class="pip"></i></div>
+            <span class="kend l">2:00</span><span class="kend r">10:00</span>
           </div>
           <div class="kval"><b id="lcdBig">4:30</b><small>Length · <span id="lcdSub">136 bars</span></small></div>
           <div class="drow"><div class="bpmbox" title="Your tempo. Empty follows the reference."><input class="in" type="text" id="bpmIn" placeholder="—"><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" style="margin-left:auto" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
