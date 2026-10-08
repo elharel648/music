@@ -708,6 +708,40 @@
   :root[data-theme=dark] .disc .pp::before { background:radial-gradient(circle at 50% 30%, #1C1D23 0%, #26272E 45%, #30313A 100%); box-shadow:inset 0 3px 6px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.06); }
   :root[data-theme=dark] .disc .pp::after { border-color:rgba(255,255,255,.05); }
   .disc canvas { inset:-8%; width:116%; height:116%; }
+
+  /* One material for every control: the knob's cap. BUILD is a cap with the label in its dish; switches are a cap sliding in a recessed track;
+     the tempo is a number in the readout you can type over. */
+  .big button { background:radial-gradient(circle at 35% 25%, #FFFFFF 0%, #F6F6F8 40%, #E3E3E8 85%, #D2D2D8 100%); color:#111113; isolation:isolate; font-size:11.5px; letter-spacing:.22em; text-indent:.22em;
+    box-shadow:0 16px 28px rgba(20,20,30,.16), 0 2px 4px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -2px 4px rgba(20,20,30,.06); transition:transform .18s var(--ease), box-shadow .18s, color .3s; }
+  .big button::before { content:""; position:absolute; inset:15%; border:0; border-radius:50%; z-index:-1; background:radial-gradient(circle at 50% 30%, #ECECF1 0%, #F7F7FA 45%, #FFFFFF 100%); box-shadow:inset 0 3px 6px rgba(20,20,30,.13), inset 0 -1px 0 rgba(255,255,255,.9), 0 1px 0 rgba(255,255,255,.8); }
+  .big button::after { content:""; position:absolute; inset:14%; height:auto; width:auto; background:none; border-radius:50%; border:1px solid rgba(20,20,30,.05); pointer-events:none; }
+  .big button:hover { transform:translateY(-1px); box-shadow:0 20px 34px rgba(20,20,30,.18), 0 3px 6px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -2px 4px rgba(20,20,30,.06); }
+  .big button:active { transform:translateY(1px); box-shadow:0 8px 16px rgba(20,20,30,.14), 0 1px 2px rgba(20,20,30,.08), inset 0 1px 0 #fff, inset 0 -2px 4px rgba(20,20,30,.06); }
+  .big button:disabled { transform:none; color:#A3A3A8; }
+  .big.working button:disabled { color:var(--acc); animation:captext var(--beat) ease-in-out infinite; }
+  .big.done button { color:#111113; }
+  :root[data-theme=dark] .big button { background:radial-gradient(circle at 35% 25%, #4A4B55 0%, #34353E 40%, #22232A 85%, #17181E 100%); color:#F4F1EA; box-shadow:0 16px 28px rgba(0,0,0,.6), 0 2px 4px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.14), inset 0 -2px 4px rgba(0,0,0,.4); }
+  :root[data-theme=dark] .big button::before { background:radial-gradient(circle at 50% 30%, #1C1D23 0%, #26272E 45%, #30313A 100%); box-shadow:inset 0 3px 6px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.06); }
+  :root[data-theme=dark] .big button::after { border-color:rgba(255,255,255,.05); }
+  :root[data-theme=dark] .big button:disabled { color:rgba(255,255,255,.3); }
+
+  .tg.sm { position:relative; display:inline-flex; align-items:center; height:26px; padding:2px; border:0; border-radius:13px; background:#ECECEF; box-shadow:inset 0 1px 3px rgba(20,20,30,.12), inset 0 0 0 1px rgba(20,20,30,.04); gap:0; }
+  :root[data-theme=dark] .tg.sm { background:#17181E; box-shadow:inset 0 1px 3px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.04); }
+  .tg.sm button { position:relative; z-index:1; height:22px; padding:0 11px; border:0; border-radius:11px; background:transparent; box-shadow:none; font-size:10.5px; font-weight:600; color:var(--sec); transition:color .2s; }
+  .tg.sm button.on { background:transparent; box-shadow:none; color:#111113; }
+  :root[data-theme=dark] .tg.sm button.on { color:#F4F1EA; }
+  .tg.sm button:disabled { opacity:.35; }
+  .tg.sm::before { content:""; position:absolute; top:2px; left:0; height:22px; width:var(--w, 0px); transform:translateX(var(--x, 2px)); border-radius:11px; z-index:0;
+    background:radial-gradient(circle at 35% 25%, #FFFFFF 0%, #F6F6F8 40%, #E6E6EB 85%, #D6D6DC 100%); box-shadow:0 2px 4px rgba(20,20,30,.16), 0 1px 1px rgba(20,20,30,.06), inset 0 1px 0 #fff, inset 0 -1px 2px rgba(20,20,30,.06);
+    transition:transform .24s var(--ease), width .24s var(--ease); }
+  :root[data-theme=dark] .tg.sm::before { background:radial-gradient(circle at 35% 25%, #4A4B55 0%, #34353E 40%, #22232A 85%, #17181E 100%); box-shadow:0 2px 4px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+  .well.dir .drow { justify-content:center; }
+
+  .kval small .bpmbox { display:inline-flex; align-items:baseline; gap:3px; }
+  .well.dir .kval small .bpmbox .in { height:auto; width:2.4em; padding:0; border:0; border-bottom:1px solid transparent; border-radius:0; background:transparent; font:inherit; color:var(--ink); text-align:right; letter-spacing:inherit; transition:border-color .2s; }
+  .well.dir .kval small .bpmbox .in::placeholder { color:var(--mut); }
+  .well.dir .kval small .bpmbox .in:hover { border-bottom-color:var(--line); } .well.dir .kval small .bpmbox .in:focus { border-bottom-color:var(--acc); }
+  .kval small .bpmbox .dl { font:inherit; color:inherit; }
 </style>
 </head>
 <body>
@@ -786,8 +820,8 @@
           <div class="cap" id="knobBody"><i class="pip"></i></div>
           <span class="kend l">2:00</span><span class="kend r">10:00</span>
         </div>
-        <div class="kval"><b id="lcdBig">4:30</b><small><span id="lcdSub">136 bars</span></small></div>
-        <div class="drow"><div class="bpmbox" title="Your tempo. Empty follows the reference."><input class="in" type="text" id="bpmIn" placeholder="—"><span class="dl">BPM</span></div><div class="tg sm" id="structSeg" style="margin-left:auto" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
+        <div class="kval"><b id="lcdBig">4:30</b><small><span id="lcdSub">136 bars</span> · <span class="bpmbox" title="Tempo. Empty follows the reference; type to override."><input class="in" type="text" id="bpmIn" placeholder="—" inputmode="numeric" maxlength="3"><span class="dl">BPM</span></span></small></div>
+        <div class="drow"><div class="tg sm" id="structSeg" title="Follow the reference's sections, or a typical club structure"><button data-v="reference" class="on">Reference</button><button data-v="typical">Typical</button></div></div>
       </div>
       <div class="hint hidden" id="targetHint"></div>
     </div>
@@ -988,7 +1022,7 @@ $('statusText').onclick = async ()=>{ const st = await api().status(); S.gateFro
 async function refreshStatus(){ const st = await api().status(); $('statusText').textContent = st.state==='licensed'?`Licensed`:(st.state==='trial'?`Trial · ${st.days_left} days`:'Trial ended'); $('ver').textContent = st.version||'';
   S.licensed = st.state!=='expired'; $('deck').classList.toggle('locked', !S.licensed);
   if(!S.licensed){ renderGate(st, 'expired'); showView('gate'); } return st; }
-window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle(); checkTarget();
+window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle(); checkTarget(); requestAnimationFrame(syncSwitches); setTimeout(syncSwitches, 400);
   const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').slice(0,28); $('resumeChip').classList.remove('hidden'); }
   setActive('ref'); liveStatus(); });
 $('stopSend').onclick = async ()=>{ $('stopSend').disabled=true; $('stopSent').textContent='Sending…'; const r = await api().send_feedback('Build stopped: ' + $('stopMsg').textContent); $('stopSend').disabled=false; $('stopSent').textContent = r.ok ? (r.sent ? 'Sent. Thank you.' : `Saved to your Desktop as ${esc(r.path.split('/').pop())} — send it to Harel.`) : (r.error||'Could not send.'); };
@@ -1116,7 +1150,9 @@ function setLen(v){ v=Math.max(K.min,Math.min(K.max,Math.round(v/K.step)*K.step)
 setLen(270);
 document.querySelectorAll('#targetSeg button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#targetSeg button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.target=b.dataset.v; checkTarget(); gateBuild(); });
 function refUsable(){ return !!(S.ref && S.ref.bars >= 48 && S.ref.sections.length >= 3); }
-function renderStruct(){ const ok=refUsable(); if(!ok && S.structure==='reference') S.structure='typical'; const rb=document.querySelector('#structSeg button[data-v="reference"]'); rb.disabled=!ok; rb.title = ok ? '' : 'The reference is too short to carry a structure'; document.querySelectorAll('#structSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===S.structure)); if(S.view==='dir') drawDir(); }
+function syncSwitches(){ document.querySelectorAll('.tg.sm').forEach(sw=>{ const on=sw.querySelector('button.on'); if(!on){ sw.style.setProperty('--w','0px'); return; } sw.style.setProperty('--w', on.offsetWidth+'px'); sw.style.setProperty('--x', on.offsetLeft+'px'); }); }
+window.addEventListener('resize', syncSwitches); document.addEventListener('click', e=>{ if(e.target.closest('.tg.sm')) requestAnimationFrame(syncSwitches); });
+function renderStruct(){ requestAnimationFrame(syncSwitches); const ok=refUsable(); if(!ok && S.structure==='reference') S.structure='typical'; const rb=document.querySelector('#structSeg button[data-v="reference"]'); rb.disabled=!ok; rb.title = ok ? '' : 'The reference is too short to carry a structure'; document.querySelectorAll('#structSeg button').forEach(x=>x.classList.toggle('on', x.dataset.v===S.structure)); if(S.view==='dir') drawDir(); }
 document.querySelectorAll('#structSeg button').forEach(b=>b.onclick=()=>{ if(b.disabled) return; S.structure=b.dataset.v; renderStruct(); markStale(); });
 $('bpmIn').addEventListener('change', ()=>{ if(S.view==='dir') drawDir(); setLen(S.len); markStale(); if(S.pack) loadKit(); if(S.refPath) analyze(); });
 $('finBtn').onclick = ()=>{ S.finOpen = !S.finOpen; $('finBtn').classList.toggle('on', S.finOpen); setActive('dir'); if(!S.finishLoaded) loadFinish(); };
