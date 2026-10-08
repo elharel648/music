@@ -465,6 +465,11 @@
   .knob .pip { top:4px; width:3px; height:8px; margin-left:-1.5px; border-radius:2px; background:var(--ink); opacity:.7; }
   .knob .kend { position:absolute; bottom:2px; font:500 9.5px var(--mono); color:var(--mut); letter-spacing:.06em; }
   .knob .kend.l { left:6px; } .knob .kend.r { right:2px; }
+  .leds { display:flex; flex-wrap:wrap; justify-content:center; gap:3px 7px; margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .rl { display:inline; font:500 9px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); transition:color .3s; }
+  .rl.on { color:var(--ink); }
+  .rl i { display:none; }
+  .mini.off { visibility:hidden; }
   .kval { text-align:center; line-height:1; margin-top:2px; }
   .kval b { display:block; font:500 22px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
   .kval small { display:block; margin-top:5px; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
@@ -792,8 +797,8 @@ async function scanPack(){ const p=S.packPath; setPackFile(); setMod('snd','Read
     msg($('packMsg'), d.error || `${d.remaining} files did not download. In Finder: right-click the folder › Download Now, then choose it again.`, 'err'); setMod('snd','Error','err'); return; }
   if(warn.length){ msg($('packMsg'), warn.join(' '), 'err'); setMod('snd','Check','err'); } else { msg($('packMsg'), ''); setMod('snd','Ready','on'); }
   renderPack(r.pack); }
-const ROLE_LEDS = [['kick','KCK'],['clap','CLP'],['chat','HAT'],['perc','PRC'],['bass','BAS'],['synth','SYN'],['pad','PAD'],['atmos','ATM'],['fx','FX']];
-function renderLeds(br){ const has = k => k==='chat' ? (br.chat||br.ohat||br.shaker) : (k==='fx' ? (br.fx||br.impact||br.uplifter||br.downlifter) : br[k]); $('roleLeds').innerHTML = ROLE_LEDS.map(([k,n])=>`<div class="rl ${has(k)?'on':''}"><i></i>${n}</div>`).join(''); }
+const ROLE_LEDS = [['kick','Kick'],['clap','Clap'],['chat','Hats'],['perc','Perc'],['bass','Bass'],['synth','Synth'],['pad','Pad'],['atmos','Atmos'],['fx','FX']];
+function renderLeds(br){ const has = k => k==='chat' ? (br.chat||br.ohat||br.shaker) : (k==='fx' ? (br.fx||br.impact||br.uplifter||br.downlifter) : br[k]); $('roleLeds').innerHTML = ROLE_LEDS.map(([k,n])=>`<span class="rl ${has(k)?'on':''}">${n}</span>`).join(''); $('sndMini').classList.toggle('off', !S.pack); }
 function kitRows(br){ return Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); }
 function renderPack(pack){ $('roCount').classList.remove('dim'); tickNum($('roCount'), pack.count); const br=pack.by_role||{}; renderLeds(br); loadKit();
   const rows = Object.entries(br).sort((a,b)=>b[1]-a[1]).slice(0,9); const mx = rows.length ? rows[0][1] : 1;
