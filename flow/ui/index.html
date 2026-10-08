@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FLOW</title>
 <script>try{ const t=localStorage.getItem('flow-theme'); if(t==='dark'||t==='light') document.documentElement.dataset.theme=t; }catch(e){}</script>
-<link rel="stylesheet" href="fonts/fonts.css?plex">
+<link rel="stylesheet" href="fonts/fonts.css?satoshi">
 <style>
-  :root { --beat:2.6s; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.3,1.25,.4,1);
+  :root { --beat:2.6s; --mono:"Satoshi",-apple-system,system-ui,sans-serif; --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.3,1.25,.4,1);
           --c-ref:#2BB8D6; --c-snd:#E0588F; --c-dir:#6F6CE0; --c-bld:#D9A520; --acc:#5C5BE0; --acc-rgb:92,91,224;
           --d-bg:#06070A; --d-ink:#EDEEF3; --d-sec:#8A8C99; --d-mut:#4A4C58; --d-line:rgba(255,255,255,.07); --d-well:#0D0E13; }
   :root, :root[data-theme=light] { color-scheme:light; --bg:#FFFFFF; --dev:#FFFFFF; --mod:#FFFFFF; --mod2:#FFFFFF; --hdr:#141519; --hdr-ink:#F3F3F6; --ink:#141418; --sec:#6A6A73; --mut:#A3A3AA;
@@ -17,7 +17,8 @@
           --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.05); --ctrl:#111116; --knob-a:#3C3D47; --knob-b:#24252C; --knob-c:#111217; --tick:#2A2B33;
           --shadow:0 30px 70px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.04); --acc:#7B79EC; --acc-rgb:123,121,236; --btn:#F2F2F5; --btn-ink:#0B0B0F; --led-off:#26272F; --ok:#4CD39B; --warn:#E8B04B; --err:#FF7070; }
   * { box-sizing:border-box; }
-  html, body { height:100%; margin:0; overflow:hidden; background:var(--bg); color:var(--ink); font-family:"IBM Plex Sans",-apple-system,system-ui,"Segoe UI",sans-serif; font-size:13px; -webkit-font-smoothing:antialiased; transition:background .35s; }
+  body { font-variant-numeric:tabular-nums; }
+  html, body { height:100%; margin:0; overflow:hidden; background:var(--bg); color:var(--ink); font-family:"Satoshi",-apple-system,system-ui,"Segoe UI",sans-serif; font-size:13.5px; -webkit-font-smoothing:antialiased; transition:background .35s; }
   button, input, select { font-family:inherit; color:inherit; }
   button { cursor:pointer; }
   button:disabled { cursor:default; }
@@ -76,7 +77,7 @@
   .dgrid .h { color:var(--d-sec); text-align:center; padding-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .dgrid .h small { display:block; color:var(--d-mut); font-size:9.5px; margin-top:1px; }
   .dgrid .h.hi { color:var(--acc); }
-  .dgrid .rl { color:var(--d-sec); padding-right:10px; white-space:nowrap; font-family:"IBM Plex Sans",sans-serif; font-size:10.5px; line-height:1; }
+  .dgrid .rl { color:var(--d-sec); padding-right:10px; white-space:nowrap; font-family:"Satoshi",sans-serif; font-size:10.5px; line-height:1; }
   .dgrid .rl.v { color:var(--d-ink); }
   .dgrid .cell { height:7px; border-radius:2px; background:#111218; transition:background .3s, box-shadow .3s; }
   .dgrid .cell.on { background:var(--acc); box-shadow:0 0 10px rgba(var(--acc-rgb),.45); animation:cellin .4s var(--spring) both; animation-delay:var(--d,0ms); }
@@ -273,7 +274,7 @@
   .vrow svg { stroke:var(--sec); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:0 0 14px; }
   .vrow.has svg { stroke:var(--acc); }
   .vrow .body { flex:1; min-width:0; font-size:11.5px; font-weight:500; color:var(--mut); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .vrow.has .body { font:600 11.5px "IBM Plex Sans",sans-serif; letter-spacing:-.01em; text-transform:none; color:var(--ink); }
+  .vrow.has .body { font:600 11.5px "Satoshi",sans-serif; letter-spacing:-.01em; text-transform:none; color:var(--ink); }
   .vrow .body small { font:500 9.5px var(--mono); color:var(--mut); font-weight:500; margin-left:8px; letter-spacing:.02em; }
   .vrow .x { background:none; border:0; padding:2px; color:var(--mut); display:flex; } .vrow .x:hover { color:var(--err); }
   .sel { border-radius:10px; background:var(--ctrl); border:1px solid var(--line); padding:5px 6px 6px; }
@@ -358,7 +359,7 @@
   .vrow svg { stroke:var(--sec); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:0 0 14px; }
   .vrow.has svg { stroke:var(--acc); }
   .vrow .body { flex:1; min-width:0; font-size:11.5px; font-weight:500; color:var(--mut); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .vrow.has .body { font:600 11.5px "IBM Plex Sans",sans-serif; letter-spacing:-.01em; text-transform:none; color:var(--ink); }
+  .vrow.has .body { font:600 11.5px "Satoshi",sans-serif; letter-spacing:-.01em; text-transform:none; color:var(--ink); }
   .vrow .body small { font:500 9.5px var(--mono); color:var(--mut); font-weight:500; margin-left:8px; letter-spacing:.02em; }
   .vrow .x { background:none; border:0; padding:2px; color:var(--mut); display:flex; } .vrow .x:hover { color:var(--err); }
   .sel { border-radius:10px; background:var(--ctrl); border:1px solid var(--line); padding:5px 6px 6px; }
@@ -424,7 +425,7 @@
   .dvhead .r b { color:var(--d-ink); font-weight:500; }
   .dvhead .t { font-size:13px; font-weight:600; letter-spacing:-.01em; }
   .dvhead .t small { font:500 10px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--d-mut); margin-left:10px; }
-  .hero .v { font-size:30px; }
+  .hero .v { font-size:32px; letter-spacing:-.03em; }
   .hero { flex-wrap:wrap; row-gap:2px; } #roUsed { flex-basis:100%; text-align:right; margin-top:-4px; }
   .mini { min-height:56px; }
   .msg { font:500 11px var(--mono); }
@@ -472,14 +473,14 @@
   .mini.off { visibility:hidden; }
   .kinds { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; gap:2px; margin-top:6px; overflow:hidden; }
   .kr { display:grid; grid-template-columns:44px 1fr 24px; align-items:center; gap:10px; height:14px; }
-  .kr .kl { font-size:10px; font-weight:500; color:var(--sec); font-family:"IBM Plex Sans",sans-serif; letter-spacing:0; text-transform:none; }
+  .kr .kl { font-size:10px; font-weight:500; color:var(--sec); font-family:"Satoshi",sans-serif; letter-spacing:0; text-transform:none; }
   .kr canvas { width:100%; height:14px; display:block; clip-path:inset(0 100% 0 0); transition:clip-path .55s var(--ease); transition-delay:var(--d,0ms); opacity:.85; }
   .kr canvas.shown { clip-path:inset(0 0 0 0); }
   .kr.has { cursor:pointer; } .kr.has:hover canvas { opacity:1; } .kr.has:hover .kl { color:var(--ink); }
   .kr b { font:500 10px var(--mono); color:var(--ink); text-align:right; font-variant-numeric:tabular-nums; }
   .kr.off .kl, .kr.off b { color:var(--mut); }
   .kval { text-align:center; line-height:1; margin-top:2px; }
-  .kval b { display:block; font:500 22px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .kval b { display:block; font:500 24px var(--mono); letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
   .kval small { display:block; margin-top:5px; font:500 9.5px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mut); }
   .well.dir .drow { width:100%; }
   /* the sounds, composed: one tile per role, the sound's own shape in it */
