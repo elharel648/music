@@ -1,6 +1,6 @@
-# Alma site: application, approval, gated download, license keys — on Firebase
+# Alma site: application, approval, gated download, license keys — all on Firebase
 
-Static page (`index.html`) on Netlify + a Firebase project for sign-in (email link), the applicant table (Firestore),
+Static page (`index.html`) on Firebase Hosting + the same Firebase project for sign-in (email link), the applicant table (Firestore),
 the private download (Storage) and feedback from inside the app. Keys are signed on your Mac by `tools/approve.py`;
 no Cloud Functions, no Blaze plan, no card. Nobody downloads anything without a verified email and your approval.
 
@@ -8,7 +8,7 @@ no Cloud Functions, no Blaze plan, no card. Nobody downloads anything without a 
 
 ### 1. Firebase (console.firebase.google.com)
 1. Add project (or reuse one). **Authentication › Sign-in method › Email/Password → enable, and turn on "Email link
-   (passwordless sign-in)"**. Authentication › Settings › Authorized domains → add your Netlify domain.
+   (passwordless sign-in)"**.
 2. **Firestore Database → Create** (production mode). Rules tab → paste `firebase/firestore.rules` → Publish.
 3. **Storage → Get started**. Rules tab → paste `firebase/storage.rules` → Publish.
 4. **Project settings › General › Your apps → Web app (</>)**, register "alma site", copy the `firebaseConfig` block into
@@ -16,16 +16,21 @@ no Cloud Functions, no Blaze plan, no card. Nobody downloads anything without a 
 5. **Project settings › Service accounts → Generate new private key** → save as `keys/firebase-admin.json` (never committed).
 6. `.venv/bin/pip install firebase-admin` (done once on this Mac).
 
-### 2. Netlify
-New site from Git → repo `elharel648/music`, base directory `site`, publish directory `site`. Custom domain when you have one;
-add that domain to Firebase › Authentication › Authorized domains as well.
+### 2. Hosting (same project, one command)
+Install the CLI once (`brew install firebase-cli`), then from the repo root:
+```bash
+cd site && firebase login && firebase use <project-id> && firebase deploy
+```
+That publishes the page at `https://<project-id>.web.app`, and the Firestore + Storage rules from `firebase/` in the same go
+(so step 1.2/1.3 can be skipped). The `*.web.app` domain is already an authorized sign-in domain. Custom domain: Hosting ›
+Add custom domain, then add it under Authentication › Authorized domains. Put the final URL in `flow/endpoints.py` → `SITE_URL`.
 
 ### 3. First release
 ```bash
 .venv/bin/python tools/approve.py release 0.8.0 dist/Alma-0.8.0-mac.dmg
 ```
-Uploads the DMG to `releases/` and points `releases/mac` at it. Rebuild the app after filling `flow/endpoints.py` so
-feedback from inside Alma lands in Firestore.
+Uploads the DMG to `releases/`, points `releases/mac` at it, and writes the signed `site/latest.json`; run `firebase deploy`
+in `site/` so installed apps see the update. Rebuild the app after filling `flow/endpoints.py` so feedback lands in Firestore.
 
 ## Daily (2 minutes)
 ```bash
