@@ -1,6 +1,7 @@
 """Alma desktop app: a pywebview window hosting ui/index.html, with a small Python API behind it."""
 from __future__ import annotations
 import json
+from datetime import datetime
 import os
 import subprocess
 import sys
@@ -12,7 +13,7 @@ import uuid
 import mimetypes
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import __version__, PRODUCT, analysis, audio, pack as packmod, plugins, license as lic, cli as flowcli, styles as stylelib
+from . import __version__, PRODUCT, feedback, analysis, audio, pack as packmod, plugins, license as lic, cli as flowcli, styles as stylelib
 
 
 def _ui_path() -> str:
@@ -112,10 +113,15 @@ class Api:
         self._ctx: dict | None = None
         self._ctx_key: str | None = None
         self._kit_cache: dict[tuple, dict] = {}
+        self._log: list[str] = []
+        self._last: dict = {}
         self.media = MediaServer()
 
     # ---- helpers
     def _emit(self, msg: str, pct: float):
+        if not msg.startswith("@"):
+            self._log.append(f"{datetime.now():%H:%M:%S} {int(pct * 100):3d}% {msg}")
+            del self._log[:-400]
         if self.window:
             self.window.evaluate_js(f"window.flowProgress({json.dumps(msg)}, {float(pct)})")
 
@@ -366,6 +372,7 @@ class Api:
                 fn()
             except BaseException as e:  # SystemExit from license too
                 tb = traceback.format_exc(limit=2)
+                self._log.append(f"{datetime.now():%H:%M:%S} ERROR {str(e) or tb}"[:600])
                 self.window.evaluate_js(f"window.flowError({json.dumps(str(e) or tb)})")
             finally:
                 self._busy = False
@@ -404,6 +411,7 @@ class Api:
             res.pop("reference", None)
             from . import arrange
             summary = {**arrange.plan_view(res.get("plan", {})), "export": res.get("export"), "ableton": res.get("ableton"), "kit": res.get("kit")}
+            self._last = {"opts": opts, "summary": summary, "notes": res.get("plan", {}).get("notes"), "profile": res.get("plan", {}).get("profile")}
             self.window.evaluate_js(f"window.flowDone({json.dumps(summary, default=str)})")
             # the track is written; now, quietly, the mix of exactly that, so it can be played from the map
             try:
@@ -412,6 +420,13 @@ class Api:
                 pass
 
         return self._run(go)
+
+    def send_feedback(self, note: str):
+        """What the user heard, next to what was built. Posted when an endpoint is configured, else saved to the Desktop."""
+        try:
+            return feedback.send(note, self._last, self._log)
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "error": str(e)}
 
     def open_path(self, path: str):
         try:

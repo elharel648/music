@@ -114,7 +114,9 @@
   .dmsg { font:500 11px var(--mono); color:var(--d-sec); margin-top:8px; line-height:1.5; }
   .gate { max-width:420px; margin:28px auto 0; text-align:center; }
   .gate h2 { font-size:18px; margin:0 0 6px; } .gate p { color:var(--d-sec); margin:0 0 16px; font-size:12.5px; line-height:1.5; }
-  .gate .in { display:flex; gap:8px; } .gate input { flex:1; font:500 13px var(--mono); padding:9px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:var(--d-well); color:var(--d-ink); outline:none; }
+  .gate .in { display:flex; gap:8px; } .gate.fb { max-width:520px; text-align:left; } .gate.fb h2, .gate.fb p { text-align:left; }
+  .gate textarea { width:100%; resize:vertical; min-height:96px; font:400 13px/1.5 "Satoshi",sans-serif; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:var(--d-well); color:var(--d-ink); outline:none; margin-bottom:10px; }
+  .gate textarea:focus { border-color:rgba(255,255,255,.3); } .gate .fbrow { display:flex; gap:8px; align-items:center; } .gate .fbrow .sp { flex:1; } .gate input { flex:1; font:500 13px var(--mono); padding:9px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:var(--d-well); color:var(--d-ink); outline:none; }
 
   /* the arrangement view (lives in the display) */
   .tl { position:relative; height:100%; display:flex; flex-direction:column; }
@@ -547,6 +549,7 @@
     <div class="dv" data-v="ref"><canvas class="full" id="waveCv"></canvas><div class="tl hidden" id="refTL"></div><div class="cap" id="refCap">No reference · the display breathes until it has a tempo</div></div>
     <div class="dv" data-v="snd"><div class="seq" id="seqEl" aria-hidden="true"></div><div id="kitView" class="hidden"></div><div class="cap" id="sndCap">No sounds · 16 steps, waiting for a kit</div></div>
     <div class="dv" data-v="dir"><div id="dirView"></div><div class="cap" id="dirCap"></div></div>
+    <div class="dv" data-v="fb"><div class="gate fb"><h2>What did you hear?</h2><p>Where it stopped feeling like a track: the bar, the layer, the section. Alma attaches what it built so Harel can see exactly what you heard.</p><textarea id="fbText" rows="5" placeholder="The break at bar 77 is too long. The bass should wait for the drop. The build needs a snare roll…"></textarea><div class="fbrow"><button class="dbtn" id="fbCancel">Back</button><span class="sp"></span><button class="dbtn" id="fbSend">Send</button></div><div class="dmsg" id="fbMsg"></div></div></div>
     <div class="dv" data-v="fin">
       <div class="fin">
         <div><h3>Finish</h3><div class="fgrid" id="finishCard"></div><div class="dmsg" style="margin-top:14px">Your Live Set, Ableton's own devices. Turn off anything you would rather do by hand.</div></div>
@@ -619,7 +622,7 @@
         <div class="frow2"><div class="fname wrap"><b id="bst">Waiting for a reference and your sounds</b></div></div>
         <div class="well bld"><div class="big wait" id="bigWrap"><div class="bezel"></div><svg viewBox="0 0 106 106"><circle class="ring" cx="53" cy="53" r="49"/><circle class="prog" id="prog" cx="53" cy="53" r="49"/></svg><button id="buildBtn" disabled>BUILD</button></div></div>
         <div class="fname wrap"><small class="clamp" id="bsub">Builds this arrangement from your sounds and your direction. Nothing is decided for you.</small></div>
-        <div class="mrow" style="justify-content:flex-start;margin-top:0"><button class="ta hidden" id="listenBtn">Listen first</button><button class="ta hidden" id="openOut">Open folder</button><button class="ta hidden" id="again">Build another</button><button class="ta hidden" id="toggleLog">Details</button></div>
+        <div class="mrow" style="justify-content:flex-start;margin-top:0"><button class="ta hidden" id="listenBtn">Listen first</button><button class="ta hidden" id="openOut">Open folder</button><button class="ta hidden" id="again">Build another</button><button class="ta hidden" id="toggleLog">Details</button><span class="sp"></span><button class="ta" id="fbBtn">Feedback</button></div>
       </div>
     </div>
   </section>
@@ -795,6 +798,13 @@ async function refreshStatus(){ const st = await api().status(); $('statusText')
 window.addEventListener('pywebviewready', async ()=>{ await refreshStatus(); if(!S.licensed) return; try { S.styles = await api().styles(); } catch(e) { S.styles = []; } renderStyle();
   const last = await api().load_session(); if(last){ S.lastOpts=last; $('resumeTxt').textContent = 'Resume · ' + last.reference.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').slice(0,28); $('resumeChip').classList.remove('hidden'); }
   setActive('ref'); liveStatus(); });
+$('fbBtn').onclick = ()=>{ S.fbFrom = S.view; $('fbMsg').textContent=''; showView('fb'); setTimeout(()=>$('fbText').focus(), 50); };
+$('fbCancel').onclick = ()=>showView(S.fbFrom || (S.built ? 'build' : 'ref'));
+$('fbSend').onclick = async ()=>{ const t=$('fbText').value.trim(); if(!t){ $('fbMsg').textContent='Write a line first.'; return; } $('fbSend').disabled=true; $('fbMsg').textContent='Sending…';
+  const r = await api().send_feedback(t); $('fbSend').disabled=false;
+  if(r.ok && r.sent){ $('fbMsg').textContent='Sent. Thank you — this is how Alma gets better.'; $('fbText').value=''; }
+  else if(r.ok){ $('fbMsg').innerHTML=`No connection. Saved to <b>${esc(r.path.split('/').pop())}</b> on your Desktop — send that file to Harel.`; $('fbText').value=''; }
+  else $('fbMsg').textContent = r.error || 'Could not send.'; };
 $('activateBtn').onclick = async ()=>{ const r = await api().activate($('keyInput').value.trim()); if(r.ok){ $('gateMsg').textContent=''; await refreshStatus(); setActive('ref'); } else $('gateMsg').textContent = r.error; };
 $('resumeChip').onclick = async ()=>{ const l=S.lastOpts; $('resumeChip').classList.add('hidden'); S.refPath=l.reference; setRefFile(); await analyze(); S.packPath=l.pack; await scanPack(); S.style=l.style||'melodic_techno'; S.target=l.target||'ableton'; S.out=l.out||null; if(S.out) $('outPath').textContent=S.out;
   document.querySelectorAll('#targetSeg button').forEach(b=>b.classList.toggle('on', b.dataset.v===S.target)); renderStyle(); if(l.length) setLen(l.length); if(l.bpm) $('bpmIn').value=l.bpm;
